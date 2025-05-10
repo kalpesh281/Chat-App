@@ -1,5 +1,6 @@
 const User = require("../Model/userModel");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const register = async (req, res) => {
   try {
@@ -37,28 +38,68 @@ const register = async (req, res) => {
   }
 };
 
-
 const login = async (req, res) => {
-    try {
-        const {userName, password} = req.body;
-        if (!userName || !password) {
-            return res.status(400).json({ message: "Please fill all the fields" });
-        }
-        const user = await User.findOne({ userName });
-        if (!user) {
-            return res.status(400).json({ message: "User not found" });
-        }
+  try {
+    const { userName, password } = req.body;
+    if (!userName || !password) {
+      return res.status(400).json({ message: "Please fill all the fields" });
+    }
+    const user = await User.findOne({ userName });
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: "Invalid credentials" });
-        }
-        
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 3600000,
+    });
+    res.status(200).json({
+      _id: user._id,
+      fullName: user.fullName,
+      userName: user.userName,
+      profilePhoto: user.profilePhoto,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const logout = async (req, res) => {
+  try {
+    res.cookie("token", "", {
+      httpOnly: true,
+      expires: new Date(0),
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    console.error("Error in logout:", error);
+    res.status(500).json({ message: "Logout failed" });
+  }
+};
+
+const getOtherUsers=async(req,res)=>{
+    try {
+        const loggedInUserId = req.id; // Get the logged-in user's ID from the request
+        const otherUsers=await User.find({ _id: { $ne: loggedInUserId } }).select("-password"); // Fetch all users except the logged-in user
+        res.status(200).json(otherUsers);
     } catch (error) {
-         console.log(error);
-         res.status(500).json({ message: "Internal server error" });
+        console.log(error);
+        res.status(500).json({ message: "Internal server error" });
+        
     }
 }
 
-
-module.exports = { register };
+module.exports = { register, login, logout, getOtherUsers };
