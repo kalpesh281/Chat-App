@@ -31,7 +31,7 @@ function Signup() {
     if (success) {
       toast.success("Registration successful!");
       dispatch(clearAuthState());
-      setTimeout(() => navigate("/"), 2000);
+      setTimeout(() => navigate("/"), 1000);
     }
     if (error) {
       toast.error(error);

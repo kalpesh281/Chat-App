@@ -1,6 +1,7 @@
 import React from "react";
 
-function OtherUser() {
+function OtherUser(props) {
+  const otherUser = props.user;
   return (
     <>
       <div
@@ -9,11 +10,11 @@ function OtherUser() {
       duration-200 cursor-pointer"
       >
         <img
-          src="https://i.pinimg.com/736x/3b/37/58/3b37587e833126e35d212355c0d8770e.jpg"
+          src={otherUser.profilePhoto}
           alt="User Avatar"
           className="w-12 h-12 rounded-full border-2 border-gray-500 object-cover"
         />
-        <span className="text-white font-medium">Muzan</span>
+        <span className="text-white font-medium">{otherUser.fullName}</span>
       </div>
       <div className="divider"></div>
     </>

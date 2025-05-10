@@ -21,13 +21,32 @@ export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (userData, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${BASE_URL}/login`, userData);
+      const response = await axios.post(`${BASE_URL}/login`, userData, {
+        withCredentials: true,
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || "Login failed");
     }
   }
 );
+
+export const logout = createAsyncThunk(
+  "auth/logout",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(
+        `${BASE_URL}/logout`,
+        {},
+        { withCredentials: true }
+      );
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Logout failed");
+    }
+  }
+);
+
 
 const authSlice = createSlice({
   name: "auth",
@@ -37,6 +56,7 @@ const authSlice = createSlice({
     error: null,
     success: false,
     isAuthenticated: false,
+    otherUsers: null,
   },
   reducers: {
     clearAuthState: (state) => {
@@ -47,6 +67,9 @@ const authSlice = createSlice({
     logoutUser: (state) => {
       state.user = null;
       state.isAuthenticated = false;
+    },
+    setOtherUsers: (state, action) => {
+      state.otherUsers = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -77,9 +100,18 @@ const authSlice = createSlice({
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(logout.fulfilled, (state) => {
+        state.user = null;
+        state.isAuthenticated = false;
+        state.otherUsers = null;
+      })
+      .addCase(logout.rejected, (state, action) => {
+        state.error = action.payload;
       });
   },
+  
 });
 
-export const { clearAuthState, logoutUser } = authSlice.actions;
+export const { clearAuthState, logoutUser,setOtherUsers } = authSlice.actions;
 export default authSlice.reducer;

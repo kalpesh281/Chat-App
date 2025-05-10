@@ -28,7 +28,7 @@ function Login() {
     if (isAuthenticated) {
       toast.success("Login successful!");
       dispatch(clearAuthState());
-      setTimeout(() => navigate("/"), 2000); // Redirect after 2 seconds
+      setTimeout(() => navigate("/"), 1000); 
     }
     if (error) {
       toast.error(error);
