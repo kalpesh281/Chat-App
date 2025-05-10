@@ -1,22 +1,53 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { registerUser, clearAuthState } from "../Features/authSlice";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function Signup() {
-  const [gender, setGender] = useState("");
+  const [formData, setFormData] = useState({
+    fullName: "",
+    userName: "",
+    password: "",
+    confirmPassword: "",
+    gender: "",
+  });
 
-  const handleGenderChange = (e) => {
-    setGender(e.target.value);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading, error, success } = useSelector((state) => state.auth);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch(registerUser(formData));
+  };
+
+  useEffect(() => {
+    if (success) {
+      toast.success("Registration successful!");
+      dispatch(clearAuthState());
+      setTimeout(() => navigate("/"), 2000);
+    }
+    if (error) {
+      toast.error(error);
+    }
+  }, [success, error, dispatch, navigate]);
 
   return (
     <>
+      <ToastContainer />
       <div className="p-4 h-screen flex items-center justify-center">
         <div className="w-full max-w-md mx-auto">
           <div className="w-full p-8 rounded-xl shadow-2xl bg-white/10 backdrop-blur-xl border border-white/20">
             <h1 className="text-3xl font-bold text-center text-white mb-6">
               Sign Up
             </h1>
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div>
                 <label className="label">
                   <span className="text-base label-text text-white/90">
@@ -24,6 +55,9 @@ function Signup() {
                   </span>
                 </label>
                 <input
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
                   className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-white/40 transition duration-300"
                   type="text"
                   placeholder="Enter your full name"
@@ -36,6 +70,9 @@ function Signup() {
                   </span>
                 </label>
                 <input
+                  name="userName"
+                  value={formData.userName}
+                  onChange={handleChange}
                   className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-white/40 transition duration-300"
                   type="text"
                   placeholder="Choose a username"
@@ -48,6 +85,9 @@ function Signup() {
                   </span>
                 </label>
                 <input
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
                   className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-white/40 transition duration-300"
                   type="password"
                   placeholder="Enter password"
@@ -60,6 +100,9 @@ function Signup() {
                   </span>
                 </label>
                 <input
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
                   className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-white/40 transition duration-300"
                   type="password"
                   placeholder="Confirm password"
@@ -71,8 +114,8 @@ function Signup() {
                     type="radio"
                     name="gender"
                     value="male"
-                    checked={gender === "male"}
-                    onChange={handleGenderChange}
+                    checked={formData.gender === "male"}
+                    onChange={handleChange}
                     className="radio radio-sm bg-white/20 border-white/50 checked:bg-white/40 checked:border-white cursor-pointer"
                   />
                   <span className="text-white select-none">Male</span>
@@ -82,8 +125,8 @@ function Signup() {
                     type="radio"
                     name="gender"
                     value="female"
-                    checked={gender === "female"}
-                    onChange={handleGenderChange}
+                    checked={formData.gender === "female"}
+                    onChange={handleChange}
                     className="radio radio-sm bg-white/20 border-white/50 checked:bg-white/40 checked:border-white cursor-pointer"
                   />
                   <span className="text-white select-none">Female</span>
@@ -100,9 +143,10 @@ function Signup() {
               </p>
               <button
                 type="submit"
+                disabled={loading}
                 className="w-full py-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold hover:bg-white/20 active:bg-white/30 transition duration-300 mt-4 cursor-pointer"
               >
-                Sign Up
+                {loading ? "Signing Up..." : "Sign Up"}
               </button>
             </form>
           </div>
