@@ -8,6 +8,7 @@ dotenv.config();
 const PORT = process.env.PORT;
 
 const registerRoute = require("./Routes/registerRoute");
+const messageRoute = require("./Routes/messageRoute");
 
 app.use(express.json());
 app.use(cookieParser());
@@ -16,6 +17,7 @@ app.use(cookieParser());
 
 
 app.use("/api/v1/auth",registerRoute)
+app.use("/api/v1/message", messageRoute);
 
 ConnectDB()
   .then(() => {

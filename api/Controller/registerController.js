@@ -63,6 +63,7 @@ const login = async (req, res) => {
       maxAge: 3600000,
     });
     res.status(200).json({
+        token,
       _id: user._id,
       fullName: user.fullName,
       userName: user.userName,
