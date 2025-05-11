@@ -1,31 +1,59 @@
-import React,{useEffect} from "react";
+import React, { useEffect, useState } from "react";
 import { BiSearchAlt2, BiLogOut } from "react-icons/bi";
 import OtherUsers from "./OtherUsers";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../Features/authSlice";
+import { logout, setOtherUsers, setSelectedUser } from "../Features/authSlice";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 function Sidebar() {
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-    const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const [search, setSearch] = useState("");
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
+  const { user, isAuthenticated, otherUsers } = useSelector((state) => state.auth);
 
-    const handleLogout = () => {
-      dispatch(logout());
-    };
-    useEffect(() => {
-      if (!isAuthenticated) {
-        toast.success("Logout successful!");
-        navigate("/login");
+  const handleLogout = () => {
+    dispatch(logout());
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      toast.success("Logout successful!");
+      navigate("/login");
+    }
+  }, [isAuthenticated, navigate]);
+
+  const searchHandle = async (e) => {
+    e.preventDefault();
+    console.log("Searching for:", search); // Debugging line to see search term
+
+    // Check if otherUsers is an array
+    if (Array.isArray(otherUsers)) {
+      console.log("Other Users: ", otherUsers); // Debugging line to see the users array
+
+      // Case insensitive search logic
+      const conversationUser = otherUsers.find((user) =>
+        user.fullName.toLowerCase().includes(search.toLowerCase())
+      );
+
+      if (conversationUser) {
+        dispatch(setSelectedUser(conversationUser)); // Select the user if found
+      } else {
+        toast.error("User not found"); // Show error toast when user is not found
       }
-    }, [isAuthenticated, navigate]);
+    } else {
+      console.error("otherUsers is not an array");
+    }
+  };
+
   return (
     <>
       <div className="border-r border-slate-500 p-4 flex flex-col h-full">
-        <form className="flex items-center gap-2 mb-4">
+        <form onSubmit={searchHandle} className="flex items-center gap-2 mb-4">
           <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             className="input input-bordered rounded-full w-full bg-transparent text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 px-4 py-2"
             type="text"
             placeholder="Search..."

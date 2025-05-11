@@ -4,8 +4,11 @@ import { useSelector } from "react-redux";
 
 function Message({ message }) {
   const { user, selectedUser } = useSelector((state) => state.auth);
-  // ✅ Format time to 24-hour format like "14:30"
-  const formattedTime = new Date(message?.createdAt).toLocaleTimeString(
+
+  // 🛡️ Guard clause: return nothing or placeholder if data isn't ready
+  if (!user || !message) return null;
+
+  const formattedTime = new Date(message.createdAt).toLocaleTimeString(
     "en-GB",
     {
       hour: "2-digit",
@@ -14,27 +17,25 @@ function Message({ message }) {
     }
   );
 
+  const isSentByCurrentUser = user.id === message.senderId;
+
   return (
-    <div
-      className={`chat ${
-        user.id === message.senderId ? "chat-end" : "chat-start"
-      }`}
-    >
+    <div className={`chat ${isSentByCurrentUser ? "chat-end" : "chat-start"}`}>
       <div className="chat-image avatar">
         <div className="w-10 rounded-full">
           <img
             alt="User Avatar"
             src={
-              message.senderId === user.id
+              isSentByCurrentUser
                 ? user.profilePhoto
-                : selectedUser.profilePhoto
+                : selectedUser?.profilePhoto
             }
           />
         </div>
       </div>
 
       <div className="chat-bubble bg-gray-800/50 border border-gray-600 rounded-lg text-gray-200">
-        {message?.message}
+        {message.message}
       </div>
 
       <div className="chat-footer flex items-center gap-2 text-gray-400 opacity-70 text-xs mt-1">
