@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setMessage } from "../Features/messageSlice";
+import { setMessages } from "../Features/messageSlice";
 
 
 const useGetMessages = () => {
@@ -16,7 +16,7 @@ const useGetMessages = () => {
             withCredentials: true,
           }
         );
-        dispatch(setMessage(res.data))
+        dispatch(setMessages(res.data))
       } catch (error) {
         console.log(error);
       }

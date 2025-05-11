@@ -16,7 +16,7 @@ function Messages() {
   if (!messages || !Array.isArray(messages)) return null;
 
   return (
-    <div className="px-4 w-full">
+    <div className="px-4 w-full  overflow-auto">
       {messages.map((message) => (
         <Message key={message._id} message={message} />
       ))}

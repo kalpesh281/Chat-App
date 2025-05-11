@@ -6,7 +6,7 @@ const sendMessage = async (req, res) => {
     senderId = req.id;
     receiverId = req.params.id;
     const { message } = req.body;
-
+    // console.log(message, "message from frontend");
     // Query for an existing conversation
     let gotConversation = await Conversation.findOne({
       participants: { $all: [senderId, receiverId] },
@@ -33,9 +33,7 @@ const sendMessage = async (req, res) => {
     // Socket io implementation
 
     return res.status(201).json({
-      message: "Message sent successfully",
-      success: true,
-      data: newMessage,
+      newMessage,
     });
   } catch (error) {
     console.log(error);

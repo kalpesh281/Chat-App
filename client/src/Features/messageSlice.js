@@ -3,14 +3,14 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 const messageSlice=createSlice({
     name:"message",
     initialState:{
-        messages:null,
+        messages:[],
     },
     reducers:{
-        setMessage:(state,action)=>{
+        setMessages:(state,action)=>{
             state.messages=action.payload;
         }
     }
 });
 
-export const {setMessage}=messageSlice.actions;
+export const {setMessages}=messageSlice.actions;
 export default messageSlice.reducer
