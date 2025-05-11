@@ -59,12 +59,11 @@ const login = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
       maxAge: 3600000,
     });
     res.status(200).json({
-       
-      _id: user._id,
+      id: user._id,
       fullName: user.fullName,
       userName: user.userName,
       profilePhoto: user.profilePhoto,
@@ -91,16 +90,17 @@ const logout = async (req, res) => {
   }
 };
 
-const getOtherUsers=async(req,res)=>{
-    try {
-        const loggedInUserId = req.id; // Get the logged-in user's ID from the request
-        const otherUsers=await User.find({ _id: { $ne: loggedInUserId } }).select("-password"); // Fetch all users except the logged-in user
-        res.status(200).json(otherUsers);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Internal server error" });
-        
-    }
-}
+const getOtherUsers = async (req, res) => {
+  try {
+    const loggedInUserId = req.id; // Get the logged-in user's ID from the request
+    const otherUsers = await User.find({ _id: { $ne: loggedInUserId } }).select(
+      "-password"
+    ); // Fetch all users except the logged-in user
+    res.status(200).json(otherUsers);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 module.exports = { register, login, logout, getOtherUsers };

@@ -47,7 +47,6 @@ export const logout = createAsyncThunk(
   }
 );
 
-
 const authSlice = createSlice({
   name: "auth",
   initialState: {
@@ -56,7 +55,8 @@ const authSlice = createSlice({
     error: null,
     success: false,
     isAuthenticated: false,
-    otherUsers: null,
+    otherUsers: [],
+    selectedUser: null,
   },
   reducers: {
     clearAuthState: (state) => {
@@ -70,6 +70,9 @@ const authSlice = createSlice({
     },
     setOtherUsers: (state, action) => {
       state.otherUsers = action.payload;
+    },
+    setSelectedUser: (state, action) => {
+      state.selectedUser = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -104,14 +107,14 @@ const authSlice = createSlice({
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.isAuthenticated = false;
-        state.otherUsers = null;
+        state.otherUsers = []; 
       })
       .addCase(logout.rejected, (state, action) => {
         state.error = action.payload;
       });
   },
-  
 });
 
-export const { clearAuthState, logoutUser,setOtherUsers } = authSlice.actions;
+export const { clearAuthState, logoutUser, setOtherUsers, setSelectedUser } =
+  authSlice.actions;
 export default authSlice.reducer;

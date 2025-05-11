@@ -6,15 +6,15 @@ function OtherUsers() {
   useGetOtherUsers();
   const { otherUsers } = useSelector((store) => store.auth);
 
-  if (!otherUsers) return;
+  if (!otherUsers || !Array.isArray(otherUsers))
+    return <div>No users available</div>;
 
   return (
     <div className="h-96 overflow-y-auto ">
-      {otherUsers?.map((user) => {
+      {otherUsers.map((user) => {
         return <OtherUser key={user._id} user={user} />;
       })}
     </div>
   );
 }
-
 export default OtherUsers;

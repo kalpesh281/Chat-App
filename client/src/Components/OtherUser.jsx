@@ -1,22 +1,38 @@
 import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setSelectedUser } from "../Features/authSlice";
 
-function OtherUser(props) {
-  const otherUser = props.user;
+function OtherUser({ user }) {
+  const dispatch = useDispatch();
+  const selectedUserState = useSelector((state) => state.auth.selectedUser);
+
+  const selectedUserHandler = () => {
+    // console.log(user)
+    dispatch(setSelectedUser(user));
+  };
+
   return (
     <>
       <div
-        className="flex items-center gap-4  hover:bg-white/6 rounded-lg transition 
-      
-      duration-200 cursor-pointer"
+        onClick={selectedUserHandler}
+        className={`${
+          selectedUserState?._id === user?._id
+            ? "bg-zinc-200 text-black"
+            : "text-white"
+        } flex gap-2 hover:text-black items-center hover:bg-zinc-200 rounded p-2 cursor-pointer`}
       >
-        <img
-          src={otherUser.profilePhoto}
-          alt="User Avatar"
-          className="w-12 h-12 rounded-full border-2 border-gray-500 object-cover"
-        />
-        <span className="text-white font-medium">{otherUser.fullName}</span>
+        <div className="avatar online">
+          <div className="w-12 rounded-full">
+            <img src={user?.profilePhoto} alt="user-profile" />
+          </div>
+        </div>
+        <div className="flex flex-col flex-1">
+          <div className="flex justify-between gap-2">
+            <p>{user?.fullName}</p>
+          </div>
+        </div>
       </div>
-      <div className="divider"></div>
+      <div className="divider my-0 py-0 h-1"></div>
     </>
   );
 }
