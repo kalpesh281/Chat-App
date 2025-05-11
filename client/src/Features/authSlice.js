@@ -57,6 +57,7 @@ const authSlice = createSlice({
     isAuthenticated: false,
     otherUsers: [],
     selectedUser: null,
+    onlineUsers: [],
   },
   reducers: {
     clearAuthState: (state) => {
@@ -73,6 +74,9 @@ const authSlice = createSlice({
     },
     setSelectedUser: (state, action) => {
       state.selectedUser = action.payload;
+    },
+    setOnlineUsers: (state, action) => {
+      state.onlineUsers = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -107,7 +111,7 @@ const authSlice = createSlice({
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.isAuthenticated = false;
-        state.otherUsers = []; 
+        state.otherUsers = [];
       })
       .addCase(logout.rejected, (state, action) => {
         state.error = action.payload;
@@ -115,6 +119,11 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearAuthState, logoutUser, setOtherUsers, setSelectedUser } =
-  authSlice.actions;
+export const {
+  clearAuthState,
+  logoutUser,
+  setOtherUsers,
+  setSelectedUser,
+  setOnlineUsers,
+} = authSlice.actions;
 export default authSlice.reducer;
