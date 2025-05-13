@@ -1,3 +1,4 @@
+const { getReceiverSocketId, getIO } = require("../socket/socket");
 const Conversation = require("../Model/converstionModel");
 const Message = require("../Model/messageModel");
 
@@ -32,6 +33,14 @@ const sendMessage = async (req, res) => {
 
     // Socket io implementation
 
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    const io = getIO(); 
+
+    if (receiverSocketId && io) {
+      io.to(receiverSocketId).emit("newMessage", newMessage);
+    }
+
+    // console.log(newMessage)
     return res.status(201).json({
       newMessage,
     });

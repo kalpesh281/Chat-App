@@ -2,9 +2,13 @@ import React, { useEffect, useRef } from "react";
 import Message from "./Message";
 import useGetMessages from "../hooks/useGetMessages";
 import { useSelector } from "react-redux";
+import useRealTimeMessage from "../hooks/useRealTimeMessage";
+
 
 function Messages() {
-  useGetMessages();
+  // useGetMessages();
+useRealTimeMessage()
+
   const { messages } = useSelector((store) => store.message);
   const messagesEndRef = useRef(null);
 

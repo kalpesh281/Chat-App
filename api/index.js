@@ -1,17 +1,17 @@
-// ==================== IMPORTS ====================
 const express = require("express");
 const http = require("http");
-const { Server } = require("socket.io");
-const ConnectDB = require("./Config/Db");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const ConnectDB = require("./Config/Db");
+
+const registerRoute = require("./Routes/registerRoute");
+const messageRoute = require("./Routes/messageRoute");
+const { initializeSocket, getReceiverSocketId } = require("./socket/socket");
 
 // ==================== CONFIGURATION ====================
 dotenv.config();
 const PORT = process.env.PORT;
-const registerRoute = require("./Routes/registerRoute");
-const messageRoute = require("./Routes/messageRoute");
 
 // ==================== EXPRESS APP SETUP ====================
 const app = express();
@@ -31,40 +31,9 @@ app.use(
 app.use("/api/v1/auth", registerRoute);
 app.use("/api/v1/message", messageRoute);
 
-// ==================== SERVER SETUP ====================
+// ==================== SERVER & SOCKET ====================
 const server = http.createServer(app);
-
-// ==================== SOCKET.IO  ====================
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-  },
-});
-
-const userSocketMap = {};
-io.on("connection", (socket) => {
-  console.log("User Connected", socket.id);
-
-  // Ensure userId is available before mapping
-  const userId = socket.handshake.query.userId;
-  if (userId) {
-    socket.userId = userId; // Store userId on the socket object
-    userSocketMap[userId] = socket.id;
-  }
-
-  io.emit("getOnlineUsers", Object.keys(userSocketMap));
-
-  socket.on("disconnect", () => {
-    console.log("User Disconnected", socket.id);
-
-    // Use the stored userId from the socket object
-    if (socket.userId) {
-      delete userSocketMap[socket.userId];
-      io.emit("getOnlineUsers", Object.keys(userSocketMap));
-    }
-  });
-});
+const { io } = initializeSocket(server);
 
 // ==================== DATABASE & SERVER INITIALIZATION ====================
 ConnectDB()
@@ -78,5 +47,4 @@ ConnectDB()
     console.error("❌ DB Connection failed:", err);
   });
 
-// ==================== EXPORTS ====================
-module.exports = { app, io, server };
+

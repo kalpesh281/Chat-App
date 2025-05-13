@@ -5,41 +5,62 @@ import Signup from "./Components/Signup";
 import PageNotFound from "./Components/PageNotFound";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import io from "socket.io-client";
-import { setSocket } from "./Features/socketSlice";
+import { updateSocketStatus } from "./Features/socketSlice";
 import { setOnlineUsers } from "./Features/authSlice";
+import { initializeSocket, closeSocket } from "./Components/SocketManager";
 
 function App() {
   const { user } = useSelector((state) => state.auth);
-  const { socket } = useSelector((state) => state.socket);
   const dispatch = useDispatch();
 
   useEffect(() => {
     if (user) {
       // If user exists, initialize socket connection
-      const newSocket = io("http://localhost:5003", {
-        transports: ["websocket"],
-        query: { userId: user.id },
-      });
-      dispatch(setSocket(newSocket));
+      const socket = initializeSocket(user.id);
 
-      newSocket.on("getOnlineUsers", (onlineUsers) => {
+      // Update Redux with serializable socket status
+      socket.on("connect", () => {
+        dispatch(
+          updateSocketStatus({
+            connected: true,
+            id: socket.id,
+          })
+        );
+      });
+
+      socket.on("disconnect", () => {
+        dispatch(
+          updateSocketStatus({
+            connected: false,
+            id: null,
+          })
+        );
+      });
+
+      socket.on("getOnlineUsers", (onlineUsers) => {
         dispatch(setOnlineUsers(onlineUsers));
       });
 
+      // Immediately set as connected if socket is already connected
+      if (socket.connected) {
+        dispatch(
+          updateSocketStatus({
+            connected: true,
+            id: socket.id,
+          })
+        );
+      }
       // Cleanup function to close socket on component unmount or user logout
       return () => {
-        newSocket.close();
-        dispatch(setSocket(null));
+        closeSocket();
+        dispatch(updateSocketStatus({ connected: false, id: null }));
       };
     } else {
       // Handle case when user is logged out and socket is not needed
-      if (socket) {
-        socket.close(); // Ensure socket is closed
-        dispatch(setSocket(null));
-      }
+      closeSocket();
+      dispatch(updateSocketStatus({ connected: false, id: null }));
     }
-  }, [user, socket, dispatch]);
+  }, [user, dispatch]); // Remove socket from dependencies
 
   return (
     <>
