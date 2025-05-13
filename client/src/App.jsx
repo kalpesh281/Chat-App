@@ -1,3 +1,4 @@
+// App.js
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./Pages/Home";
 import Login from "./Components/Login";
@@ -5,8 +6,8 @@ import Signup from "./Components/Signup";
 import PageNotFound from "./Components/PageNotFound";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
+import { setOnlineUsers, setUnreadMessageCounts } from "./Features/authSlice";
 import { updateSocketStatus } from "./Features/socketSlice";
-import { setOnlineUsers } from "./Features/authSlice";
 import { initializeSocket, closeSocket } from "./Components/SocketManager";
 
 function App() {
@@ -18,7 +19,7 @@ function App() {
       // If user exists, initialize socket connection
       const socket = initializeSocket(user.id);
 
-      // Update Redux with serializable socket status
+      // Update Redux with socket status
       socket.on("connect", () => {
         dispatch(
           updateSocketStatus({
@@ -37,11 +38,17 @@ function App() {
         );
       });
 
+      // Listen for online users updates
       socket.on("getOnlineUsers", (onlineUsers) => {
         dispatch(setOnlineUsers(onlineUsers));
       });
 
-      // Immediately set as connected if socket is already connected
+      // Listen for unread message counts when logging in
+      socket.on("unreadMessageCounts", (counts) => {
+        dispatch(setUnreadMessageCounts(counts));
+      });
+
+      // If socket is already connected
       if (socket.connected) {
         dispatch(
           updateSocketStatus({
@@ -50,17 +57,18 @@ function App() {
           })
         );
       }
-      // Cleanup function to close socket on component unmount or user logout
+
+      // Cleanup function
       return () => {
         closeSocket();
         dispatch(updateSocketStatus({ connected: false, id: null }));
       };
     } else {
-      // Handle case when user is logged out and socket is not needed
+      // Handle logout case
       closeSocket();
       dispatch(updateSocketStatus({ connected: false, id: null }));
     }
-  }, [user, dispatch]); // Remove socket from dependencies
+  }, [user, dispatch]);
 
   return (
     <>

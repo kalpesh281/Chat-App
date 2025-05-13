@@ -56,6 +56,7 @@ const authSlice = createSlice({
     otherUsers: [],
     selectedUser: null,
     onlineUsers: null,
+    unreadMessageCounts: {},
   },
   reducers: {
     clearAuthState: (state) => {
@@ -76,6 +77,19 @@ const authSlice = createSlice({
     setOnlineUsers: (state, action) => {
       state.onlineUsers = action.payload;
     },
+    setUnreadMessageCounts: (state, action) => {
+      state.unreadMessageCounts = action.payload;
+    },
+    updateUnreadMessageCount: (state, action) => {
+      const { senderId, count } = action.payload;
+      state.unreadMessageCounts[senderId] = count;
+    },
+    clearUnreadMessages: (state, action) => {
+      const senderId = action.payload;
+      if (state.unreadMessageCounts[senderId]) {
+        state.unreadMessageCounts[senderId] = 0;
+      }
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -124,5 +138,8 @@ export const {
   setOtherUsers,
   setSelectedUser,
   setOnlineUsers,
+  setUnreadMessageCounts,
+  updateUnreadMessageCount,
+  clearUnreadMessages,
 } = authSlice.actions;
 export default authSlice.reducer;

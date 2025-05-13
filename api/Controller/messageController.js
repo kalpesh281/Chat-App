@@ -1,4 +1,8 @@
-const { getReceiverSocketId, getIO } = require("../socket/socket");
+const {
+  getReceiverSocketId,
+  getIO,
+  incrementUnreadCount,
+} = require("../socket/socket");
 const Conversation = require("../Model/converstionModel");
 const Message = require("../Model/messageModel");
 
@@ -34,10 +38,13 @@ const sendMessage = async (req, res) => {
     // Socket io implementation
 
     const receiverSocketId = getReceiverSocketId(receiverId);
-    const io = getIO(); 
 
-    if (receiverSocketId && io) {
-      io.to(receiverSocketId).emit("newMessage", newMessage);
+    if (receiverSocketId) {
+      // User is online, send message directly
+      getIO().to(receiverSocketId).emit("newMessage", newMessage);
+    } else {
+      // User is offline, increment unread counter
+      incrementUnreadCount(receiverId, senderId);
     }
 
     // console.log(newMessage)

@@ -4,9 +4,12 @@ import { setSelectedUser } from "../Features/authSlice";
 
 function OtherUser({ user }) {
   const dispatch = useDispatch();
-  const { selectedUser, onlineUsers } = useSelector((state) => state.auth);
+  const { selectedUser, onlineUsers, unreadMessageCounts } = useSelector(
+    (state) => state.auth
+  );
 
   const isOnline = onlineUsers?.includes(user._id);
+  const unreadCount = unreadMessageCounts?.[user._id] || 0;
 
   const selectedUserHandler = () => {
     dispatch(setSelectedUser(user));
@@ -22,7 +25,6 @@ function OtherUser({ user }) {
             : "text-white"
         } flex gap-3 items-center hover:text-black hover:bg-zinc-200 rounded p-2 cursor-pointer`}
       >
-        {/* Avatar with custom online indicator */}
         <div className="relative">
           <img
             className="w-12 h-12 rounded-full object-cover"
@@ -34,15 +36,19 @@ function OtherUser({ user }) {
           )}
         </div>
 
-        {/* User Details */}
         <div className="flex flex-col flex-1">
-          <div className="flex justify-between gap-2">
+          <div className="flex justify-between gap-2 items-center">
             <p className="font-semibold">{user?.fullName || "Unknown User"}</p>
+
+            {unreadCount > 0 && (
+              <span className="bg-red-500 text-white text-xs font-semibold rounded-full px-2 py-0.5">
+                {unreadCount}
+              </span>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Divider */}
       <div className="divider my-0 py-0 h-1"></div>
     </>
   );

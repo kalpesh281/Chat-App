@@ -9,9 +9,9 @@ function MessageContainer() {
   const selectedUser = useSelector((state) => state.auth.selectedUser);
   useEffect(() => {
     return () => {
-      dispatch(setSelectedUser(null)); // only runs on unmount
+      dispatch(setSelectedUser(null)); 
     };
-  }, []); // ✅ empty array = runs once on mount, cleans up on unmount
+  }, []);
 
   return (
     <>
