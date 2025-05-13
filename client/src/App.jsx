@@ -16,21 +16,31 @@ function App() {
 
   useEffect(() => {
     if (user) {
-      const socket = io("http://localhost:5003", {
+      // If user exists, initialize socket connection
+      const newSocket = io("http://localhost:5003", {
         transports: ["websocket"],
-        query: { userId: user.id }, // ✅ Correct way
+        query: { userId: user.id },
       });
-      dispatch(setSocket(socket));
-      socket.on("getOnlineUsers", (onlineUsers) => {
+      dispatch(setSocket(newSocket));
+
+      newSocket.on("getOnlineUsers", (onlineUsers) => {
         dispatch(setOnlineUsers(onlineUsers));
       });
+
+      // Cleanup function to close socket on component unmount or user logout
+      return () => {
+        newSocket.close();
+        dispatch(setSocket(null));
+      };
     } else {
+      // Handle case when user is logged out and socket is not needed
       if (socket) {
-        socket.close();
+        socket.close(); // Ensure socket is closed
         dispatch(setSocket(null));
       }
     }
-  }, [user]);
+  }, [user, socket, dispatch]);
+
   return (
     <>
       <BrowserRouter>

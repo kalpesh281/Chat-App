@@ -4,10 +4,11 @@ import { setSelectedUser } from "../Features/authSlice";
 
 function OtherUser({ user }) {
   const dispatch = useDispatch();
-  const selectedUserState = useSelector((state) => state.auth.selectedUser);
+  const { selectedUser, onlineUsers } = useSelector((state) => state.auth);
+
+  const isOnline = onlineUsers?.includes(user._id);
 
   const selectedUserHandler = () => {
-    // console.log(user)
     dispatch(setSelectedUser(user));
   };
 
@@ -16,22 +17,32 @@ function OtherUser({ user }) {
       <div
         onClick={selectedUserHandler}
         className={`${
-          selectedUserState?._id === user?._id
+          selectedUser?._id === user?._id
             ? "bg-zinc-200 text-black"
             : "text-white"
-        } flex gap-2 hover:text-black items-center hover:bg-zinc-200 rounded p-2 cursor-pointer`}
+        } flex gap-3 items-center hover:text-black hover:bg-zinc-200 rounded p-2 cursor-pointer`}
       >
-        <div className="avatar online">
-          <div className="w-12 rounded-full">
-            <img src={user?.profilePhoto} alt="user-profile" />
-          </div>
+        {/* Avatar with custom online indicator */}
+        <div className="relative">
+          <img
+            className="w-12 h-12 rounded-full object-cover"
+            src={user?.profilePhoto || "https://i.pravatar.cc/300"}
+            alt="user-profile"
+          />
+          {isOnline && (
+            <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+          )}
         </div>
+
+        {/* User Details */}
         <div className="flex flex-col flex-1">
           <div className="flex justify-between gap-2">
-            <p>{user?.fullName}</p>
+            <p className="font-semibold">{user?.fullName || "Unknown User"}</p>
           </div>
         </div>
       </div>
+
+      {/* Divider */}
       <div className="divider my-0 py-0 h-1"></div>
     </>
   );

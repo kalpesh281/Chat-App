@@ -11,7 +11,9 @@ function Sidebar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { user, isAuthenticated, otherUsers } = useSelector((state) => state.auth);
+  const { user, isAuthenticated, otherUsers } = useSelector(
+    (state) => state.auth
+  );
 
   const handleLogout = () => {
     dispatch(logout());

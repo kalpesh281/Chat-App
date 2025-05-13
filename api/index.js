@@ -43,18 +43,26 @@ const io = new Server(server, {
 });
 
 const userSocketMap = {};
-
 io.on("connection", (socket) => {
   console.log("User Connected", socket.id);
+
+  // Ensure userId is available before mapping
   const userId = socket.handshake.query.userId;
-  if (userId !== undefined) {
+  if (userId) {
+    socket.userId = userId; // Store userId on the socket object
     userSocketMap[userId] = socket.id;
   }
+
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
+
   socket.on("disconnect", () => {
     console.log("User Disconnected", socket.id);
-    delete userSocketMap[userId];
-    io.emit("getOnlineUsers", Object.keys(userSocketMap));
+
+    // Use the stored userId from the socket object
+    if (socket.userId) {
+      delete userSocketMap[socket.userId];
+      io.emit("getOnlineUsers", Object.keys(userSocketMap));
+    }
   });
 });
 
