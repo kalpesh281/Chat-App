@@ -1,9 +1,10 @@
 import React from 'react'
+import AppLayout from '../components/layout/AppLayout'
 
-function HomePage() {
+const HomePage=()=> {
   return (
     <div>HomePage</div>
   )
 }
 
-export default HomePage
+export default AppLayout()(HomePage)

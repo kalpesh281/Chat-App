@@ -9,7 +9,7 @@ const ChatPage = lazy(() => import("./pages/ChatPage"));
 const GroupPage = lazy(() => import("./pages/GroupPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
-const user = false;
+const user = true;
 function App() {
   return (
     <>
@@ -18,7 +18,7 @@ function App() {
           <Route element={<ProtectedRoute user={user} />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/chat/:chatId" element={<ChatPage />} />
-            <Route path="/group" element={<GroupPage />} />
+            <Route path="/groups" element={<GroupPage />} />
           </Route>
 
           <Route

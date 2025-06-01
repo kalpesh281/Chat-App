@@ -1,4 +1,5 @@
 import React from 'react'
+import AppLayout from '../components/layout/AppLayout'
 
 function ChatPage() {
   return (
@@ -6,4 +7,4 @@ function ChatPage() {
   )
 }
 
-export default ChatPage
+export default AppLayout()(ChatPage)
