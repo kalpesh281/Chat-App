@@ -1,23 +1,35 @@
-import React,{lazy} from 'react';
+import React, { lazy } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import ProtectedRoute from "./components/Auth/ProtectedRoute";
 
 // Lazy loading pages
-const HomePage = lazy(() => import('./pages/HomePage'));
-const LoginPage = lazy(() => import('./pages/LoginPage'));
-const ChatPage = lazy(() => import('./pages/ChatPage'));
-const GroupPage = lazy(() => import('./pages/GroupPage'));
+const HomePage = lazy(() => import("./pages/HomePage"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const ChatPage = lazy(() => import("./pages/ChatPage"));
+const GroupPage = lazy(() => import("./pages/GroupPage"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
+
+const user = false;
 function App() {
   return (
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/chat/chatId" element={<ChatPage />} />
-          <Route path="/group" element={<GroupPage />} />
-          <Route path="*" element={<h1>Page Not Found</h1>} />
+          <Route element={<ProtectedRoute user={user} />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/chat/:chatId" element={<ChatPage />} />
+            <Route path="/group" element={<GroupPage />} />
+          </Route>
 
-        
+          <Route
+            path="/login"
+            element={
+              <ProtectedRoute user={!user} redirect="/">
+                <LoginPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
     </>
