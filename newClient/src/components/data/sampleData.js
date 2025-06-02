@@ -7,15 +7,11 @@ export const sampleChats = [
     members: ["1", "2"],
   },
   {
-    avatar: ["https://example.com/avatar2.jpg",
-                "https://example.com/avatar3.jpg",
-                "https://example.com/avatar4.jpg",
-                "https://example.com/avatar5.jpg"
-            ],
-    
+    avatar: ["https://example.com/avatar2.jpg"],
+
     name: "Mary",
     _id: "2",
-    groupChat: true,
+    groupChat: false,
     members: ["1", "3", "4"],
-  }
+  },
 ];

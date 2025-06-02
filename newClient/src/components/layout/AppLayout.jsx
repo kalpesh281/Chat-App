@@ -4,6 +4,7 @@ import { Grid, Typography, Box } from "@mui/material";
 import ChatList from "../specific/ChatList";
 import { sampleChats } from "../data/sampleData";
 import { useParams } from "react-router-dom";
+import Profile from "../specific/Profile";
 
 const AppLayout = () => (WrappedComponent) => {
   return (props) => {
@@ -38,7 +39,7 @@ const AppLayout = () => (WrappedComponent) => {
         >
           <Box
             sx={{
-              width: "30%", // Changed from 33.33% to 30%
+              width: "25%",
               bgcolor: "#ffffff",
               height: "100%",
               overflow: "auto",
@@ -108,7 +109,7 @@ const AppLayout = () => (WrappedComponent) => {
 
           <Box
             sx={{
-              width: "40%", // Changed from 33.33% to 40%
+              width: "45%",
               bgcolor: "#ffffff",
               height: "100%",
               overflow: "auto",
@@ -120,7 +121,7 @@ const AppLayout = () => (WrappedComponent) => {
 
           <Box
             sx={{
-              width: "30%", // Changed from 33.33% to 30%
+              width: "30%",
               bgcolor: "#ffffff",
               p: 2,
               height: "100%",
@@ -128,22 +129,7 @@ const AppLayout = () => (WrappedComponent) => {
               display: { xs: "none", md: "block" },
             }}
           >
-            <Box
-              sx={{
-                p: 2,
-                borderRadius: 2,
-                backgroundColor: "#f5f5f5",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-              }}
-            >
-              <Typography variant="h6" color="primary.dark" gutterBottom>
-                Profile & Settings
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                View and edit your profile information, preferences, and
-                notification settings.
-              </Typography>
-            </Box>
+            <Profile />
           </Box>
         </Box>
       </Box>
