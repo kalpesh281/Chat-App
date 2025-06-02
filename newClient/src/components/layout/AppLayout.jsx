@@ -1,10 +1,20 @@
 import React from "react";
 import Header from "./Header";
 import { Grid, Typography, Box } from "@mui/material";
+import ChatList from "../specific/ChatList";
+import { sampleChats } from "../data/sampleData";
+import { useParams } from "react-router-dom";
 
 const AppLayout = () => (WrappedComponent) => {
-   
   return (props) => {
+    const params = useParams();
+    const chatId = params.chatId;
+
+    const handleDeleteChat = (e, _id, groupChat) => {
+      e.preventDefault();
+      console.log("Delete chat with ID:", chatId);
+    };
+
     return (
       <Box
         sx={{
@@ -13,6 +23,7 @@ const AppLayout = () => (WrappedComponent) => {
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
+          backgroundColor: "#f9fafb",
         }}
       >
         <Header />
@@ -25,43 +36,114 @@ const AppLayout = () => (WrappedComponent) => {
             overflow: "hidden",
           }}
         >
-      
           <Box
             sx={{
-              width: "33.33%",
-              bgcolor: "#f0f0f0",
-              p: 2,
+              width: "30%", // Changed from 33.33% to 30%
+              bgcolor: "#ffffff",
               height: "100%",
               overflow: "auto",
+              borderRight: "1px solid #e0e0e0",
+              display: "flex",
+              flexDirection: "column",
             }}
           >
-            <Typography variant="h6">First Section</Typography>
+            <Box
+              sx={{
+                p: 2,
+                borderBottom: "1px solid rgba(0,0,0,0.06)",
+                background: "linear-gradient(180deg, #ffffff, #fafafa)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Typography
+                variant="h6"
+                color="primary.dark"
+                sx={{
+                  fontSize: "1.1rem",
+                  fontWeight: 600,
+                  letterSpacing: "0.01em",
+                }}
+              >
+                Conversations
+              </Typography>
+              <Box
+                sx={{
+                  fontSize: "0.75rem",
+                  color: "text.secondary",
+                  background: "rgba(25, 118, 210, 0.08)",
+                  px: 1.5,
+                  py: 0.5,
+                  borderRadius: 10,
+                  fontWeight: 500,
+                }}
+              >
+                {sampleChats.length} Chats
+              </Box>
+            </Box>
+
+            <Box
+              sx={{
+                overflowY: "auto",
+                flexGrow: 1,
+                px: 1.5,
+                py: 1,
+                background: "linear-gradient(180deg, #fafafa 0%, #ffffff 100%)",
+              }}
+            >
+              <ChatList
+                chats={sampleChats}
+                chatId={chatId}
+                newMessagesAlert={[
+                  {
+                    chatId,
+                    count: 4,
+                  },
+                ]}
+                onlineUsers={["1", "2", "3"]}
+              />
+            </Box>
           </Box>
 
-      
           <Box
             sx={{
-              width: "33.33%",
-              bgcolor: "#f8f8f8",
-              p: 2,
+              width: "40%", // Changed from 33.33% to 40%
+              bgcolor: "#ffffff",
               height: "100%",
               overflow: "auto",
+              borderRight: "1px solid #e0e0e0",
             }}
           >
             <WrappedComponent {...props} />
           </Box>
 
-         
           <Box
             sx={{
-              width: "33.33%",
-              bgcolor: "#f0f0f0",
+              width: "30%", // Changed from 33.33% to 30%
+              bgcolor: "#ffffff",
               p: 2,
               height: "100%",
               overflow: "auto",
+              display: { xs: "none", md: "block" },
             }}
           >
-            <Typography variant="h6">Third Section</Typography>
+            <Box
+              sx={{
+                p: 2,
+                borderRadius: 2,
+                backgroundColor: "#f5f5f5",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+              }}
+            >
+              <Typography variant="h6" color="primary.dark" gutterBottom>
+                Profile & Settings
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                View and edit your profile information, preferences, and
+                notification settings.
+              </Typography>
+            </Box>
           </Box>
         </Box>
       </Box>
