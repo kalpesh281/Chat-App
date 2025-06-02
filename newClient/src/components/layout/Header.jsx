@@ -1,12 +1,13 @@
 import {
   AppBar,
+  Backdrop,
   Box,
   IconButton,
   Toolbar,
   Tooltip,
   Typography,
 } from "@mui/material";
-import React, { lazy, useState } from "react";
+import React, { lazy, Suspense, useState } from "react";
 import {
   Add as AddIcon,
   Menu as MenuIcon,
@@ -110,8 +111,18 @@ function Header() {
         </AppBar>
       </Box>
       {isSearch && (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<Backdrop open={true} />}>
           <SearchDialog />
+        </Suspense>
+      )}
+      {isNotifications && (
+        <Suspense fallback={<Backdrop open={true} />}>
+          <NotificationsDialog />
+        </Suspense>
+      )}
+      {isNewGroup && (
+        <Suspense fallback={<Backdrop open={true} />}>
+          <NewGroupDialog />
         </Suspense>
       )}
     </>
