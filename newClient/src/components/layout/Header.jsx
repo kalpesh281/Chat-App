@@ -178,17 +178,17 @@ function Header() {
       </Box>
       {isSearch && (
         <Suspense fallback={<Backdrop open={true} />}>
-          <SearchDialog />
+          <SearchDialog onClose={() => setIsSearch(false)} />
         </Suspense>
       )}
       {isNotifications && (
         <Suspense fallback={<Backdrop open={true} />}>
-          <NotificationsDialog />
+          <NotificationsDialog onClose={() => setIsNotifications(false)} />
         </Suspense>
       )}
       {isNewGroup && (
         <Suspense fallback={<Backdrop open={true} />}>
-          <NewGroupDialog />
+          <NewGroupDialog onClose={() => setIsNewGroup(false)} />
         </Suspense>
       )}
     </>
