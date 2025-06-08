@@ -30,3 +30,28 @@ export const sampleUsers = [
     _id: "2",
   },
 ];
+
+
+export const sampleNotification = [
+  {
+    sender:{
+    avatar: ["https://example.com/avatar1.jpg"],
+    name: "Jony",
+    },
+    _id: "1",
+  },
+  {
+    sender:{
+    avatar: ["https://example.com/avatar2.jpg"],
+    name: "Mary",
+    },
+    _id: "2",
+  },
+  {
+    sender:{
+    avatar: ["https://example.com/avatar3.jpg"],
+    name: "Alex",
+    },
+    _id: "3",
+  }
+];
