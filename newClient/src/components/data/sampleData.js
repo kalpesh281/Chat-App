@@ -16,7 +16,6 @@ export const sampleChats = [
   },
 ];
 
-
 export const sampleUsers = [
   {
     avatar: ["https://example.com/avatar1.jpg"],
@@ -29,29 +28,38 @@ export const sampleUsers = [
     name: "Mary",
     _id: "2",
   },
+  {
+    avatar: ["https://example.com/avatar3.jpg"],
+    name: "Alex",
+    _id: "3",
+  },
+  {
+    avatar: ["https://example.com/avatar4.jpg"],
+    name: "Sarah",
+    _id: "4",
+  },
 ];
-
 
 export const sampleNotification = [
   {
-    sender:{
-    avatar: ["https://example.com/avatar1.jpg"],
-    name: "Jony",
+    sender: {
+      avatar: ["https://example.com/avatar1.jpg"],
+      name: "Jony",
     },
     _id: "1",
   },
   {
-    sender:{
-    avatar: ["https://example.com/avatar2.jpg"],
-    name: "Mary",
+    sender: {
+      avatar: ["https://example.com/avatar2.jpg"],
+      name: "Mary",
     },
     _id: "2",
   },
   {
-    sender:{
-    avatar: ["https://example.com/avatar3.jpg"],
-    name: "Alex",
+    sender: {
+      avatar: ["https://example.com/avatar3.jpg"],
+      name: "Alex",
     },
     _id: "3",
-  }
+  },
 ];

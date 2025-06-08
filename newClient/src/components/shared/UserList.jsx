@@ -65,7 +65,7 @@ const UserList = ({
     >
       <ListItemAvatar>
         <Avatar
-          src={user.avatar}
+          src={user.avatar[0]}
           alt={user.name}
           sx={{
             width: 40,
@@ -84,7 +84,6 @@ const UserList = ({
             {user.name}
           </Typography>
         }
-       
       />
     </ListItem>
   );
