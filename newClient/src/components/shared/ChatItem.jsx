@@ -14,6 +14,12 @@ const ChatItem = ({
   index = 0,
   handleDeleteChat,
 }) => {
+  const testMessageAlert = newMessageAlert || { count: index + 1 };
+  const showNewMessageIndicators = !sameSender;
+
+  // Extract first letter of name for the avatar
+  const firstLetter = name ? name.charAt(0).toUpperCase() : "";
+
   return (
     <Link
       sx={{
@@ -46,7 +52,6 @@ const ChatItem = ({
             : "4px solid transparent",
         }}
       >
-        {/* Avatar Section with enhanced styling */}
         <Box
           sx={{
             display: "flex",
@@ -59,7 +64,8 @@ const ChatItem = ({
             position: "relative",
           }}
         >
-          <AvatarCard avatar={avatar} />
+          {/* Pass the first letter to AvatarCard */}
+          <AvatarCard avatar={avatar} firstLetter={firstLetter} name={name} />
           {isOnline && (
             <Box
               sx={{
@@ -84,75 +90,90 @@ const ChatItem = ({
           )}
         </Box>
 
-        {/* Content Section - Simplified */}
         <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
           sx={{
             flex: 1,
             overflow: "hidden",
           }}
         >
-          <Typography
-            variant="body1"
-            fontWeight={sameSender ? "500" : "400"}
-            color={sameSender ? "primary.dark" : "text.primary"}
-            noWrap
-            sx={{
-              fontSize: "0.95rem",
-              letterSpacing: "0.02em",
-            }}
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{ width: "100%" }}
           >
-            {name}
-            {groupChat && (
-              <Box
-                component="span"
-                sx={{
-                  ml: 1,
-                  px: 1,
-                  py: 0.2,
-                  borderRadius: "4px",
-                  backgroundColor: "rgba(25, 118, 210, 0.1)",
-                  color: "primary.main",
-                  fontSize: "0.7rem",
-                  fontWeight: 500,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                }}
-              >
-                Group
-              </Box>
-            )}
-          </Typography>
-
-          {newMessageAlert && (
-            <Box
+            <Typography
+              variant="body1"
+              fontWeight={sameSender ? "500" : "400"}
+              color={sameSender ? "primary.dark" : "text.primary"}
+              noWrap
               sx={{
-                display: "flex",
-                alignItems: "center",
-                background: "rgba(25, 118, 210, 0.1)",
-                borderRadius: "12px",
-                padding: "2px 8px",
-                ml: 1,
+                fontSize: "0.95rem",
+                letterSpacing: "0.02em",
+                maxWidth: "75%",
               }}
             >
+              {name}
+              {groupChat && (
+                <Box
+                  component="span"
+                  sx={{
+                    ml: 1,
+                    px: 1,
+                    py: 0.2,
+                    borderRadius: "4px",
+                    backgroundColor: "rgba(25, 118, 210, 0.1)",
+                    color: "primary.main",
+                    fontSize: "0.7rem",
+                    fontWeight: 500,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  Group
+                </Box>
+              )}
+            </Typography>
+
+            {showNewMessageIndicators && (
               <Typography
                 variant="caption"
                 color="primary"
                 fontWeight="bold"
-                sx={{ mr: 0.5, fontSize: "0.75rem" }}
+                sx={{
+                  fontSize: "0.8rem",
+                  bgcolor: "primary.main",
+                  color: "white",
+                  borderRadius: "50%",
+                  width: "20px",
+                  height: "20px",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginLeft: "auto",
+                }}
               >
-                {newMessageAlert.count}
+                {testMessageAlert.count}
               </Typography>
-              <Typography
-                variant="caption"
-                color="primary.dark"
-                sx={{ fontSize: "0.7rem" }}
-              >
-                New
-              </Typography>
-            </Box>
+            )}
+          </Stack>
+
+          {showNewMessageIndicators && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              noWrap
+              sx={{
+                fontSize: "0.8rem",
+                fontWeight: 400,
+                mt: 0.5,
+                display: "block",
+                padding: "2px 4px",
+                borderRadius: "4px",
+              }}
+            >
+              New messages
+            </Typography>
           )}
         </Stack>
       </Box>

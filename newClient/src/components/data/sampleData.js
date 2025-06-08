@@ -14,6 +14,27 @@ export const sampleChats = [
     groupChat: false,
     members: ["1", "3", "4"],
   },
+  {
+    avatar: ["https://example.com/avatar3.jpg"],
+    name: "Alex",
+    _id: "3",
+    groupChat: false,
+    members: ["1", "2", "4"],
+  }
+  ,{
+    avatar: ["https://example.com/avatar4.jpg"],
+    name: "Sarah",
+    _id: "4",
+    groupChat: false,
+
+    members: ["2", "3"],
+  },{
+    avatar: ["https://example.com/avatar5.jpg"],
+    name: "Kevin",
+    _id: "5",
+    groupChat: false,
+    members: ["1", "2", "3", "4"],
+  }
 ];
 
 export const sampleUsers = [

@@ -1,25 +1,39 @@
-import { Avatar, AvatarGroup } from "@mui/material";
 import React from "react";
+import { Avatar, AvatarGroup } from "@mui/material";
 
-const AvatarCard = ({ avatar = [], max = 4 }) => {
-  return (
-    <AvatarGroup
-      max={max}
-      sx={{
-        "& .MuiAvatar-root": {
-          width: 36,
-          height: 36,
-          fontSize: "0.9rem",
-          border: "2px solid #fff",
-        },
-        justifyContent: "flex-start",
-        width: "fit-content",
-      }}
-    >
+const AvatarCard = ({ avatar = [], firstLetter = "", name = "" }) => {
+  return avatar.length > 0 ? (
+    <AvatarGroup max={2} sx={{ position: "relative" }}>
       {avatar.map((i, index) => (
-        <Avatar key={index} src={i} alt={`Avatar ${index + 1}`} />
+        <Avatar
+          key={index}
+          src={i}
+          alt={name || "User"}
+          sx={{
+            width: 40,
+            height: 40,
+            borderWidth: 2,
+            backgroundColor: "primary.main",
+            color: "white",
+          }}
+        >
+          {firstLetter}
+        </Avatar>
       ))}
     </AvatarGroup>
+  ) : (
+    <Avatar
+      src=""
+      alt={name || "User"}
+      sx={{
+        width: 40,
+        height: 40,
+        backgroundColor: "primary.main",
+        color: "white",
+      }}
+    >
+      {firstLetter}
+    </Avatar>
   );
 };
 
