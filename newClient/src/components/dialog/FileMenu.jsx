@@ -1,9 +1,13 @@
-import React from 'react'
+import { Menu } from "@mui/material";
+import React from "react";
 
-function FileMenu() {
+function FileMenu({ anchorE1 }) {
   return (
-    <div>FileMenu</div>
-  )
+    <Menu
+      //open={true}
+      anchorEl={anchorE1}
+    ></Menu>
+  );
 }
 
-export default FileMenu
+export default FileMenu;

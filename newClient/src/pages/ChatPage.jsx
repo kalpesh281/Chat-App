@@ -6,6 +6,14 @@ import {
   Send as SendIcon,
 } from "@mui/icons-material";
 import { InputBox, Button } from "../components/styles/StyledComponent";
+import FileMenu from "../components/dialog/FileMenu";
+import { sampleMessages } from "../components/data/sampleData";
+import MessageComponent from "../components/shared/MessageComponent";
+
+const user={
+  name:"John Doe",
+  _id:"12345",
+}
 
 function ChatPage() {
   const containerRef = useRef(null);
@@ -31,7 +39,11 @@ function ChatPage() {
           overflowY: "auto",
         }}
       >
-        {/* Messages will appear here */}
+       {
+        sampleMessages.map((i)=>(
+          <MessageComponent key={i._id} message={i} user={user} />
+        ))
+       }
       </Stack>
 
       {/* Input form area */}
@@ -73,6 +85,7 @@ function ChatPage() {
           </IconButton>
         </Stack>
       </Paper>
+      <FileMenu/>
     </Box>
   );
 }
