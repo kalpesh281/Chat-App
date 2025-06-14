@@ -88,12 +88,6 @@ export const sampleNotification = [
 
 export const sampleMessages = [
   {
-    attachments: [
-      {
-        public_id: "asd",
-        url: "https://images.pexels.com/photos/326055/pexels-photo-326055.jpeg",
-      },
-    ],
     content: "Hello, how are you?",
     _id: "1",
     sender: {
