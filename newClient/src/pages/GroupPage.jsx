@@ -25,11 +25,12 @@ import {
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Link } from "../components/styles/StyledComponent";
 import AvatarCard from "../components/shared/AvatarCard";
-import { sampleChats } from "../components/data/sampleData";
+import { sampleChats, sampleUsers } from "../components/data/sampleData";
 import { useEffect } from "react";
 import { Suspense } from "react";
 import ConfirmDeleteDialog from "../components/dialog/ConfirmDeleteDialog";
 import AddMemberDialog from "../components/dialog/AddMemberDialog";
+import UserList from "../components/shared/UserList";
 
 const isAddMember = false;
 
@@ -47,8 +48,10 @@ function GroupPage() {
   const chatId = useSearchParams()[0].get("group");
 
   useEffect(() => {
+   if(chatId) {
     setGroupName(`Group Name ${chatId}`);
     setGroupNameUpdatedValue(`Group Name ${chatId}`);
+   }
 
     return () => {
       setGroupName("");
@@ -74,6 +77,10 @@ function GroupPage() {
 
   const handleAddGroup = () => {
     console.log("Add member to group");
+  };
+
+  const removeMemberHandler = (id) => {
+    console.log("Remove member with ID:", id);
   };
 
   const deleteHandle = () => {
@@ -280,7 +287,7 @@ function GroupPage() {
           textTransform: "none",
           fontWeight: 500,
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-          background: `linear-gradient(90deg, #1976d2, #115293)`, // primary.main to primary.dark
+          background: `linear-gradient(90deg, #1976d2, #115293)`,
           "&:hover": {
             boxShadow: "0 6px 15px rgba(0, 0, 0, 0.25)",
             transform: "translateY(-2px)",
@@ -364,10 +371,9 @@ function GroupPage() {
           sx={{
             width: "100%",
             height: "100%",
-            backgroundColor: "rgba(255, 255, 255, 0.7)", // alpha(background.paper, 0.7)
+            backgroundColor: "rgba(255, 255, 255, 0.7)",
             backdropFilter: "blur(10px)",
             boxSizing: "border-box",
-            padding: "1.5rem 3rem",
             display: "flex",
             position: "relative",
             flexDirection: "column",
@@ -398,9 +404,12 @@ function GroupPage() {
                   width: "100%",
                   borderRadius: 3,
                   bgcolor: "#ffffff",
-
                   mb: 3,
                   position: "relative",
+                  maxHeight: "400px",  // Fixed height to enable scrolling
+                  overflow: "hidden",  // Hide overflow
+                  display: "flex",
+                  flexDirection: "column"
                 }}
               >
                 <Typography
@@ -417,27 +426,45 @@ function GroupPage() {
                   Members
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
-
-                <Box
-                  sx={{
-                    width: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    py: 3,
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    color="#757575" // text.secondary
-                    sx={{
-                      fontStyle: "italic",
-                      opacity: 0.7,
-                    }}
-                  >
-                    Member list will be displayed here
-                  </Typography>
+                
+                <Box sx={{ 
+                  overflowY: "auto", 
+                  flex: 1,
+                  pr: 1, // Add a bit of padding to account for scrollbar
+                  "&::-webkit-scrollbar": {
+                    width: "8px",
+                  },
+                  "&::-webkit-scrollbar-thumb": {
+                    backgroundColor: "rgba(0,0,0,0.1)",
+                    borderRadius: "4px",
+                  },
+                  "&::-webkit-scrollbar-track": {
+                    backgroundColor: "rgba(0,0,0,0.05)",
+                  }
+                }}>
+                  {sampleUsers.map((i) => (
+                    <UserList
+                      user={i}
+                      key={i._id}
+                      handler={removeMemberHandler}
+                      isAdded
+                      styling={{
+                        cursor: "pointer",
+                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
+                        padding: "8px 16px",
+                        borderRadius: 2,
+                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                        mb: 3,
+                        borderLeft: "3px solid rgba(62, 105, 184, 0.5)", // Green border indicating member
+                        transition: "all 0.2s ease-in-out",
+                        "&:hover": {
+                          backgroundColor: "rgba(255, 255, 255, 0.9)",
+                          transform: "translateY(-2px)",
+                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                        },
+                      }}
+                    />
+                  ))}
                 </Box>
               </Paper>
 
@@ -468,7 +495,7 @@ function GroupPage() {
 
 const GroupList = ({ w = "100%", myGroups = [], chatId }) => {
   return (
-    <Stack spacing={1.5}>
+    <Stack spacing={0.5}>
       {myGroups.length > 0 ? (
         myGroups.map((group) => (
           <GroupListItem
@@ -482,9 +509,9 @@ const GroupList = ({ w = "100%", myGroups = [], chatId }) => {
         <Paper
           elevation={0}
           sx={{
-            p: 2,
+            p: 1.5, // Reduced padding
             borderRadius: 2,
-            bgcolor: "rgba(255, 255, 255, 0.5)", // alpha(background.paper, 0.5)
+            bgcolor: "rgba(255, 255, 255, 0.5)",
             border: `1px dashed rgba(158, 158, 158, 0.3)`, // alpha(text.disabled, 0.3)
             textAlign: "center",
           }}
@@ -520,8 +547,8 @@ const GroupListItem = memo(({ group, chatId }) => {
       <Paper
         elevation={isSelected ? 1 : 0}
         sx={{
-          p: 1.5,
-          borderRadius: 2,
+          p: 0.75, // Reduced padding
+          borderRadius: 1, // Smaller border radius
           backgroundColor: isSelected
             ? "rgba(25, 118, 210, 0.08)" // alpha(primary.main, 0.08)
             : "transparent",
@@ -533,14 +560,14 @@ const GroupListItem = memo(({ group, chatId }) => {
             backgroundColor: isSelected
               ? "rgba(25, 118, 210, 0.12)" // alpha(primary.main, 0.12)
               : "rgba(0, 0, 0, 0.04)", // alpha(action.hover, 0.1)
-            transform: "translateX(3px)",
+            transform: "translateX(2px)", // Reduced transform
           },
         }}
       >
         <Stack
           direction="row"
           alignItems="center"
-          spacing={1.5}
+          spacing={1} // Reduced spacing
           sx={{ width: "100%" }}
         >
           <AvatarCard avatar={avatar} />
@@ -548,9 +575,8 @@ const GroupListItem = memo(({ group, chatId }) => {
             variant="body2"
             sx={{
               fontWeight: isSelected ? 600 : 500,
-              color: isSelected
-                ? "#1976d2" // primary.main
-                : "#212121", // text.primary
+              fontSize: "0.85rem", // Smaller font size
+              color: isSelected ? "#1976d2" : "#212121", // text.primary
               flexGrow: 1,
               whiteSpace: "nowrap",
               overflow: "hidden",
@@ -562,11 +588,11 @@ const GroupListItem = memo(({ group, chatId }) => {
           {isSelected && (
             <Box
               sx={{
-                width: 8,
-                height: 8,
+                width: 6, // Smaller indicator
+                height: 6,
                 borderRadius: "50%",
                 bgcolor: "#1976d2", // primary.main
-                boxShadow: `0 0 0 3px rgba(25, 118, 210, 0.2)`, // alpha(primary.main, 0.2)
+                boxShadow: `0 0 0 2px rgba(25, 118, 210, 0.2)`, // Smaller shadow
               }}
             />
           )}

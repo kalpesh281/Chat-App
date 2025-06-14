@@ -8,7 +8,10 @@ import {
   CircularProgress,
   Box,
 } from "@mui/material";
-import { PersonAdd as PersonAddIcon } from "@mui/icons-material";
+import {
+  PersonAdd as PersonAddIcon,
+  PersonRemove as PersonRemoveIcon,
+} from "@mui/icons-material";
 import React, { memo } from "react";
 
 const UserList = ({
@@ -17,6 +20,7 @@ const UserList = ({
   handlerIsLoading,
   handleIsDisabled = false,
   isAdded = false,
+  styling = {},
 }) => {
   return (
     <ListItem
@@ -25,10 +29,11 @@ const UserList = ({
         py: 1,
         px: 2,
         "&:hover": {
-          "& .add-friend-btn": {
+          "& .user-action-btn": {
             opacity: 1,
           },
         },
+        ...styling,
       }}
       secondaryAction={
         <Box>
@@ -40,24 +45,28 @@ const UserList = ({
             />
           ) : (
             <IconButton
-              className="add-friend-btn"
+              className="user-action-btn"
               edge="end"
-              disabled={handleIsDisabled || isAdded}
+              disabled={handleIsDisabled}
               onClick={() => handler(user._id)}
               sx={{
-                bgcolor: isAdded ? "success.light" : "rgba(25, 118, 210, 0.08)",
+                bgcolor: isAdded ? "#ff4d4f" : "rgba(25, 118, 210, 0.08)",
                 color: isAdded ? "white" : "primary.main",
                 opacity: { xs: 1, sm: 0.7 },
                 transition: "all 0.2s",
                 "&:hover": {
                   bgcolor: isAdded
-                    ? "success.main"
+                    ? "#f5222d"
                     : "rgba(25, 118, 210, 0.15)",
                   transform: "scale(1.05)",
                 },
               }}
             >
-              <PersonAddIcon fontSize="small" />
+              {isAdded ? (
+                <PersonRemoveIcon fontSize="small" />
+              ) : (
+                <PersonAddIcon fontSize="small" />
+              )}
             </IconButton>
           )}
         </Box>
