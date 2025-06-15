@@ -148,52 +148,22 @@ function UserListPage() {
         </Typography>
       ),
     },
-    {
-      field: "actions",
-      headerName: "Actions",
-      headerClassName: "table-header",
-      width: 120,
-      flex: 0.8,
-      sortable: false,
-      renderCell: (params) => (
-        <Stack direction="row" spacing={1}>
-          <IconButton
-            size="small"
-            color="primary"
-            sx={{
-              backgroundColor: "rgba(25, 118, 210, 0.08)",
-              "&:hover": {
-                backgroundColor: "rgba(25, 118, 210, 0.12)",
-              },
-            }}
-          >
-            <Edit fontSize="small" />
-          </IconButton>
-          <IconButton
-            size="small"
-            color="error"
-            sx={{
-              backgroundColor: "rgba(211, 47, 47, 0.08)",
-              "&:hover": {
-                backgroundColor: "rgba(211, 47, 47, 0.12)",
-              },
-            }}
-          >
-            <DeleteOutline fontSize="small" />
-          </IconButton>
-        </Stack>
-      ),
-    },
   ];
 
   return (
     <AdminLayout>
-      <Container maxWidth="xl">
+      <Container
+        maxWidth="xl"
+        sx={{
+          py: 2, // Reduced top/bottom padding
+          px: { xs: 1, sm: 2 }, // Responsive horizontal padding
+        }}
+      >
         <Paper
           elevation={2}
           sx={{
-            p: { xs: 2, md: 2 },
-            mb: 4,
+            p: { xs: 1.5, md: 2 }, // Reduced padding
+            mb: 3, // Reduced bottom margin
             borderRadius: 3,
             background: `linear-gradient(145deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.9))`,
             backdropFilter: "blur(10px)",
@@ -299,41 +269,30 @@ function UserListPage() {
           </Stack>
         </Paper>
 
-        <Paper
-          elevation={3}
+        <Box
           sx={{
-            height: 650,
+            height: { xs: "calc(100vh - 190px)", md: "calc(100vh - 170px)" }, // Dynamic height based on viewport
             width: "100%",
-            overflow: "hidden",
             borderRadius: 3,
-            "& .table-header": {
-              backgroundColor: "rgba(25, 118, 210, 0.08)",
-              color: "#1976d2",
-              fontWeight: 600,
-            },
-            "& .MuiDataGrid-cell:focus": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-row": {
-              transition: "background-color 0.2s ease",
-              "&:hover": {
-                backgroundColor: "rgba(0, 0, 0, 0.04)",
-              },
-              "&:nth-of-type(even)": {
-                backgroundColor: "rgba(0, 0, 0, 0.02)",
-              },
-            },
+            overflow: "hidden",
+            boxShadow: "0 4px 15px rgba(0, 0, 0, 0.05)",
+            backgroundColor: "white",
           }}
         >
           <DataGrid
             rows={filteredRows}
             columns={columns}
             pageSize={10}
-            rowsPerPageOptions={[10]}
+            rowsPerPageOptions={[10, 25, 50]}
             disableSelectionOnClick
             disableColumnMenu
             sx={{
               border: "none",
+              "& .table-header": {
+                backgroundColor: "rgba(25, 118, 210, 0.08)",
+                color: "#1976d2",
+                fontWeight: 600,
+              },
               "& .MuiDataGrid-columnHeaders": {
                 borderBottom: "none",
               },
@@ -343,18 +302,44 @@ function UserListPage() {
               "& .MuiDataGrid-footerContainer": {
                 borderTop: "none",
                 backgroundColor: "white",
+                px: 2, // Add some padding to footer
               },
               "& .MuiDataGrid-toolbarContainer": {
                 backgroundColor: "white",
-                padding: 2,
+                padding: 1, // Reduce padding
               },
               "& .MuiDataGrid-cell": {
                 paddingLeft: 1,
                 paddingRight: 1,
+                fontSize: "0.875rem", // Slightly smaller font for better fit
+              },
+              "& .MuiDataGrid-row": {
+                transition: "background-color 0.2s ease",
+                "&:hover": {
+                  backgroundColor: "rgba(0, 0, 0, 0.04)",
+                },
+                "&:nth-of-type(even)": {
+                  backgroundColor: "rgba(0, 0, 0, 0.02)",
+                },
+              },
+              "& .MuiDataGrid-cell:focus": {
+                outline: "none",
+              },
+              // Better header styling
+              "& .MuiDataGrid-columnHeaderTitle": {
+                fontWeight: 600,
+                fontSize: "0.875rem",
+              },
+              // Row height slightly reduced
+              "& .MuiDataGrid-viewport": {
+                "& .MuiDataGrid-row": {
+                  maxHeight: "52px !important",
+                  minHeight: "52px !important",
+                },
               },
             }}
           />
-        </Paper>
+        </Box>
       </Container>
     </AdminLayout>
   );

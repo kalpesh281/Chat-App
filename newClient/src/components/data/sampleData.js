@@ -304,3 +304,71 @@ export const sampleGroupData = [
     lastActive: "2023-08-20",
   },
 ];
+
+export const sampleMessageData = [
+  {
+    id: 1,
+    attachment: true,
+    content:
+      "Hello everyone, check out this document I've prepared for our meeting tomorrow.",
+    sender: "john_doe",
+    chat: "Project Team Alpha",
+    groupChat: true,  
+    time: "2023-08-25 09:15:22",
+  },
+  {
+    id: 2,
+    attachment: false,
+    content: "Thanks for sharing. I'll review it tonight.",
+    sender: "mary_s",
+    chat: "Project Team Alpha",
+    groupChat: true,
+    time: "2023-08-25 09:20:45",
+  },
+  {
+    id: 3,
+    attachment: true,
+    content: "Here's the presentation slides from yesterday's client meeting.",
+    sender: "alex_j",
+    chat: "Work Team",
+    groupChat: true,
+    time: "2023-08-24 16:30:10",
+  },
+  {
+    id: 4,
+    attachment: false,
+    content: "Are we still meeting for coffee tomorrow?",
+    sender: "sarah_w",
+    chat: "John Doe",
+    groupChat: false,
+    time: "2023-08-25 14:05:33",
+  },
+  {
+    id: 5,
+    attachment: true,
+    content: "Check out this photo from our trip!",
+    sender: "mike_w",
+    chat: "Family Group",
+    groupChat: true,
+    time: "2023-08-23 20:45:12",
+  },
+  {
+    id: 6,
+    attachment: false,
+    content: "Don't forget about the team-building event next Friday.",
+    sender: "emily_d",
+    chat: "Work Team",
+    groupChat: true,
+    time: "2023-08-25 11:22:09",
+  },
+  {
+    id: 7,
+    attachment: false,
+    content:
+      "I've finished the report you requested. Let me know if you need any changes.",
+    sender: "david_m",
+    chat: "Lisa Rodriguez",
+    groupChat: false,
+    time: "2023-08-24 13:10:45",
+  },
+];

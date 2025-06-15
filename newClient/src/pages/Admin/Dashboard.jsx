@@ -150,11 +150,11 @@ function Dashboard() {
   const widgets = (
     <Stack
       direction={{ xs: "column", sm: "row" }}
-      spacing={{ xs: 2, md: 4 }}
+      spacing={{ xs: 2, md: 3 }} // Reduced spacing
       justifyContent="center"
       alignItems="center"
       sx={{
-        my: 4,
+        my: 3, // Reduced vertical margin
         width: "100%",
       }}
     >
@@ -185,94 +185,102 @@ function Dashboard() {
   return (
     <>
       <AdminLayout>
-        <Container component={"main"} maxWidth="xl">
+        <Container
+          component={"main"}
+          maxWidth="xl"
+          sx={{
+            py: 2, // Reduced top/bottom padding
+          }}
+        >
           {Appbar}
         </Container>
-        <Stack
-          direction={{ xs: "column", md: "row" }}
-          spacing={2}
-          flexWrap={{ xs: "wrap", md: "nowrap" }} 
-          justifyContent="space-between"
-          mb={2}
-        >
-          <Paper
-            elevation={3}
-            sx={{
-              padding: { xs: "1.5rem", md: "2rem" },
-              borderRadius: 3,
-              width: "100%", 
-              maxWidth: { xs: "100%", md: "60%" }, 
-              height: { xs: "20rem", md: "24rem" },
-              background: "white",
-              position: "relative",
-              overflow: "hidden",
-              flexGrow: 3, 
-              "&::before": {
-                content: '""',
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "6px",
-                height: "100%",
-                background: "#1976d2",
-                borderTopLeftRadius: 3,
-                borderBottomLeftRadius: 3,
-              },
-            }}
+        <Container maxWidth="xl" sx={{ px: { xs: 1, sm: 2 } }}>
+          <Stack
+            direction={{ xs: "column", md: "row" }}
+            spacing={2}
+            flexWrap={{ xs: "wrap", md: "nowrap" }}
+            justifyContent="space-between"
+            mb={2}
           >
-            <Typography variant="h5" fontWeight={600} color="#212121">
-              Last Messages
-            </Typography>
-            <LineChart
-              value={[65, 59, 80, 81, 56, 55, 40, 60, 70, 90, 100, 120]}
-            />
-          </Paper>
-          <Paper
-            elevation={3}
-            sx={{
-              padding: { xs: "1.5rem", md: "2rem" },
-              borderRadius: 3,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "100%", // Take full width of the container
-              maxWidth: { xs: "100%", md: "40%" }, // Percentage-based max width
-              height: { xs: "20rem", md: "24rem" },
-              position: "relative",
-              background: "white",
-              flexGrow: 2, // Takes less space in the row
-              "&::before": {
-                content: '""',
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "6px",
-                height: "100%",
-                background: "#2e7d32", // Using success green color
-                borderTopLeftRadius: 3,
-                borderBottomLeftRadius: 3,
-              },
-            }}
-          >
-            <Typography
-              variant="h5"
-              alignSelf="flex-start"
-              mb={2}
-              fontWeight={600}
-              color="#212121"
+            <Paper
+              elevation={3}
+              sx={{
+                padding: { xs: "1.25rem", md: "1.75rem" }, // Slightly reduced padding
+                borderRadius: 3,
+                width: "100%",
+                maxWidth: { xs: "100%", md: "60%" },
+                height: { xs: "18rem", md: "22rem" }, // Slightly reduced height
+                background: "white",
+                position: "relative",
+                overflow: "hidden",
+                flexGrow: 3,
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "6px",
+                  height: "100%",
+                  background: "#1976d2",
+                  borderTopLeftRadius: 3,
+                  borderBottomLeftRadius: 3,
+                },
+              }}
             >
-              Chat Distribution
-            </Typography>
-            <Box sx={{ width: "100%", height: "80%", position: "relative" }}>
-              <DoughnutChart
-                labels={chatDistributionLabels}
-                values={chatDistributionValues}
+              <Typography variant="h5" fontWeight={600} color="#212121">
+                Last Messages
+              </Typography>
+              <LineChart
+                value={[65, 59, 80, 81, 56, 55, 40, 60, 70, 90, 100, 120]}
               />
-            </Box>
-          </Paper>
-        </Stack>
-        {widgets}
+            </Paper>
+            <Paper
+              elevation={3}
+              sx={{
+                padding: { xs: "1.25rem", md: "1.75rem" }, // Slightly reduced padding
+                borderRadius: 3,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                width: "100%",
+                maxWidth: { xs: "100%", md: "40%" },
+                height: { xs: "18rem", md: "22rem" }, // Slightly reduced height
+                position: "relative",
+                background: "white",
+                flexGrow: 2, // Takes less space in the row
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "6px",
+                  height: "100%",
+                  background: "#2e7d32", // Using success green color
+                  borderTopLeftRadius: 3,
+                  borderBottomLeftRadius: 3,
+                },
+              }}
+            >
+              <Typography
+                variant="h5"
+                alignSelf="flex-start"
+                mb={2}
+                fontWeight={600}
+                color="#212121"
+              >
+                Chat Distribution
+              </Typography>
+              <Box sx={{ width: "100%", height: "80%", position: "relative" }}>
+                <DoughnutChart
+                  labels={chatDistributionLabels}
+                  values={chatDistributionValues}
+                />
+              </Box>
+            </Paper>
+          </Stack>
+          {widgets}
+        </Container>
       </AdminLayout>
     </>
   );
