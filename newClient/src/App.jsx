@@ -2,10 +2,6 @@ import React, { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import Loader from "./components/layout/Loader";
-import Dashboard from "./pages/Admin/Dashboard";
-import UserListPage from "./pages/Admin/UserManagement";
-import ChatManagement from "./pages/Admin/ChatManagement";
-import MessageManagement from "./pages/Admin/MessageManagement";
 
 // Lazy loading pages
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -13,6 +9,12 @@ const LoginPage = lazy(() => import("./pages/LoginPage"));
 const ChatPage = lazy(() => import("./pages/ChatPage"));
 const GroupPage = lazy(() => import("./pages/GroupPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
+
+// Lazy load admin pages
+const Dashboard = lazy(() => import("./pages/Admin/Dashboard"));
+const UserListPage = lazy(() => import("./pages/Admin/UserManagement"));
+const ChatManagement = lazy(() => import("./pages/Admin/ChatManagement"));
+const MessageManagement = lazy(() => import("./pages/Admin/MessageManagement"));
 
 const user = true;
 
