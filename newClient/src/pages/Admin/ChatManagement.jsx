@@ -261,28 +261,6 @@ function ChatManagement() {
               }}
             />
 
-            <Button
-              variant="contained"
-              color="success"
-              startIcon={<AddIcon />}
-              size="medium"
-              sx={{
-                borderRadius: 2,
-                py: 1,
-                px: 2,
-                textTransform: "none",
-                fontWeight: 500,
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-                background: `linear-gradient(90deg, #2e7d32, #1b5e20)`,
-                "&:hover": {
-                  boxShadow: "0 6px 15px rgba(0, 0, 0, 0.25)",
-                  transform: "translateY(-2px)",
-                },
-                transition: "all 0.3s ease",
-              }}
-            >
-              Add New Group
-            </Button>
           </Stack>
         </Paper>
 

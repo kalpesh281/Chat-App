@@ -244,28 +244,6 @@ function UserListPage() {
               }}
             />
 
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<PersonAdd />}
-              size="medium"
-              sx={{
-                borderRadius: 2,
-                py: 1,
-                px: 2,
-                textTransform: "none",
-                fontWeight: 500,
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-                background: `linear-gradient(90deg, #1976d2, #115293)`,
-                "&:hover": {
-                  boxShadow: "0 6px 15px rgba(0, 0, 0, 0.25)",
-                  transform: "translateY(-2px)",
-                },
-                transition: "all 0.3s ease",
-              }}
-            >
-              Add User
-            </Button>
           </Stack>
         </Paper>
 
