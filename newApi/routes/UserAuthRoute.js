@@ -9,6 +9,7 @@ import {
   acceptFriendRequest,
   getAllNotifications,
   getMyFriends,
+  getProfileDetails,
 } from "../controllers/UserAuthController.js";
 import { authMiddleware } from "../middlewares/AuthMiddleware.js";
 
@@ -23,5 +24,6 @@ router.put("/send-friend-request", authMiddleware, sendFriendRequest);
 router.put("/accept-request", authMiddleware, acceptFriendRequest);
 router.get("/notifications", authMiddleware, getAllNotifications);
 router.get("/friends", authMiddleware, getMyFriends);
+router.get("/me", authMiddleware, getProfileDetails);
 
 export default router;

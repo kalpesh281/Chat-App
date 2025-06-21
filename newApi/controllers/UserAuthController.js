@@ -239,6 +239,39 @@ const SearchUser = async (req, res) => {
   }
 };
 
+const getProfileDetails = async (req, res) => {
+  try {
+    const user = await User.findById(req.id).select("-password -__v");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const userProfile = {
+      _id: user._id,
+      name: user.name,
+      username: user.username,
+      bio: user.bio,
+      createdAt: user.createdAt,
+    };
+
+    res.status(200).json({
+      success: true,
+      message: "Profile details retrieved successfully",
+      user: userProfile,
+    });
+  } catch (error) {
+    console.error("getProfileDetails error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 const sendFriendRequest = async (req, res) => {
   try {
     const { userId } = req.body;
@@ -446,8 +479,10 @@ export {
   Logout,
   CheckCreds,
   SearchUser,
+  getProfileDetails,
   sendFriendRequest,
   acceptFriendRequest,
   getAllNotifications,
   getMyFriends,
+  
 };
