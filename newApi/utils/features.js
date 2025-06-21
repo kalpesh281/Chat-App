@@ -13,4 +13,8 @@ const connectDB = async () => {
   }
 };
 
-export { connectDB };
+const emitEvent = (req, event, data, users) => {
+  console.log(`Emitting event: ${event} with data:`, data);
+};
+
+export { connectDB, emitEvent };

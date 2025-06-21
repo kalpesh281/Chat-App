@@ -176,4 +176,15 @@ const CheckCreds = async (req, res) => {
   }
 };
 
-export { Register, Login, Logout, CheckCreds };
+const SearchUser = async (req, res) => {
+  try {
+  } catch (error) {
+    console.error("SearchUser error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export { Register, Login, Logout, CheckCreds, SearchUser };

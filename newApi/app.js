@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { connectDB } from "./utils/features.js";
 import UserAuthRoute from "./routes/UserAuthRoute.js";
+import ChatRoute from "./routes/ChatRoute.js";
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ connectDB();
 
 // Routes
 app.use("/api/v2/auth", UserAuthRoute);
+app.use("/api/v2/chat", ChatRoute);
 
 app.get("/", (req, res) => {
   res.send("Hello, World!");
