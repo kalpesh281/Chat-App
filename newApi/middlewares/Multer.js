@@ -6,4 +6,6 @@ const multerUpload = multer({
   },
 });
 
-export { multerUpload };
+const attachmentsMulter = multerUpload.array("files", 5);
+
+export { multerUpload, attachmentsMulter };

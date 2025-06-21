@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 
 const messageSchema = new mongoose.Schema(
   {
+    content: {
+      type: String,
+      default: "",
+    },
     attachments: [
       {
         public_id: {
@@ -14,15 +18,14 @@ const messageSchema = new mongoose.Schema(
         },
       },
     ],
-    content: String,
     sender: {
-      type: mongoose.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
     chat: {
-      type: mongoose.Types.ObjectId,
-      ref: "Chats",
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Chat",
       required: true,
     },
   },
@@ -30,7 +33,7 @@ const messageSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-const Message =
-  mongoose.models.Message || mongoose.model("Message", messageSchema);
+
+const Message = mongoose.model("Message", messageSchema);
 
 export { Message };

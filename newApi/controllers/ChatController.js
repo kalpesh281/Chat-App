@@ -1,7 +1,13 @@
-import { ALERT, REFETCH_CHATS } from "../constants/events.js";
+import {
+  ALERT,
+  NEW_ATTACHMENT,
+  NEW_MESSAGE_ALERT,
+  REFETCH_CHATS,
+} from "../constants/events.js";
 import { Chat } from "../models/ChatSchema.js";
+import { Message } from "../models/MessageSchema.js";
 import { User } from "../models/UserSchema.js";
-import { emitEvent } from "../utils/features.js";
+import { deleteFilesFromCloudinary, emitEvent } from "../utils/features.js";
 
 const newGroupChat = async (req, res) => {
   try {
@@ -180,4 +186,358 @@ const addMemberToGroup = async (req, res) => {
   }
 };
 
-export { newGroupChat, getMyChats, myGroups, addMemberToGroup };
+const removeMembers = async (req, res) => {
+  try {
+    const { chatId, userId } = req.body;
+    if (!chatId || !userId) {
+      return res.status(400).json({
+        success: false,
+        message: "Chat ID and user ID are required",
+      });
+    }
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      return res.status(404).json({
+        success: false,
+        message: "Chat not found",
+      });
+    }
+    if (!chat.groupChat) {
+      return res.status(400).json({
+        success: false,
+        message: "This chat is not a group chat",
+      });
+    }
+    if (chat.creator.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Only the group creator can remove members",
+      });
+    }
+
+    if (chat.members.length <= 3) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot remove members, at least two members are required",
+      });
+    }
+
+    chat.members = chat.members.filter(
+      (member) => member.toString() !== userId.toString()
+    );
+    await chat.save();
+    const removedUser = await User.findById(userId, "name");
+    emitEvent(
+      req,
+      ALERT,
+      chat.members,
+      `Removed ${removedUser.name} from the group`
+    );
+    return res.json({
+      success: true,
+      message: "Member removed successfully",
+    });
+  } catch (error) {
+    console.error("removeMembers error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+const leaveGroup = async (req, res) => {
+  try {
+    const chatId = req.params.id;
+
+    if (!chatId) {
+      return res.status(400).json({
+        success: false,
+        message: "Chat ID is required",
+      });
+    }
+
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      return res.status(404).json({
+        success: false,
+        message: "Chat not found",
+      });
+    }
+
+    if (!chat.groupChat) {
+      return res.status(400).json({
+        success: false,
+        message: "This chat is not a group chat",
+      });
+    }
+
+    const remainingMembers = chat.members.filter(
+      (member) => member.toString() !== req.id.toString()
+    );
+
+    if (chat.creator.toString() === req.id.toString()) {
+      if (remainingMembers.length === 0) {
+        await Chat.findByIdAndDelete(chatId);
+        return res.json({
+          success: true,
+          message: "Group deleted as you were the last member",
+        });
+      } else {
+        chat.creator = remainingMembers[0];
+      }
+    }
+
+    chat.members = remainingMembers;
+
+    const user = await User.findById(req.id, "name");
+    await chat.save();
+    emitEvent(req, ALERT, chat.members, `${user.name} has left the group`);
+    return res.json({
+      success: true,
+      message: "You have left the group successfully",
+    });
+  } catch (error) {
+    console.error("leaveGroup error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+const sendAttachments = async (req, res) => {
+  try {
+    const { chatId } = req.body;
+    console.log("sendAttachments called with chatId:", chatId);
+    console.log("req.files:", req.files);
+    console.log("req.file:", req.file);
+
+    const [chat, me] = await Promise.all([
+      Chat.findById(chatId),
+      User.findById(req.id, "name username"),
+    ]);
+
+    const files = req.files || [];
+    if (!chat) {
+      return res.status(404).json({
+        success: false,
+        message: "Chat not found",
+      });
+    }
+    if (!chatId || !files || files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Chat ID and files are required",
+      });
+    }
+
+    // Process uploaded files into proper attachment format
+    const attachments = files.map((file, index) => ({
+      public_id: `attachment_${Date.now()}_${index}`,
+      url: `http://localhost:5001/uploads/${file.filename}`,
+    }));
+
+    const messageForRealTime = {
+      content: "",
+      attachments,
+      sender: {
+        _id: me._id,
+        name: me.name,
+      },
+      chat: chatId,
+    };
+
+    const messageForDb = {
+      content: "",
+      attachments,
+      sender: me._id,
+      chat: chatId, // Changed from chatId to chat
+    };
+
+    const message = await Message.create(messageForDb);
+
+    emitEvent(req, NEW_ATTACHMENT, chat.members, {
+      message: messageForRealTime,
+      chatId,
+    });
+    emitEvent(req, NEW_MESSAGE_ALERT, chat.members, { chatId });
+
+    res.status(200).json({
+      success: true,
+      message,
+    });
+  } catch (error) {
+    console.error("sendAttachments error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+const getChatDetails = async (req, res) => {
+  try {
+    if (req.query.populate === "true") {
+      //   console.log("true");
+      const chat = await Chat.findById(req.params.id)
+        .populate("members", "name username")
+        .lean();
+      if (!chat) {
+        return res.status(404).json({
+          success: false,
+          message: "Chat not found",
+        });
+      }
+      chat.members = chat.members.map(({ _id, name, username }) => ({
+        _id,
+        name,
+        username: chat.members.find(
+          (member) => member._id.toString() === _id.toString()
+        ).username,
+      }));
+      return res.status(200).json({
+        success: true,
+        chat,
+      });
+    } else {
+      //   console.log("false");
+      const chat = await Chat.findById(req.params.id);
+      if (!chat) {
+        return res.status(404).json({
+          success: false,
+          message: "Chat not found",
+        });
+      }
+      return res.status(200).json({
+        success: true,
+        chat,
+      });
+    }
+  } catch (error) {
+    console.error("chatDetails error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+const renameGroup = async (req, res) => {
+  try {
+    const chatId = req.params.id;
+    const { groupName } = req.body;
+    if (!chatId || !groupName) {
+      return res.status(400).json({
+        success: false,
+        message: "Chat ID and group name are required",
+      });
+    }
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      return res.status(404).json({
+        success: false,
+        message: "Chat not found",
+      });
+    }
+    if (!chat.groupChat) {
+      return res.status(400).json({
+        success: false,
+        message: "This chat is not a group chat",
+      });
+    }
+    if (chat.creator.toString() !== req.id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Only the group Admin can rename the group",
+      });
+    }
+    chat.groupName = groupName;
+    await chat.save();
+    emitEvent(req, ALERT, chat.members, `Group renamed to ${groupName}`);
+    return res.status(200).json({
+      success: true,
+      message: "Group renamed successfully",
+    });
+  } catch (error) {
+    console.error("renameGroup error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+const deleteChat = async (req, res) => {
+  try {
+    const chatId = req.params.id;
+    if (!chatId) {
+      return res.status(400).json({
+        success: false,
+        message: "Chat ID is required",
+      });
+    }
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      return res.status(404).json({
+        success: false,
+        message: "Chat not found",
+      });
+    }
+
+    const members = chat.members;
+    if (chat.groupChat && chat.creator.toString() !== req.id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not allowed to delete this group chat",
+      });
+    }
+    if (!chat.groupChat && !chat.members.includes(req.id)) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not a member of this chat",
+      });
+    }
+
+    // Delete the all the messages in the chat and also all the attachments from the cloudinary
+    const messagesWithAttachments = await Message.find({
+      chat: chatId,
+      attachments: { $exists: true, $ne: [] },
+    });
+
+    const public_ids = [];
+    messagesWithAttachments.forEach(({ attachments }) =>
+      attachments.forEach(({ public_id }) => public_ids.push(public_id))
+    );
+    await Promise.all([
+      deleteFilesFromCloudinary(public_ids),
+      chat.deleteOne(),
+      Message.deleteMany({ chat: chatId }),
+    ]);
+
+    emitEvent(req, REFETCH_CHATS, members);
+    return res.status(200).json({
+      success: true,
+      message: "Chat deleted successfully",
+    });
+  } catch (error) {
+    console.error("deleteChat error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export {
+  newGroupChat,
+  getMyChats,
+  myGroups,
+  addMemberToGroup,
+  removeMembers,
+  leaveGroup,
+  sendAttachments,
+  getChatDetails,
+  renameGroup,
+  deleteChat,
+};

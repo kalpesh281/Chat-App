@@ -17,4 +17,6 @@ const emitEvent = (req, event, data, users) => {
   console.log(`Emitting event: ${event} with data:`, data);
 };
 
-export { connectDB, emitEvent };
+const deleteFilesFromCloudinary = async (files) => {};
+
+export { connectDB, emitEvent, deleteFilesFromCloudinary };
