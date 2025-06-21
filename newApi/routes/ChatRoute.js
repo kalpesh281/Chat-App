@@ -4,6 +4,7 @@ import {
   addMemberToGroup,
   deleteChat,
   getChatDetails,
+  getMessages,
   getMyChats,
   leaveGroup,
   myGroups,
@@ -29,4 +30,5 @@ router
   .put(authMiddleware, renameGroup)
   .delete(authMiddleware, deleteChat);
 
+router.get("/messages/:id", authMiddleware, getMessages);
 export default router;
