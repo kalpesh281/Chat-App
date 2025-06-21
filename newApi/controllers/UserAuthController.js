@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { Chat } from "../models/ChatSchema.js";
 import { Request } from "../models/RequestSchema.js";
 import { emitEvent } from "../utils/features.js";
-import { NEW_REQUEST } from "../constants/events.js";
+import { NEW_REQUEST, REFETCH_CHATS } from "../constants/events.js";
 
 const Register = async (req, res) => {
   try {
@@ -275,4 +275,122 @@ const sendFriendRequest = async (req, res) => {
   }
 };
 
-export { Register, Login, Logout, CheckCreds, SearchUser, sendFriendRequest };
+const acceptFriendRequest = async (req, res) => {
+  try {
+    const { requestId, accept } = req.body;
+    console.log(req.id);
+    console.log("requestId:", requestId);
+    console.log("accept:", accept);
+    const request = await Request.findById(requestId)
+      .populate("sender", "name")
+      .populate("receiver", "name");
+
+    console.log("Request found:", request);
+    console.log("Current user ID:", req.id);
+    console.log("Sender ID:", request?.sender?._id?.toString());
+    console.log("Receiver ID:", request?.receiver?._id?.toString());
+
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: "Friend request not found",
+      });
+    }
+
+    if (request.sender._id.toString() === req.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You can't accept friend request from yourself",
+      });
+    }
+
+    // Fix: request.receiver is populated, so we need to access _id
+    if (request.receiver._id.toString() !== req.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to accept this request",
+      });
+    }
+
+    if (!accept) {
+      await Request.findByIdAndDelete(requestId);
+
+      res.status(200).json({
+        success: true,
+        message: "Friend request rejected successfully",
+      });
+    }
+
+    const members = [request.sender._id, request.receiver._id];
+    await Promise.all([
+      Chat.create({
+        members,
+        groupName: `${request.sender.name} - ${request.receiver.name}`,
+      }),
+      request.deleteOne(),
+    ]);
+    emitEvent(req, REFETCH_CHATS, members);
+
+    res.status(200).json({
+      success: true,
+      message: "Friend request accepted successfully",
+    });
+  } catch (error) {
+    console.error("acceptFriendRequest error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+const getAllNotifications = async (req, res) => {
+  try {
+    // console.log("getAllNotifications called for user ID:", req.id);
+    const requests = await Request.find({
+      receiver: req.id,
+    })
+      .populate("sender", "name username")
+      .sort({ createdAt: -1 });
+
+    if (!requests || requests.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No notifications found",
+        requests: [],
+      });
+    } // Filter to return only specific fields
+    const filteredRequests = requests.map((request) => ({
+      _id: request._id,
+      status: request.status,
+      sender: {
+        _id: request.sender._id,
+        name: request.sender.name,
+        username: request.sender.username,
+      },
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: "Notifications retrieved successfully",
+      requests: filteredRequests,
+    });
+  } catch (error) {
+    console.error("getAllNotifications error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export {
+  Register,
+  Login,
+  Logout,
+  CheckCreds,
+  SearchUser,
+  sendFriendRequest,
+  acceptFriendRequest,
+  getAllNotifications,
+};
