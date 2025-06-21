@@ -1,15 +1,24 @@
 import express from "express";
+import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { connectDB } from "./utils/features.js";
+import UserAuthRoute from "./routes/UserAuthRoute.js";
 
 dotenv.config();
 
 const app = express();
 
+// Middleware to parse JSON
+app.use(express.json());
+app.use(cookieParser());
+
 const PORT = process.env.PORT || 5001;
 
 // Connect to MongoDB
 connectDB();
+
+// Routes
+app.use("/api/v2/auth", UserAuthRoute);
 
 app.get("/", (req, res) => {
   res.send("Hello, World!");

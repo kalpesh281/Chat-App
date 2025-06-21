@@ -1,6 +1,6 @@
-import { Schema, Types, model, models } from "mongoose";
+import mongoose from "mongoose";
 
-const requestSchema = new Schema(
+const requestSchema = new mongoose.Schema(
   {
     status: {
       type: String,
@@ -8,12 +8,12 @@ const requestSchema = new Schema(
       default: "pending",
     },
     sender: {
-      type: Types.ObjectId,
+      type: mongoose.Types.ObjectId,
       ref: "User",
       required: true,
     },
     receiver: {
-      type: Types.ObjectId,
+      type: mongoose.Types.ObjectId,
       ref: "User",
       required: true,
     },
@@ -22,4 +22,8 @@ const requestSchema = new Schema(
     timestamps: true,
   }
 );
-const Request = models.Request || model("Request", requestSchema);
+
+const Request =
+  mongoose.models.Request || mongoose.model("Request", requestSchema);
+
+export { Request };
