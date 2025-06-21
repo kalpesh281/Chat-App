@@ -8,7 +8,7 @@ import { NEW_REQUEST, REFETCH_CHATS } from "../constants/events.js";
 
 const Register = async (req, res) => {
   try {
-    const { name, username, password, bio } = req.body;
+    const { name, username, password, bio, role } = req.body;
 
     if (!name || !username || !password) {
       return res.status(400).json({
@@ -33,6 +33,7 @@ const Register = async (req, res) => {
       username,
       password: hashedPassword,
       bio: bio || "",
+      role: role || "user",
     });
 
     const savedUser = await newUser.save();
@@ -82,7 +83,7 @@ const Login = async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { userId: user._id, username: user.username },
+      { userId: user._id, username: user.username, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
@@ -384,6 +385,61 @@ const getAllNotifications = async (req, res) => {
   }
 };
 
+const getMyFriends = async (req, res) => {
+  try {
+    const chatId = req.query.chatId;
+    const chats = await Chat.find({
+      members: req.id,
+      groupChat: false,
+    }).populate("members", "name username ");
+    if (!chats || chats.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No friends found",
+        friends: [],
+      });
+    }
+
+    const friends = chats.map((chat) => {
+      const friend = chat.members.find(
+        (member) => member._id.toString() !== req.id
+      );
+      return {
+        _id: friend._id,
+        name: friend.name,
+        username: friend.username,
+        chatId: chat._id,
+      };
+    });
+
+    if (chatId) {
+      // console.log("Chat ID provided:", chatId);
+      const chat = await Chat.findById(chatId);
+      const availableFriends = friends.filter(
+        (friend) => !chat.members.includes(friend._id)
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Friends retrieved successfully",
+        friends: availableFriends,
+      });
+    } else {
+      // console.log("No Chat ID provided, returning all friends");
+      return res.status(200).json({
+        success: true,
+        message: "Friends retrieved successfully",
+        friends,
+      });
+    }
+  } catch (error) {
+    console.error("getMyFriends error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
 export {
   Register,
   Login,
@@ -393,4 +449,5 @@ export {
   sendFriendRequest,
   acceptFriendRequest,
   getAllNotifications,
+  getMyFriends,
 };

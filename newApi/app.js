@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { connectDB } from "./utils/features.js";
 import UserAuthRoute from "./routes/UserAuthRoute.js";
 import ChatRoute from "./routes/ChatRoute.js";
+import AdminRoute from "./routes/AdminRoute.js";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ connectDB();
 // Routes
 app.use("/api/v2/auth", UserAuthRoute);
 app.use("/api/v2/chat", ChatRoute);
+app.use("/api/v2/admin", AdminRoute);
 
 app.get("/", (req, res) => {
   res.send("Hello, World!");
