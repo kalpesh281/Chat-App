@@ -1,6 +1,10 @@
 import { User } from "../models/UserSchema.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { Chat } from "../models/ChatSchema.js";
+import { Request } from "../models/RequestSchema.js";
+import { emitEvent } from "../utils/features.js";
+import { NEW_REQUEST } from "../constants/events.js";
 
 const Register = async (req, res) => {
   try {
@@ -178,6 +182,53 @@ const CheckCreds = async (req, res) => {
 
 const SearchUser = async (req, res) => {
   try {
+    const { name } = req.query;
+    const currentUserId = req.id; // Using req.id as set by your auth middleware
+    // console.log("Current user ID:", currentUserId);
+
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        message: "Name query parameter is required",
+      });
+    }
+    const myChats = await Chat.find({
+      members: currentUserId,
+    });
+    //the list of the user in my chats means friends
+    const allUserFromMyChats = myChats.flatMap((chat) => chat.members);
+
+    const uniqueUserIds = [
+      ...new Set(allUserFromMyChats.map((id) => id.toString())),
+    ];
+    const friendUserIds = uniqueUserIds.filter(
+      (id) => id !== currentUserId.toString()
+    );
+
+    // console.log("All Friend User IDs:", friendUserIds);
+
+    // Add current user to the exclusion list to ensure they don't appear in results
+    const usersToExclude = [...friendUserIds, currentUserId.toString()];
+
+    const allUsersExpectMeAndFriends = await User.find({
+      _id: { $nin: usersToExclude },
+      name: { $regex: name, $options: "i" },
+    });
+
+    // console.log("Other Remaining Users:", allUsersExpectMeAndFriends.map(user => ({ id: user._id, name: user.name })));
+
+    const users = allUsersExpectMeAndFriends.map((user) => ({
+      _id: user._id,
+      name: user.name,
+      username: user.username,
+      bio: user.bio,
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: "Search results",
+      users,
+    });
   } catch (error) {
     console.error("SearchUser error:", error);
     res.status(500).json({
@@ -187,4 +238,41 @@ const SearchUser = async (req, res) => {
   }
 };
 
-export { Register, Login, Logout, CheckCreds, SearchUser };
+const sendFriendRequest = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    const request = await Request.findOne({
+      $or: [
+        { sender: req.id, receiver: userId },
+        { sender: userId, receiver: req.id },
+      ],
+    });
+
+    if (request) {
+      return res.status(400).json({
+        success: false,
+        message: "Friend request already sent",
+      });
+    }
+    await Request.create({
+      sender: req.id,
+      receiver: userId,
+    });
+
+    emitEvent(req, NEW_REQUEST, [userId]);
+
+    res.status(200).json({
+      success: true,
+      message: "Friend request sent successfully",
+    });
+  } catch (error) {
+    console.error("sendFriendRequest error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export { Register, Login, Logout, CheckCreds, SearchUser, sendFriendRequest };
