@@ -157,4 +157,76 @@ const allTotalMessages = async (req, res) => {
   }
 };
 
-export { allUsers, allGroups, allTotalMessages };
+const getDashboardStats = async (req, res) => {
+  try {
+    const [usersCount, groupsCount, messagesCount, totalChatCount] =
+      await Promise.all([
+        User.countDocuments(),
+        Chat.countDocuments({ groupChat: true }),
+        Message.countDocuments(),
+        Chat.countDocuments(),
+      ]);
+
+    const stats = {
+      usersCount,
+      groupsCount,
+      messagesCount,
+      totalChatCount,
+    };
+
+    const today = new Date();
+    const last7Days = new Date();
+    last7Days.setDate(last7Days.getDate() - 7);
+
+    const last7DaysMessages = await Message.find({
+      createdAt: { $gte: last7Days, $lte: today },
+    }).select("createdAt -_id");
+
+    const messages = new Array(7).fill(0);
+    last7DaysMessages.forEach((message) => {
+      const messageDate = new Date(message.createdAt);
+      const dayIndex = (today.getDay() - messageDate.getDay() + 7) % 7;
+      messages[dayIndex]++;
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Dashboard stats fetched successfully",
+      stats,
+      messagesChart: messages,
+    });
+  } catch (error) {
+    console.error("Error in getDashboardStash controller:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while fetching dashboard stash",
+    });
+  }
+};
+const adminLogout = async (req, res) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      sameSite: "strict",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Admin logged out successfully",
+    });
+  } catch (error) {
+    console.error("Error in adminLogout controller:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while logging out",
+    });
+  }
+};
+
+export {
+  allUsers,
+  allGroups,
+  allTotalMessages,
+  getDashboardStats,
+  adminLogout,
+};
