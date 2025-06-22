@@ -7,7 +7,11 @@ import {
 import { Chat } from "../models/ChatSchema.js";
 import { Message } from "../models/MessageSchema.js";
 import { User } from "../models/UserSchema.js";
-import { deleteFilesFromCloudinary, emitEvent } from "../utils/features.js";
+import {
+  deleteFilesFromCloudinary,
+  emitEvent,
+  uploadFilesToCloudinary,
+} from "../utils/features.js";
 
 const newGroupChat = async (req, res) => {
   try {
@@ -311,7 +315,6 @@ const sendAttachments = async (req, res) => {
     const { chatId } = req.body;
     console.log("sendAttachments called with chatId:", chatId);
     console.log("req.files:", req.files);
-    console.log("req.file:", req.file);
 
     const [chat, me] = await Promise.all([
       Chat.findById(chatId),
@@ -319,12 +322,14 @@ const sendAttachments = async (req, res) => {
     ]);
 
     const files = req.files || [];
+
     if (!chat) {
       return res.status(404).json({
         success: false,
         message: "Chat not found",
       });
     }
+
     if (!chatId || !files || files.length === 0) {
       return res.status(400).json({
         success: false,
@@ -332,11 +337,7 @@ const sendAttachments = async (req, res) => {
       });
     }
 
-    // Process uploaded files into proper attachment format
-    const attachments = files.map((file, index) => ({
-      public_id: `attachment_${Date.now()}_${index}`,
-      url: `http://localhost:5001/uploads/${file.filename}`,
-    }));
+    const attachments = await uploadFilesToCloudinary(files);
 
     const messageForRealTime = {
       content: "",
@@ -352,7 +353,7 @@ const sendAttachments = async (req, res) => {
       content: "",
       attachments,
       sender: me._id,
-      chat: chatId, // Changed from chatId to chat
+      chat: chatId,
     };
 
     const message = await Message.create(messageForDb);
