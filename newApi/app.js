@@ -6,11 +6,80 @@ import { connectDB } from "./utils/features.js";
 import UserAuthRoute from "./routes/UserAuthRoute.js";
 import ChatRoute from "./routes/ChatRoute.js";
 import AdminRoute from "./routes/AdminRoute.js";
+import { Server } from "socket.io";
+import { createServer } from "http";
+import { NEW_MESSAGE, NEW_MESSAGE_ALERT } from "./constants/events.js";
+import { v4 as uuid } from "uuid";
+import { getSockets } from "./lib/helper.js";
+import { Message } from "./models/MessageSchema.js";
 
 dotenv.config();
 
 const app = express();
+const server = createServer(app);
+
+const io = new Server(server, {});
+
 const PORT = process.env.PORT || 5001;
+const userSocketIds = new Map();
+
+io.use((socket, next) => {});
+
+io.on("connection", (socket) => {
+  const user = {
+    _id: "000123",
+    name: "John",
+  };
+  userSocketIds.set(user._id.toString(), socket.id);
+  console.log("Client connected", userSocketIds);
+
+  socket.on(NEW_MESSAGE, async ({ chatId, members, message }) => {
+    console.log("NEW_MESSAGE event received:", { chatId, members, message });
+
+    const messageForRealTime = {
+      content: message,
+      _id: uuid(),
+      sender: {
+        _id: user._id,
+        name: user.name,
+      },
+      chat: chatId,
+      createdAt: new Date().toISOString(),
+    };
+    const messageForDb = {
+      content: message,
+      chat: chatId,
+      sender: user._id,
+    };
+
+    const memberSockets = getSockets(members);
+    console.log("Member sockets:", memberSockets);
+
+    io.to(memberSockets).emit(NEW_MESSAGE, {
+      message: messageForRealTime,
+      chatId,
+    });
+    io.to(memberSockets).emit(NEW_MESSAGE_ALERT, {
+      chatId,
+    });
+
+    try {
+      await Message.create(messageForDb);
+      console.log("Message saved to database:", messageForDb);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      return;
+    }
+
+    console.log("New message sent to sockets:", messageForRealTime);
+  });
+
+  // Handle incoming messages
+  socket.on("disconnect", () => {
+    userSocketIds.delete(user._id.toString());
+    console.log("User disconnected");
+  });
+});
 
 // Middleware
 app.use(
@@ -35,6 +104,8 @@ app.get("/", (req, res) => {
   res.send("Hello, World!");
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`);
 });
+
+export { io, userSocketIds };
