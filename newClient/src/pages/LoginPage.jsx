@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Paper,
@@ -12,6 +12,8 @@ import {
   useTheme,
   InputAdornment,
   IconButton,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
@@ -20,45 +22,118 @@ import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
-import { useInputValidation } from "6pp"; //
+import { useInputValidation } from "6pp";
 import { usernameValidator } from "../utils/validators";
+import { useDispatch, useSelector } from "react-redux";
+import { signupUser, loginUser, clearError } from "../redux/reducers/authSlice";
+import { useNavigate } from "react-router-dom";
+import {
+  showSuccess,
+  showError,
+  showWarning,
+  showInfo,
+  showNotification,
+} from "ios-notification-stack";
+import "ios-notification-stack/dist/style.css";
 
 function LoginPage() {
   const theme = useTheme();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Redux state
+  const { isLoading, error, isAuthenticated } = useSelector(
+    (state) => state.auth
+  );
 
   const name = useInputValidation("");
   const username = useInputValidation("", usernameValidator);
   const password = useInputValidation("");
   const bio = useInputValidation("");
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Clear error when switching between login/signup
+  useEffect(() => {
+    if (error) {
+      dispatch(clearError());
+    }
+  }, [isLogin]);
+
   const toggleMode = () => {
     setIsLogin(!isLogin);
   };
 
-  const login = (data) => {
-    console.log("Login data:", data);
+  const login = async (data) => {
+    try {
+      const result = await dispatch(loginUser(data)).unwrap();
+      showSuccess("Login successful!");
+
+      // Redirect based on user role
+      const userRole = result.user?.role;
+      if (userRole === "admin") {
+        navigate("/dashboard");
+      } else {
+        navigate("/");
+      }
+    } catch (error) {
+      showError(error || "Login failed");
+    }
   };
 
-  const signup = (data) => {
-    console.log("Signup data:", data);
+  const signup = async (data) => {
+    try {
+      const result = await dispatch(signupUser(data)).unwrap();
+      showSuccess("Account created successfully! Please login.");
+      setIsLogin(true);
+      // Clear form after successful signup
+      name.clear && name.clear();
+      username.clear && username.clear();
+      password.clear && password.clear();
+      bio.clear && bio.clear();
+    } catch (error) {
+      showError(error || "Signup failed");
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
+    // Basic validation
+    if (!username.value || !password.value) {
+      showWarning("Please fill in all required fields");
+      return;
+    }
+
+    if (!isLogin && !name.value) {
+      showWarning("Name is required for signup");
+      return;
+    }
+
+    if (username.error) {
+      showError("Please fix the username error");
+      return;
+    }
+
     if (isLogin) {
       login({
         username: username.value,
-        password: password.value
+        password: password.value,
       });
     } else {
       signup({
         name: name.value,
         username: username.value,
         password: password.value,
-        bio: bio.value
+        bio: bio.value,
       });
     }
   };
@@ -66,43 +141,44 @@ function LoginPage() {
   return (
     <Box
       sx={{
-        display: 'flex',
-        minHeight: '100vh',
-        width: '100%',
-        flexDirection: { xs: 'column', md: 'row' },
+        display: "flex",
+        minHeight: "100vh",
+        width: "100%",
+        flexDirection: { xs: "column", md: "row" },
         background: `linear-gradient(145deg, #f8f9fa 0%, #f1f3f5 100%)`,
-        position: 'relative',
-        overflow: 'hidden',
+        position: "relative",
+        overflow: "hidden",
       }}
     >
       {/* Decorative background elements for entire page */}
       <Box
         sx={{
-          position: 'absolute',
-          width: '100%',
-          height: '100%',
+          position: "absolute",
+          width: "100%",
+          height: "100%",
           opacity: 0.4,
-          background: 'radial-gradient(circle at 25% 25%, rgba(255,255,255,0.2) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(255,255,255,0.2) 0%, transparent 50%)',
+          background:
+            "radial-gradient(circle at 25% 25%, rgba(255,255,255,0.2) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(255,255,255,0.2) 0%, transparent 50%)",
           zIndex: 0,
         }}
       />
-        
+
       {/* Left section - 60% with enhanced design */}
       <Box
         sx={{
-          flex: { xs: '1', md: '0.6' },
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
-          overflow: 'hidden',
-          background: 'transparent',
+          flex: { xs: "1", md: "0.6" },
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
+          overflow: "hidden",
+          background: "transparent",
           p: 4,
           zIndex: 1,
-          '&::before': {
+          "&::before": {
             content: '""',
-            position: 'absolute',
+            position: "absolute",
             top: 0,
             left: 0,
             right: 0,
@@ -115,47 +191,47 @@ function LoginPage() {
         {/* Background decorative elements */}
         <Box
           sx={{
-            position: 'absolute',
-            width: '50%',
-            height: '50%',
-            borderRadius: '50%',
+            position: "absolute",
+            width: "50%",
+            height: "50%",
+            borderRadius: "50%",
             background: `linear-gradient(135deg, ${theme.palette.primary.light}20 0%, ${theme.palette.primary.main}10 100%)`,
-            filter: 'blur(60px)',
-            top: '5%',
-            left: '5%',
+            filter: "blur(60px)",
+            top: "5%",
+            left: "5%",
             zIndex: -1,
-            animation: 'pulse 15s infinite ease-in-out',
-            '@keyframes pulse': {
-              '0%': { transform: 'scale(1) translate(0, 0)' },
-              '50%': { transform: 'scale(1.1) translate(5%, 2%)' },
-              '100%': { transform: 'scale(1) translate(0, 0)' },
+            animation: "pulse 15s infinite ease-in-out",
+            "@keyframes pulse": {
+              "0%": { transform: "scale(1) translate(0, 0)" },
+              "50%": { transform: "scale(1.1) translate(5%, 2%)" },
+              "100%": { transform: "scale(1) translate(0, 0)" },
             },
           }}
         />
         <Box
           sx={{
-            position: 'absolute',
-            width: '35%',
-            height: '35%',
-            borderRadius: '50%',
+            position: "absolute",
+            width: "35%",
+            height: "35%",
+            borderRadius: "50%",
             background: `linear-gradient(135deg, ${theme.palette.secondary.light}15 0%, ${theme.palette.secondary.main}10 100%)`,
-            filter: 'blur(60px)',
-            bottom: '10%',
-            right: '10%',
+            filter: "blur(60px)",
+            bottom: "10%",
+            right: "10%",
             zIndex: -1,
-            animation: 'float 20s infinite ease-in-out',
-            '@keyframes float': {
-              '0%': { transform: 'translate(0, 0)' },
-              '50%': { transform: 'translate(-15%, 10%)' },
-              '100%': { transform: 'translate(0, 0)' },
+            animation: "float 20s infinite ease-in-out",
+            "@keyframes float": {
+              "0%": { transform: "translate(0, 0)" },
+              "50%": { transform: "translate(-15%, 10%)" },
+              "100%": { transform: "translate(0, 0)" },
             },
           }}
         />
-        
+
         {/* Decorative patterns */}
         <Box
           sx={{
-            position: 'absolute',
+            position: "absolute",
             top: 20,
             left: 20,
             width: 200,
@@ -163,14 +239,14 @@ function LoginPage() {
             opacity: 0.4,
             background: `radial-gradient(circle, transparent 20%, ${theme.palette.background.default} 22%, transparent 23%) 0 0, 
                          radial-gradient(circle, transparent 20%, ${theme.palette.background.default} 22%, transparent 23%) 25px 25px`,
-            backgroundSize: '50px 50px',
-            transform: 'rotate(-5deg)',
+            backgroundSize: "50px 50px",
+            transform: "rotate(-5deg)",
             zIndex: -1,
           }}
         />
         <Box
           sx={{
-            position: 'absolute',
+            position: "absolute",
             bottom: 20,
             right: 20,
             width: 150,
@@ -178,22 +254,22 @@ function LoginPage() {
             opacity: 0.3,
             backgroundImage: `linear-gradient(${theme.palette.primary.light}20 1px, transparent 1px), 
                              linear-gradient(90deg, ${theme.palette.primary.light}20 1px, transparent 1px)`,
-            backgroundSize: '20px 20px',
-            transform: 'rotate(5deg)',
+            backgroundSize: "20px 20px",
+            transform: "rotate(5deg)",
             zIndex: -1,
           }}
         />
-        
+
         {/* Logo and text container */}
         <Box
           sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'relative',
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            position: "relative",
             zIndex: 2,
-            transform: 'translateY(-5%)',
+            transform: "translateY(-5%)",
           }}
         >
           {/* App logo */}
@@ -201,80 +277,89 @@ function LoginPage() {
             sx={{
               width: 120,
               height: 120,
-              borderRadius: '30%',
+              borderRadius: "30%",
               background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               mb: 4,
-              boxShadow: '0 15px 35px rgba(0, 0, 0, 0.1), 0 3px 10px rgba(0, 0, 0, 0.07)',
-              position: 'relative',
-              overflow: 'hidden',
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                transform: 'translateY(-5px)',
-                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08)',
+              boxShadow:
+                "0 15px 35px rgba(0, 0, 0, 0.1), 0 3px 10px rgba(0, 0, 0, 0.07)",
+              position: "relative",
+              overflow: "hidden",
+              transition: "all 0.3s ease",
+              "&:hover": {
+                transform: "translateY(-5px)",
+                boxShadow:
+                  "0 20px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08)",
               },
-              '&::before': {
+              "&::before": {
                 content: '""',
-                position: 'absolute',
+                position: "absolute",
                 inset: 0,
-                borderRadius: '30%',
-                padding: '3px',
+                borderRadius: "30%",
+                padding: "3px",
                 background: `linear-gradient(135deg, ${theme.palette.primary.light}, ${theme.palette.secondary.light})`,
-                WebkitMask: 
-                  'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                WebkitMaskComposite: 'xor',
-                maskComposite: 'exclude',
+                WebkitMask:
+                  "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                WebkitMaskComposite: "xor",
+                maskComposite: "exclude",
               },
-              '&::after': {
+              "&::after": {
                 content: '""',
-                position: 'absolute',
-                top: '-50%',
-                left: '-50%',
-                width: '200%',
-                height: '200%',
-                background: 'conic-gradient(transparent, rgba(255, 255, 255, 0.3), transparent 30%)',
-                animation: 'rotate 4s linear infinite',
-                '@keyframes rotate': {
-                  '100%': { transform: 'rotate(1turn)' }
-                }
-              }
+                position: "absolute",
+                top: "-50%",
+                left: "-50%",
+                width: "200%",
+                height: "200%",
+                background:
+                  "conic-gradient(transparent, rgba(255, 255, 255, 0.3), transparent 30%)",
+                animation: "rotate 4s linear infinite",
+                "@keyframes rotate": {
+                  "100%": { transform: "rotate(1turn)" },
+                },
+              },
             }}
           >
-            <ChatBubbleOutlineIcon sx={{ color: 'white', fontSize: 65, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />
+            <ChatBubbleOutlineIcon
+              sx={{
+                color: "white",
+                fontSize: 65,
+                filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))",
+              }}
+            />
           </Box>
-          
+
           {/* App title */}
-          <Typography 
-            variant="h1" 
-            component="h1" 
-            fontWeight="bold" 
-            sx={{ 
-              fontSize: { xs: '3.5rem', md: '5rem' },
-              letterSpacing: '-2px',
+          <Typography
+            variant="h1"
+            component="h1"
+            fontWeight="bold"
+            sx={{
+              fontSize: { xs: "3.5rem", md: "5rem" },
+              letterSpacing: "-2px",
               mb: 3,
-              textAlign: 'center',
+              textAlign: "center",
               background: `linear-gradient(90deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main} 50%, ${theme.palette.primary.light})`,
-              backgroundSize: '200% auto',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              textShadow: '0 10px 30px rgba(0, 0, 0, 0.05)',
-              animation: 'shine 3s linear infinite',
-              '@keyframes shine': {
-                'to': { backgroundPosition: '200% center' }
-              }
+              backgroundSize: "200% auto",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              textShadow: "0 10px 30px rgba(0, 0, 0, 0.05)",
+              animation: "shine 3s linear infinite",
+              "@keyframes shine": {
+                to: { backgroundPosition: "200% center" },
+              },
             }}
           >
             Chat App
           </Typography>
-          
+
           {/* App tagline */}
           <Typography
             variant="h5"
-            sx={{ 
-              textAlign: 'center',
-              maxWidth: '450px',
+            sx={{
+              textAlign: "center",
+              maxWidth: "450px",
               fontWeight: 500,
               color: theme.palette.text.secondary,
               opacity: 0.9,
@@ -284,46 +369,48 @@ function LoginPage() {
           >
             Connect and chat with friends in real-time
           </Typography>
-          
+
           {/* Feature bullets */}
           <Box
             sx={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "center",
               gap: 2,
-              maxWidth: '450px',
+              maxWidth: "450px",
             }}
           >
-            {['Real-time messaging', 'User friendly', 'Secure chats'].map((feature, i) => (
-              <Box
-                key={i}
-                sx={{
-                  bgcolor: 'rgba(255, 255, 255, 0.8)',
-                  px: 2,
-                  py: 1,
-                  borderRadius: 10,
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                  color: theme.palette.primary.main,
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
-                  border: `1px solid ${theme.palette.primary.light}20`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1
-                }}
-              >
+            {["Real-time messaging", "User friendly", "Secure chats"].map(
+              (feature, i) => (
                 <Box
+                  key={i}
                   sx={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    bgcolor: theme.palette.primary.main,
+                    bgcolor: "rgba(255, 255, 255, 0.8)",
+                    px: 2,
+                    py: 1,
+                    borderRadius: 10,
+                    fontSize: "0.875rem",
+                    fontWeight: 500,
+                    color: theme.palette.primary.main,
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
+                    border: `1px solid ${theme.palette.primary.light}20`,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
                   }}
-                />
-                {feature}
-              </Box>
-            ))}
+                >
+                  <Box
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: "50%",
+                      bgcolor: theme.palette.primary.main,
+                    }}
+                  />
+                  {feature}
+                </Box>
+              )
+            )}
           </Box>
         </Box>
       </Box>
@@ -331,13 +418,13 @@ function LoginPage() {
       {/* Right section - 40% with clean, simple form */}
       <Box
         sx={{
-          flex: { xs: '1', md: '0.4' },
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          flex: { xs: "1", md: "0.4" },
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
           p: { xs: 3, md: 4 },
-          bgcolor: 'white',
-          position: 'relative',
+          bgcolor: "white",
+          position: "relative",
           zIndex: 1,
         }}
       >
@@ -345,16 +432,16 @@ function LoginPage() {
           elevation={3}
           sx={{
             p: isLogin ? 4 : 3,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
             borderRadius: 2,
-            width: '100%',
+            width: "100%",
             maxWidth: 450,
-            maxHeight: isLogin ? 'none' : '90vh',
-            overflowY: isLogin ? 'visible' : 'auto',
-            background: 'white',
-            position: 'relative',
+            maxHeight: isLogin ? "none" : "90vh",
+            overflowY: isLogin ? "visible" : "auto",
+            background: "white",
+            position: "relative",
             "&:before": {
               content: '""',
               position: "absolute",
@@ -374,11 +461,7 @@ function LoginPage() {
               height: 56,
             }}
           >
-            {isLogin ? (
-              <LockOutlinedIcon />
-            ) : (
-              <PersonAddIcon />
-            )}
+            {isLogin ? <LockOutlinedIcon /> : <PersonAddIcon />}
           </Avatar>
 
           <Typography
@@ -402,7 +485,14 @@ function LoginPage() {
               : "Fill in your details to get started"}
           </Typography>
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+          <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
+            {/* Display error message */}
+            {error && (
+              <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+                {error}
+              </Alert>
+            )}
+
             <Stack spacing={isLogin ? 2 : 1.5}>
               {!isLogin && (
                 <TextField
@@ -426,7 +516,7 @@ function LoginPage() {
                       },
                     },
                   }}
-                  value={name.change}
+                  value={name.value}
                   onChange={name.changeHandler}
                 />
               )}
@@ -456,10 +546,10 @@ function LoginPage() {
                 }}
               />
               {username.error && (
-                <Typography 
-                  variant="caption" 
-                  color="error" 
-                  sx={{ ml: 2, display: 'block' }}
+                <Typography
+                  variant="caption"
+                  color="error"
+                  sx={{ ml: 2, display: "block" }}
                 >
                   {username.error}
                 </Typography>
@@ -542,6 +632,7 @@ function LoginPage() {
                 variant="contained"
                 color="primary"
                 size="large"
+                disabled={isLoading}
                 sx={{
                   mt: isLogin ? 2 : 1.5,
                   py: isLogin ? 1.5 : 1.2,
@@ -556,13 +647,27 @@ function LoginPage() {
                     boxShadow: "0 6px 15px rgba(0, 0, 0, 0.25)",
                     transform: "translateY(-2px)",
                   },
+                  "&:disabled": {
+                    background: theme.palette.action.disabledBackground,
+                    color: theme.palette.action.disabled,
+                  },
                 }}
               >
-                {isLogin ? "Sign In" : "Sign Up"}
+                {isLoading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : isLogin ? (
+                  "Sign In"
+                ) : (
+                  "Sign Up"
+                )}
               </Button>
-              
+
               <Divider sx={{ my: 1 }}>
-                <Typography variant="body2" color="text.secondary" sx={{ px: 1 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ px: 1 }}
+                >
                   OR
                 </Typography>
               </Divider>
@@ -572,6 +677,7 @@ function LoginPage() {
                 fullWidth
                 variant="outlined"
                 onClick={toggleMode}
+                disabled={isLoading}
                 sx={{
                   py: 1.2,
                   borderRadius: 2,
@@ -582,6 +688,10 @@ function LoginPage() {
                   "&:hover": {
                     borderWidth: "1.5px",
                     background: "rgba(0, 0, 0, 0.02)",
+                  },
+                  "&:disabled": {
+                    borderColor: theme.palette.action.disabled,
+                    color: theme.palette.action.disabled,
                   },
                 }}
               >
