@@ -14,7 +14,7 @@ createRoot(document.getElementById("root")).render(
         <CssBaseline />
         <App />
         <Toaster
-          position="top-right"
+          position="bottom-center"
           toastOptions={{
             style: {
               padding: "16px 24px",

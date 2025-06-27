@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AdminLayout from "../../components/layout/AdminLayout";
 import {
   Box,
@@ -22,19 +22,47 @@ import {
   Add as AddIcon,
 } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
-import { sampleGroupData } from "../../components/data/sampleData";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAllGroups } from "../../redux/reducers/adminSlice";
 
 function ChatManagement() {
+  const dispatch = useDispatch();
+
+  const { groups, error, loading } = useSelector((state) => state.admin || {});
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Filter data based on search query
-  const filteredData = sampleGroupData.filter(
+  useEffect(() => {
+    dispatch(fetchAllGroups());
+  }, [dispatch]);
+
+  // Map backend groups to DataGrid rows
+  const groupRows = Array.isArray(groups)
+    ? groups.map((group, idx) => ({
+        id: idx + 1,
+        name: group.groupName || "",
+        creator:
+          typeof group.creator === "object"
+            ? group.creator.username || group.creator.name || ""
+            : group.creator || "",
+        members: group.members ?? 0,
+        messages: group.messages ?? 0,
+        createdAt: group.createdAt
+          ? new Date(group.createdAt).toLocaleDateString()
+          : "",
+        lastActive: group.updatedAt
+          ? new Date(group.updatedAt).toLocaleDateString()
+          : "",
+      }))
+    : [];
+
+
+  const filteredData = groupRows.filter(
     (group) =>
       group.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       group.creator.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Define columns for group chat data with enhanced styling
+
   const columns = [
     {
       field: "id",
@@ -260,7 +288,6 @@ function ChatManagement() {
                 ),
               }}
             />
-
           </Stack>
         </Paper>
 

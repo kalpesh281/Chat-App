@@ -48,6 +48,15 @@ const lineChartOptions = {
       grid: {
         display: false,
       },
+      beginAtZero: true,
+      ticks: {
+        stepSize: 5,
+        callback: function (value) {
+          return value;
+        },
+      },
+      suggestedMin: 0,
+      suggestedMax: 60,
     },
   },
 };
