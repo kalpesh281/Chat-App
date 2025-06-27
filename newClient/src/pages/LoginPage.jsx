@@ -86,13 +86,15 @@ function LoginPage() {
   const signup = async (data) => {
     try {
       const result = await dispatch(signupUser(data)).unwrap();
-      toast.success("Account created successfully! Please login.");
+      toast.success("Account created successfully!");
       setIsLogin(true);
       // Clear form after successful signup
       name.clear && name.clear();
       username.clear && username.clear();
       password.clear && password.clear();
       bio.clear && bio.clear();
+      // Redirect to home page after signup
+  
     } catch (error) {
       toast.error(error || "Signup failed");
     }

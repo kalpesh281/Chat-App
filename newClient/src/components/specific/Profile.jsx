@@ -6,11 +6,25 @@ import {
   Edit as EditIcon,
   CalendarToday as CalendarIcon,
 } from "@mui/icons-material";
-import React from "react";
+import React, { useEffect } from "react";
 import moment from "moment";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUserProfile } from "../../redux/reducers/authSlice";
 
 function Profile() {
-  const joinDate = moment("2023-05-11", "YYYY-MM-DD").fromNow();
+  const dispatch = useDispatch();
+
+  const { userProfile } = useSelector((state) => state.auth);
+
+  console.log("User Profile:", userProfile);
+
+  useEffect(() => {
+    dispatch(fetchUserProfile());
+  }, []);
+
+  const joinDate = userProfile?.createdAt
+    ? moment(userProfile.createdAt).format("MMMM Do, YYYY")
+    : "";
 
   return (
     <Paper
@@ -56,31 +70,8 @@ function Profile() {
                 fontSize: "2.5rem",
               }}
             >
-              K
+              {userProfile?.name?.charAt(0)?.toUpperCase() || "?"}
             </Avatar>
-            <Box
-              sx={{
-                position: "absolute",
-                right: -4,
-                bottom: 5,
-                backgroundColor: "#1976d2",
-                borderRadius: "50%",
-                width: 32,
-                height: 32,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                border: "2px solid white",
-                cursor: "pointer",
-                transition: "all 0.2s",
-                "&:hover": {
-                  transform: "scale(1.1)",
-                },
-              }}
-            >
-              <EditIcon sx={{ fontSize: 16, color: "white" }} />
-            </Box>
           </Box>
         </Box>
       </Box>
@@ -96,14 +87,14 @@ function Profile() {
       >
         <ProfileCard
           heading="Name"
-          text="Karan Sharma"
+          text={userProfile?.name}
           Icon={<PersonIcon color="primary" />}
         />
         <Divider sx={{ opacity: 0.6 }} />
 
         <ProfileCard
           heading="Username"
-          text="@Kaay"
+          text={userProfile?.username}
           Icon={<UsernameIcon color="primary" />}
         />
         <Divider sx={{ opacity: 0.6 }} />
@@ -117,7 +108,7 @@ function Profile() {
 
         <ProfileCard
           heading="Bio"
-          text="This is the bio text. Here you can write a short description about yourself that others will see on your profile."
+          text={userProfile?.bio}
           Icon={<BioIcon color="primary" />}
           multiline
         />
