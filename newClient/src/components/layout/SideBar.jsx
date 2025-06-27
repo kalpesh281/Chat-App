@@ -14,6 +14,10 @@ import {
   Message as MessageIcon,
   Logout as LogoutIcon,
 } from "@mui/icons-material";
+import { useDispatch } from "react-redux";
+import { logoutUser } from "../../redux/reducers/authSlice";
+import { useNavigate } from "react-router-dom";
+import { showSuccess, showError } from "ios-notification-stack";
 
 const adminTabs = [
   {
@@ -36,10 +40,17 @@ const adminTabs = [
 
 function SideBar({ w = "100%" }) {
   const location = useLocation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const handleLogout = () => {
-    // Add your logout logic here
-    console.log("Logging out...");
+  const handleLogout = async () => {
+    try {
+      await dispatch(logoutUser()).unwrap();
+      showSuccess("Logged out successfully");
+      navigate("/login");
+    } catch (error) {
+      showError(error || "Logout failed");
+    }
   };
 
   return (

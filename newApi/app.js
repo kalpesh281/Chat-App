@@ -27,9 +27,9 @@ app.use(cookieParser());
 connectDB();
 
 // Routes
-app.use("/api/v2/auth", UserAuthRoute);
-app.use("/api/v2/chat", ChatRoute);
-app.use("/api/v2/admin", AdminRoute);
+app.use("/api/v1/user", UserAuthRoute);
+app.use("/api/v1/chat", ChatRoute);
+app.use("/api/v1/admin", AdminRoute);
 
 app.get("/", (req, res) => {
   res.send("Hello, World!");
