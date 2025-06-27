@@ -27,14 +27,7 @@ import { usernameValidator } from "../utils/validators";
 import { useDispatch, useSelector } from "react-redux";
 import { signupUser, loginUser, clearError } from "../redux/reducers/authSlice";
 import { useNavigate } from "react-router-dom";
-import {
-  showSuccess,
-  showError,
-  showWarning,
-  showInfo,
-  showNotification,
-} from "ios-notification-stack";
-import "ios-notification-stack/dist/style.css";
+import toast from "react-hot-toast";
 
 function LoginPage() {
   const theme = useTheme();
@@ -45,9 +38,7 @@ function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   // Redux state
-  const { isLoading, error, isAuthenticated } = useSelector(
-    (state) => state.auth
-  );
+  const { loader, error, isAuthenticated } = useSelector((state) => state.auth);
 
   const name = useInputValidation("");
   const username = useInputValidation("", usernameValidator);
@@ -74,8 +65,10 @@ function LoginPage() {
 
   const login = async (data) => {
     try {
+      console.log("Dispatching loginUser", data);
       const result = await dispatch(loginUser(data)).unwrap();
-      showSuccess("Login successful!");
+      console.log("Login success", result);
+      toast.success("Login successful!");
 
       // Redirect based on user role
       const userRole = result.user?.role;
@@ -85,14 +78,15 @@ function LoginPage() {
         navigate("/");
       }
     } catch (error) {
-      showError(error || "Login failed");
+      console.log("Login failed", error);
+      toast.error(error || "Login failed");
     }
   };
 
   const signup = async (data) => {
     try {
       const result = await dispatch(signupUser(data)).unwrap();
-      showSuccess("Account created successfully! Please login.");
+      toast.success("Account created successfully! Please login.");
       setIsLogin(true);
       // Clear form after successful signup
       name.clear && name.clear();
@@ -100,7 +94,7 @@ function LoginPage() {
       password.clear && password.clear();
       bio.clear && bio.clear();
     } catch (error) {
-      showError(error || "Signup failed");
+      toast.error(error || "Signup failed");
     }
   };
 
@@ -109,17 +103,17 @@ function LoginPage() {
 
     // Basic validation
     if (!username.value || !password.value) {
-      showWarning("Please fill in all required fields");
+      toast("Please fill in all required fields", { icon: "⚠️" });
       return;
     }
 
     if (!isLogin && !name.value) {
-      showWarning("Name is required for signup");
+      toast("Name is required for signup", { icon: "⚠️" });
       return;
     }
 
     if (username.error) {
-      showError("Please fix the username error");
+      toast.error("Please fix the username error");
       return;
     }
 
@@ -632,7 +626,7 @@ function LoginPage() {
                 variant="contained"
                 color="primary"
                 size="large"
-                disabled={isLoading}
+                disabled={loader}
                 sx={{
                   mt: isLogin ? 2 : 1.5,
                   py: isLogin ? 1.5 : 1.2,
@@ -653,7 +647,7 @@ function LoginPage() {
                   },
                 }}
               >
-                {isLoading ? (
+                {loader ? (
                   <CircularProgress size={24} color="inherit" />
                 ) : isLogin ? (
                   "Sign In"
@@ -677,7 +671,7 @@ function LoginPage() {
                 fullWidth
                 variant="outlined"
                 onClick={toggleMode}
-                disabled={isLoading}
+                disabled={loader}
                 sx={{
                   py: 1.2,
                   borderRadius: 2,

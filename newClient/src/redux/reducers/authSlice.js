@@ -70,33 +70,13 @@ export const logoutUser = createAsyncThunk(
   }
 );
 
-export const getCurrentUser = createAsyncThunk(
-  "auth/getCurrentUser",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await api.get("/me");
-      return response.data;
-    } catch (error) {
-      // Handle 401 Unauthorized specifically
-      if (error.response?.status === 401) {
-        return rejectWithValue("Unauthorized");
-      }
-
-      return rejectWithValue(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to get user info"
-      );
-    }
-  }
-);
-
 const initialState = {
   user: null,
   isAuthenticated: false,
-  loader: true,
+  loader: false, // set to false by default for faster UI
   error: null,
-  isLoading: false,
+  // Add this if you want a true initial loader:
+  // appLoading: true,
 };
 
 const authSlice = createSlice({
@@ -126,34 +106,33 @@ const authSlice = createSlice({
     builder
       // Signup cases
       .addCase(signupUser.pending, (state) => {
-        state.isLoading = true;
+        state.loader = true;
         state.error = null;
       })
       .addCase(signupUser.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.loader = false;
         state.error = null;
         // Note: Signup doesn't automatically log in the user
         // You might want to redirect to login page after successful signup
       })
       .addCase(signupUser.rejected, (state, action) => {
-        state.isLoading = false;
+        state.loader = false;
         state.error = action.payload;
       })
 
       // Login cases
       .addCase(loginUser.pending, (state) => {
-        state.isLoading = true;
+        state.loader = true;
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.loader = false;
         state.user = action.payload.user;
         state.isAuthenticated = true;
-        state.loader = false;
         state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
-        state.isLoading = false;
+        state.loader = false;
         state.error = action.payload;
         state.isAuthenticated = false;
         state.user = null;
@@ -161,61 +140,34 @@ const authSlice = createSlice({
 
       // Check credentials cases
       .addCase(checkCredentials.pending, (state) => {
-        state.isLoading = true;
+        state.loader = true;
         state.error = null;
       })
       .addCase(checkCredentials.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.loader = false;
         state.user = action.payload.user;
         state.isAuthenticated = true;
-        state.loader = false;
         state.error = null;
       })
       .addCase(checkCredentials.rejected, (state, action) => {
-        state.isLoading = false;
+        state.loader = false;
         state.error = action.payload;
       })
 
       // Logout cases
       .addCase(logoutUser.pending, (state) => {
-        state.isLoading = true;
+        state.loader = true;
         state.error = null;
       })
       .addCase(logoutUser.fulfilled, (state) => {
-        state.isLoading = false;
+        state.loader = false;
         state.user = null;
         state.isAuthenticated = false;
-        state.loader = false;
         state.error = null;
       })
       .addCase(logoutUser.rejected, (state, action) => {
-        state.isLoading = false;
+        state.loader = false;
         state.error = action.payload;
-      })
-
-      // Get current user cases
-      .addCase(getCurrentUser.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(getCurrentUser.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.user = action.payload.user;
-        state.isAuthenticated = true;
-        state.loader = false;
-        state.error = null;
-      })
-      .addCase(getCurrentUser.rejected, (state, action) => {
-        state.isLoading = false;
-        state.user = null;
-        state.isAuthenticated = false;
-        state.loader = false;
-        // Don't set error for authentication check failures
-        if (action.payload !== "Unauthorized") {
-          state.error = action.payload;
-        } else {
-          state.error = null;
-        }
       });
   },
 });

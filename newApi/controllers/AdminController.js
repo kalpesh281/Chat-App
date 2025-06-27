@@ -4,6 +4,13 @@ import { Message } from "../models/MessageSchema.js";
 
 const allUsers = async (req, res) => {
   try {
+    const { role } = req.user;
+    if (role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Admin role required.",
+      });
+    }
     console.log("Fetching all users");
 
     const users = await User.find({ _id: { $ne: req.user.userId } }).select(
@@ -61,6 +68,13 @@ const allUsers = async (req, res) => {
 
 const allGroups = async (req, res) => {
   try {
+    const { role } = req.user;
+    if (role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Admin role required.",
+      });
+    }
     const groups = await Chat.find({ groupChat: true })
       .populate("creator", "username name")
       .select("-__v");
@@ -110,6 +124,13 @@ const allGroups = async (req, res) => {
 
 const allTotalMessages = async (req, res) => {
   try {
+    const { role } = req.user;
+    if (role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Admin role required.",
+      });
+    }
     const totalMessages = await Message.countDocuments();
 
     if (totalMessages === 0) {
@@ -159,6 +180,13 @@ const allTotalMessages = async (req, res) => {
 
 const getDashboardStats = async (req, res) => {
   try {
+    const { role } = req.user;
+    if (role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Admin role required.",
+      });
+    }
     const [usersCount, groupsCount, messagesCount, totalChatCount] =
       await Promise.all([
         User.countDocuments(),
@@ -205,6 +233,7 @@ const getDashboardStats = async (req, res) => {
 };
 const adminLogout = async (req, res) => {
   try {
+    
     res.clearCookie("token", {
       httpOnly: true,
       sameSite: "strict",

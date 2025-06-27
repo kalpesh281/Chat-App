@@ -17,7 +17,7 @@ import {
 import { useDispatch } from "react-redux";
 import { logoutUser } from "../../redux/reducers/authSlice";
 import { useNavigate } from "react-router-dom";
-import { showSuccess, showError } from "ios-notification-stack";
+import toast from "react-hot-toast";
 
 const adminTabs = [
   {
@@ -46,10 +46,10 @@ function SideBar({ w = "100%" }) {
   const handleLogout = async () => {
     try {
       await dispatch(logoutUser()).unwrap();
-      showSuccess("Logged out successfully");
+      toast.success("Logged out successfully");
       navigate("/login");
     } catch (error) {
-      showError(error || "Logout failed");
+      toast.error(error || "Logout failed");
     }
   };
 

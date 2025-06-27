@@ -20,6 +20,9 @@ import {
   Chat as ChatIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logoutUser } from "../../redux/reducers/authSlice";
+import toast from "react-hot-toast";
 
 const SearchDialog = lazy(() => import("../specific/Search"));
 const NotificationsDialog = lazy(() => import("../specific/Notification"));
@@ -32,6 +35,7 @@ function Header() {
   const [isNotifications, setIsNotifications] = useState(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const handleMobile = () => {
     setIsMobile((prev) => !prev);
     console.log("Mobile view detected");
@@ -53,8 +57,14 @@ function Header() {
     setIsNotifications((prev) => !prev);
     console.log("Open notifications dialog");
   };
-  const logoutHandler = () => {
-    console.log("Logout handler called");
+  const logoutHandler = async () => {
+    try {
+      await dispatch(logoutUser()).unwrap();
+      toast.success("Logged out successfully");
+      navigate("/login");
+    } catch (error) {
+      toast.error(error || "Logout failed");
+    }
   };
   return (
     <>
