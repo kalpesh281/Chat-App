@@ -1,21 +1,13 @@
-import React, { lazy, Suspense, useEffect } from "react";
+import React, { lazy, Suspense } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   userExists,
   userNotExists,
-  getCurrentUser,
+  // getCurrentUser, // Remove this import
 } from "./redux/reducers/authSlice";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import Loader from "./components/layout/Loader";
-import {
-  showSuccess,
-  showError,
-  showWarning,
-  showInfo,
-  showNotification,
-} from "ios-notification-stack";
-import "ios-notification-stack/dist/style.css";
 
 // Lazy loading pages
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -38,26 +30,6 @@ function App() {
     loader,
   } = useSelector((state) => state.auth);
 
-  useEffect(() => {
-    // Check if user is authenticated on app load
-    dispatch(getCurrentUser())
-      .unwrap()
-      .then((result) => {
-        if (result.success) {
-          console.log("User authenticated:", result.user);
-        }
-      })
-      .catch((error) => {
-        // This is expected when user is not logged in
-        console.log("User not authenticated, redirecting to login");
-        // Don't show error notification for unauthenticated users
-      });
-  }, [dispatch]);
-
-  // Show loader while checking authentication
-  if (loader) {
-    return <Loader />;
-  }
   return (
     <>
       <BrowserRouter>
@@ -69,7 +41,7 @@ function App() {
                 <ProtectedRoute
                   user={isAuthenticated}
                   requiredRole="user"
-                  userRole={authUser?.role}
+                  // userRole={authUser?.role} // Remove this prop
                 />
               }
             >
@@ -84,7 +56,7 @@ function App() {
                 <ProtectedRoute
                   user={isAuthenticated}
                   requiredRole="admin"
-                  userRole={authUser?.role}
+                  // userRole={authUser?.role} // Remove this prop
                 />
               }
             >
