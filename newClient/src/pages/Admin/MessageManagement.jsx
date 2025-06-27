@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AdminLayout from "../../components/layout/AdminLayout";
 import {
   Box,
@@ -26,19 +26,51 @@ import {
 } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 import { sampleMessageData } from "../../components/data/sampleData";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAllMessages } from "../../redux/reducers/adminSlice";
 
 function MessageManagement() {
+  const dispatch = useDispatch();
+
+  const { messages, loading, error } = useSelector(
+    (state) => state.admin || {}
+  );
+
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Filter data based on search query
-  const filteredData = sampleMessageData.filter(
+  useEffect(() => {
+    dispatch(fetchAllMessages());
+  }, [dispatch]);
+
+  console.log("Messages fetched:", messages);
+
+  const rows = messages.map((message, index) => ({
+    id: index + 1,
+    content: message.content,
+    attachment: message.attachments && message.attachments.length > 0,
+    sender: message.sentBy.username,
+    chat: message.chatName || "--",
+    groupChat: message.groupChat,
+    // Format: time first, then date (e.g., "10:30 AM, 04/27")
+    time: message.createdAt
+      ? `${new Date(message.createdAt).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })}, ${new Date(message.createdAt).toLocaleDateString([], {
+          month: "2-digit",
+          day: "2-digit",
+        })}`
+      : "",
+  }));
+
+  const filteredData = rows.filter(
     (message) =>
       message.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
       message.sender.toLowerCase().includes(searchQuery.toLowerCase()) ||
       message.chat.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Define columns for message data with enhanced styling
   const columns = [
     {
       field: "id",

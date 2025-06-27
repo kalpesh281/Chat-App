@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchDashboardStats } from "../../redux/reducers/adminSlice";
 import AdminLayout from "../../components/layout/AdminLayout";
 
 import {
@@ -25,14 +27,29 @@ import moment from "moment";
 import { DoughnutChart, LineChart } from "../../components/specific/Charts";
 
 function Dashboard() {
-  // Define user and group counts for consistent usage
-  const userCount = 1234;
-  const groupCount = 567;
-  const messageCount = 89;
+  const dispatch = useDispatch();
+  const { dashboardStats, users, loading, error } = useSelector(
+    (state) => state.admin || {}
+  );
+
+  useEffect(() => {
+    dispatch(fetchDashboardStats());
+  }, [dispatch]);
+
+  // Debug: log the dashboardStats to verify structure
+  // console.log("dashboardStats from Redux:", dashboardStats);
+
+  // Use real data if available, fallback to 0
+  const userCount = dashboardStats?.stats?.usersCount ?? 0;
+  const groupCount = dashboardStats?.stats?.groupsCount ?? 0;
+  const messageCount = dashboardStats?.stats?.messagesCount ?? 0;
+
+  // Use real chart data if available
+  const lineChartData = dashboardStats?.messagesChart ?? [0, 0, 0, 0, 0, 0, 0];
 
   // Define chart data
   const chatDistributionLabels = ["Single Chat", "Group Chats"];
-  const chatDistributionValues = [20, 80];
+  const chatDistributionValues = [userCount, groupCount];
 
   const Appbar = (
     <Paper
@@ -182,6 +199,31 @@ function Dashboard() {
     </Stack>
   );
 
+  // Optionally, show loading or error
+  if (loading) {
+    return (
+      <AdminLayout>
+        <Container maxWidth="xl">
+          <Typography variant="h6" align="center" sx={{ mt: 8 }}>
+            Loading dashboard...
+          </Typography>
+        </Container>
+      </AdminLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <AdminLayout>
+        <Container maxWidth="xl">
+          <Typography variant="h6" color="error" align="center" sx={{ mt: 8 }}>
+            {typeof error === "string" ? error : "Failed to load dashboard"}
+          </Typography>
+        </Container>
+      </AdminLayout>
+    );
+  }
+
   return (
     <>
       <AdminLayout>
@@ -230,9 +272,7 @@ function Dashboard() {
               <Typography variant="h5" fontWeight={600} color="#212121">
                 Last Messages
               </Typography>
-              <LineChart
-                value={[65, 59, 80, 81, 56, 55, 40, 60, 70, 90, 100, 120]}
-              />
+              <LineChart value={lineChartData} />
             </Paper>
             <Paper
               elevation={3}

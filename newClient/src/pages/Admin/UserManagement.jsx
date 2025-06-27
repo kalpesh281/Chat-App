@@ -21,23 +21,56 @@ import {
   Person,
   Group as GroupIcon,
 } from "@mui/icons-material";
+import { fetchAllUsers } from "../../redux/reducers/adminSlice";
 import { DataGrid } from "@mui/x-data-grid";
 import { sampleUserData } from "../../components/data/sampleData";
+import { useDispatch, useSelector } from "react-redux";
 
 function UserListPage() {
+  const dispatch = useDispatch();
+
+  const { users, loading, error } = useSelector((state) => state.admin);
   const [searchQuery, setSearchQuery] = useState("");
   const [rows, setRows] = useState([]);
 
   useEffect(() => {
-    setRows(sampleUserData);
-  }, []);
+    dispatch(fetchAllUsers());
+  }, [dispatch]);
 
+  // Map users from Redux to DataGrid rows
+  useEffect(() => {
+    if (Array.isArray(users)) {
+      setRows(
+        users.map((user, idx) => ({
+          id: idx + 1,
+          name: user.name || "",
+          username: user.username || "",
+          friends:
+            user.friendsCount ??
+            (Array.isArray(user.friends) ? user.friends.length : 0),
+          groups:
+            user.groupsCount ??
+            (Array.isArray(user.groups) ? user.groups.length : 0),
+          joinedAt: user.updatedAt
+            ? new Date(user.updatedAt).toLocaleDateString()
+            : "",
+        }))
+      );
+    }
+  }, [users]);
+
+  console.log("Users fetched:", users);
   // Filter rows based on search query
-  const filteredRows = rows.filter(
-    (row) =>
-      row.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.username.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredRows = rows.filter((row) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      row.name.toLowerCase().includes(query) ||
+      row.username.toLowerCase().includes(query) ||
+      row.friends.toString().includes(query) ||
+      row.groups.toString().includes(query) ||
+      row.joinedAt.toLowerCase().includes(query)
+    );
+  });
 
   // Define columns with enhanced styling
   const columns = [
@@ -243,7 +276,6 @@ function UserListPage() {
                 ),
               }}
             />
-
           </Stack>
         </Paper>
 

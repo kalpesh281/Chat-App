@@ -4,12 +4,12 @@ const authMiddleware = (req, res, next) => {
   try {
     console.log("Auth middleware triggered");
     const token = req.cookies?.token;
-    console.log(token, "token in authMiddleware");
+    // console.log(token, "token in authMiddleware");
     if (!token) {
       return res.status(401).json({ message: "Unauthorized" });
     }
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log(decoded, "decoded in authMiddleware");
+    // console.log(decoded, "decoded in authMiddleware");
     if (!decoded) {
       return res.status(401).json({ message: "Unauthorized" });
     }

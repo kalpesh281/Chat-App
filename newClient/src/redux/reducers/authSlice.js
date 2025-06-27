@@ -14,9 +14,12 @@ const api = axios.create({
 // Async thunks for API calls
 export const signupUser = createAsyncThunk(
   "auth/signup",
-  async (userData, { rejectWithValue }) => {
+  async (userData, { getState, rejectWithValue }) => {
     try {
-      const response = await api.post("/register", userData);
+      const state = getState();
+      const role = state.auth?.user?.role;
+      const payload = role ? { ...userData, role } : userData;
+      const response = await api.post("/register", payload);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -28,9 +31,12 @@ export const signupUser = createAsyncThunk(
 
 export const loginUser = createAsyncThunk(
   "auth/login",
-  async (credentials, { rejectWithValue }) => {
+  async (credentials, { getState, rejectWithValue }) => {
     try {
-      const response = await api.post("/login", credentials);
+      const state = getState();
+      const role = state.auth?.user?.role;
+      const payload = role ? { ...credentials, role } : credentials;
+      const response = await api.post("/login", payload);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -42,9 +48,12 @@ export const loginUser = createAsyncThunk(
 
 export const checkCredentials = createAsyncThunk(
   "auth/checkCreds",
-  async (credData, { rejectWithValue }) => {
+  async (credData, { getState, rejectWithValue }) => {
     try {
-      const response = await api.post("/check-creds", credData);
+      const state = getState();
+      const role = state.auth?.user?.role;
+      const payload = role ? { ...credData, role } : credData;
+      const response = await api.post("/check-creds", payload);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -75,8 +84,7 @@ const initialState = {
   isAuthenticated: false,
   loader: false, // set to false by default for faster UI
   error: null,
-  // Add this if you want a true initial loader:
-  // appLoading: true,
+  
 };
 
 const authSlice = createSlice({
@@ -175,4 +183,5 @@ const authSlice = createSlice({
 export default authSlice;
 export const { userExists, userNotExists, clearError, setLoader } =
   authSlice.actions;
+export const selectUserRole = (state) => state.auth?.user?.role;
 authSlice.actions;
