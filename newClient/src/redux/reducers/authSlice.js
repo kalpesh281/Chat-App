@@ -175,3 +175,4 @@ const authSlice = createSlice({
 export default authSlice;
 export const { userExists, userNotExists, clearError, setLoader } =
   authSlice.actions;
+authSlice.actions;
