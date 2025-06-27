@@ -60,6 +60,7 @@ function Header() {
   const logoutHandler = async () => {
     try {
       await dispatch(logoutUser()).unwrap();
+      localStorage.clear();
       toast.success("Logged out successfully");
       navigate("/login");
     } catch (error) {
