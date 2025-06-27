@@ -79,12 +79,27 @@ export const logoutUser = createAsyncThunk(
   }
 );
 
+export const fetchUserProfile = createAsyncThunk(
+  "auth/fetchUserProfile",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get("/me");
+      console.log("User profile fetched:", response.data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || error.message || "Fetch profile failed"
+      );
+    }
+  }
+);
+
 const initialState = {
   user: null,
+  userProfile: null, // Optional: to store user profile data
   isAuthenticated: false,
   loader: false, // set to false by default for faster UI
   error: null,
-  
 };
 
 const authSlice = createSlice({
@@ -176,6 +191,21 @@ const authSlice = createSlice({
       .addCase(logoutUser.rejected, (state, action) => {
         state.loader = false;
         state.error = action.payload;
+      })
+      // Fetch user profile
+      .addCase(fetchUserProfile.pending, (state) => {
+        state.loader = true;
+        state.error = null;
+      })
+      .addCase(fetchUserProfile.fulfilled, (state, action) => {
+        state.loader = false;
+        console.log("User profile fetched:", action.payload);
+        state.userProfile = action.payload.user; // Store user profile data
+        state.error = null;
+      })
+      .addCase(fetchUserProfile.rejected, (state, action) => {
+        state.loader = false;
+        state.error = action.payload;
       });
   },
 });
@@ -183,5 +213,3 @@ const authSlice = createSlice({
 export default authSlice;
 export const { userExists, userNotExists, clearError, setLoader } =
   authSlice.actions;
-export const selectUserRole = (state) => state.auth?.user?.role;
-authSlice.actions;
