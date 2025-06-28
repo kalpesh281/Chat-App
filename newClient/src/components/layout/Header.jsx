@@ -23,7 +23,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../redux/reducers/authSlice";
 import toast from "react-hot-toast";
-import { setIsSearch } from "../../redux/reducers/miscSlice";
+import { setIsNotification, setIsSearch } from "../../redux/reducers/miscSlice";
 
 const SearchDialog = lazy(() => import("../specific/Search"));
 const NotificationsDialog = lazy(() => import("../specific/Notification"));
@@ -31,14 +31,12 @@ const NewGroupDialog = lazy(() => import("../specific/NewGroup"));
 
 function Header() {
   const [isMobile, setIsMobile] = useState(false);
-
   const [isNewGroup, setIsNewGroup] = useState(false);
-  const [isNotifications, setIsNotifications] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { isSearch } = useSelector((state) => state.misc);
+  const { isSearch, isNotification } = useSelector((state) => state.misc);
 
   const handleMobile = () => {
     setIsMobile((prev) => !prev);
@@ -58,8 +56,7 @@ function Header() {
   const navigateToGroup = () => navigate("/groups");
 
   const openNotifications = () => {
-    setIsNotifications((prev) => !prev);
-    console.log("Open notifications dialog");
+    dispatch(setIsNotification(true));
   };
   const logoutHandler = async () => {
     try {
@@ -196,9 +193,9 @@ function Header() {
           <SearchDialog onClose={() => dispatch(setIsSearch(false))} />
         </Suspense>
       )}
-      {isNotifications && (
+      {isNotification && (
         <Suspense fallback={<Backdrop open={true} />}>
-          <NotificationsDialog onClose={() => setIsNotifications(false)} />
+          <NotificationsDialog onClose={() => dispatch(setIsNotification(false))} />
         </Suspense>
       )}
       {isNewGroup && (
@@ -232,5 +229,7 @@ const IconBtn = ({ title, icon, onClick }) => {
     </Tooltip>
   );
 };
+
+
 
 export default Header;

@@ -18,21 +18,50 @@ import {
   Close as CloseIcon,
   Notifications as NotificationsIcon,
 } from "@mui/icons-material";
-import { sampleNotification } from "../data/sampleData";
+import {
+  useAcceptFriendRequestMutation,
+  useGetNotificationQuery,
+} from "../../redux/api/api";
+import { useErrors } from "../../hooks/hooks";
+import { useDispatch, useSelector } from "react-redux";
+import { setIsNotification } from "../../redux/reducers/miscSlice";
+import toast from "react-hot-toast";
 
-const friendHandler = ({ _id, accept }) => {
-  console.log(`Friend request ${accept ? "accepted" : "rejected"}: ${_id}`);
-};
+function Notification() {
+  const dispatch = useDispatch();
+  const isNotification = useSelector((state) => state.misc.isNotification);
+  const { isLoading, error, data, isError } = useGetNotificationQuery("");
 
-function Notification({ onClose }) {
-  const handleClose = () => {
-    if (onClose) onClose();
-    else console.log("No onClose prop provided");
+  const [acceptRequest] = useAcceptFriendRequestMutation();
+
+  useErrors([{ isError, error }]);
+
+  const friendHandler = async ({ _id, accept }) => {
+    dispatch(setIsNotification(false));
+    try {
+      const res = await acceptRequest({ requestId: _id, accept });
+      if (res?.data?.success) {
+        console.log("Use Here Socket ");
+        toast.success(res.data.message);
+      }
+      toast.error(
+        res?.error?.data?.message ||
+          res?.error?.message ||
+          "Failed to update request"
+      );
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        error?.data?.message || error?.message || "Failed to update request"
+      );
+    }
   };
+
+  const handleClose = () => dispatch(setIsNotification(false));
 
   return (
     <Dialog
-      open={true}
+      open={isNotification}
       onClose={handleClose}
       PaperProps={{
         sx: {
@@ -84,14 +113,27 @@ function Notification({ onClose }) {
       </Box>
 
       <Stack p={2} spacing={2} sx={{ maxHeight: "400px" }}>
-        {sampleNotification.length > 0 ? (
+        {isLoading ? (
+          <Box
+            sx={{
+              py: 4,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              color: "text.secondary",
+            }}
+          >
+            <NotificationsIcon sx={{ fontSize: 40, opacity: 0.3, mb: 1 }} />
+            <Typography>Loading notifications...</Typography>
+          </Box>
+        ) : data?.requests?.length > 0 ? (
           <>
             <Typography
               variant="body2"
               color="text.secondary"
               sx={{ pl: 1, fontWeight: 500 }}
             >
-              {sampleNotification.length} notifications
+              {data.requests.length} notifications
             </Typography>
 
             <Divider sx={{ opacity: 0.6 }} />
@@ -111,7 +153,7 @@ function Notification({ onClose }) {
                 },
               }}
             >
-              {sampleNotification.map(({ sender, _id }) => (
+              {data.requests.map(({ sender, _id }) => (
                 <Paper
                   key={_id}
                   elevation={0}
