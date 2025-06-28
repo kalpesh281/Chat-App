@@ -17,7 +17,7 @@ const AppLayout = () => (WrappedComponent) => {
 
     const socket = getSocket();
 
-    console.log("Socket instance:", socket);
+    // console.log("Socket instance:", socket);
 
     const { isLoading, data, isError, error, refetch } = useMyChatQuery("");
 
@@ -32,7 +32,7 @@ const AppLayout = () => (WrappedComponent) => {
 
     const handleDeleteChat = (e, _id, groupChat) => {
       e.preventDefault();
-      console.log("Delete chat with ID:", chatId);
+      // console.log("Delete chat with ID:", chatId);
     };
 
     return (

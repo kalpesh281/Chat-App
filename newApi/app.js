@@ -45,8 +45,8 @@ io.on("connection", (socket) => {
   // console.log("Client connected", userSocketIds);
 
   socket.on(NEW_MESSAGE, async ({ chatId, members, message }) => {
-    console.log("NEW_MESSAGE event received:", { chatId, members, message });
-
+    // console.log("NEW_MESSAGE event received:", { chatId, members, message });
+    console.log(members, "members in NEW_MESSAGE event");
     const messageForRealTime = {
       content: message,
       _id: uuid(),
@@ -76,13 +76,13 @@ io.on("connection", (socket) => {
 
     try {
       await Message.create(messageForDb);
-      console.log("Message saved to database:", messageForDb);
+      // console.log("Message saved to database:", messageForDb);
     } catch (error) {
       console.error("Error sending message:", error);
       return;
     }
 
-    console.log("New message sent to sockets:", messageForRealTime);
+    // console.log("New message sent to sockets:", messageForRealTime);
   });
 
   // Handle incoming messages

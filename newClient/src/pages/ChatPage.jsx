@@ -13,16 +13,17 @@ import { getSocket } from "../socket";
 import { useState } from "react";
 import { NEW_MESSAGE } from "../constant/events";
 import { useChatDetailsQuery } from "../redux/api/api";
-
-const user = {
-  name: "John Doe",
-  _id: "12345",
-};
+import { useEffect } from "react";
+import { useCallback } from "react";
+import { useSocketEvents } from "../hooks/hooks";
+import { useSelector } from "react-redux";
 
 function ChatPage({ chatId }) {
   const containerRef = useRef(null);
 
   const [message, setMessage] = useState("");
+
+  const [messages, setMessages] = useState([]);
 
   const socket = getSocket();
 
@@ -47,6 +48,17 @@ function ChatPage({ chatId }) {
     // console.log("Message submitted:", message);
   };
 
+  const newMessagesHandler = useCallback((data) => {
+    setMessages((prevMessages) => [...prevMessages, data.message]);
+    console.log("New message received:", data);
+  });
+
+  const eventHandler = {
+    [NEW_MESSAGE]: newMessagesHandler,
+  };
+
+  useSocketEvents(socket, eventHandler);
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -54,6 +66,9 @@ function ChatPage({ chatId }) {
       e.target.form.requestSubmit();
     }
   };
+
+  // Get the actual logged-in user
+  const user = useSelector((state) => state.auth.user);
 
   return chatDetails.isLoading ? (
     <Skeleton />
@@ -79,7 +94,7 @@ function ChatPage({ chatId }) {
           overflowY: "auto",
         }}
       >
-        {sampleMessages.map((i) => (
+        {messages.map((i) => (
           <MessageComponent key={i._id} message={i} user={user} />
         ))}
       </Stack>
