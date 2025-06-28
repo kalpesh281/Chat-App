@@ -1,15 +1,29 @@
-import React from "react";
+import React, { use, useEffect } from "react";
 import Header from "./Header";
 import { Grid, Typography, Box } from "@mui/material";
 import ChatList from "../specific/ChatList";
 import { sampleChats } from "../data/sampleData";
 import { useParams } from "react-router-dom";
 import Profile from "../specific/Profile";
+import { useMyChatQuery } from "../../redux/api/api";
+import toast from "react-hot-toast";
+import { useErrors } from "../../hooks/hooks";
 
 const AppLayout = () => (WrappedComponent) => {
   return (props) => {
     const params = useParams();
     const chatId = params.chatId;
+
+    const { isLoading, data, isError, error, refetch } = useMyChatQuery("");
+
+    // console.log("Chat data:", data);
+
+    useErrors([
+      {
+        isError,
+        error,
+      },
+    ]);
 
     const handleDeleteChat = (e, _id, groupChat) => {
       e.preventDefault();
@@ -80,7 +94,7 @@ const AppLayout = () => (WrappedComponent) => {
                   fontWeight: 500,
                 }}
               >
-                {sampleChats.length} Chats
+                {data?.chats?.length} Chats
               </Box>
             </Box>
 
@@ -93,17 +107,23 @@ const AppLayout = () => (WrappedComponent) => {
                 background: "linear-gradient(180deg, #fafafa 0%, #ffffff 100%)",
               }}
             >
-              <ChatList
-                chats={sampleChats}
-                chatId={chatId}
-                newMessagesAlert={[
-                  {
-                    chatId,
-                    count: 4,
-                  },
-                ]}
-                onlineUsers={["1", "2", "3"]}
-              />
+              {isLoading ? (
+                <Typography variant="body2" color="text.secondary">
+                  Loading chats...
+                </Typography>
+              ) : (
+                <ChatList
+                  chats={data?.chats}
+                  chatId={chatId}
+                  newMessagesAlert={[
+                    {
+                      chatId,
+                      count: 4,
+                    },
+                  ]}
+                  onlineUsers={["1", "2", "3"]}
+                />
+              )}
             </Box>
           </Box>
 

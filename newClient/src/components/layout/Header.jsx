@@ -20,9 +20,10 @@ import {
   Chat as ChatIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../redux/reducers/authSlice";
 import toast from "react-hot-toast";
+import { setIsSearch } from "../../redux/reducers/miscSlice";
 
 const SearchDialog = lazy(() => import("../specific/Search"));
 const NotificationsDialog = lazy(() => import("../specific/Notification"));
@@ -30,19 +31,22 @@ const NewGroupDialog = lazy(() => import("../specific/NewGroup"));
 
 function Header() {
   const [isMobile, setIsMobile] = useState(false);
-  const [isSearch, setIsSearch] = useState(false);
+
   const [isNewGroup, setIsNewGroup] = useState(false);
   const [isNotifications, setIsNotifications] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const { isSearch } = useSelector((state) => state.misc);
+
   const handleMobile = () => {
     setIsMobile((prev) => !prev);
     console.log("Mobile view detected");
   };
 
   const openSearchDialog = () => {
-    setIsSearch((prev) => !prev);
+    dispatch(setIsSearch(true));
     console.log("Open search dialog");
   };
 
@@ -189,7 +193,7 @@ function Header() {
       </Box>
       {isSearch && (
         <Suspense fallback={<Backdrop open={true} />}>
-          <SearchDialog onClose={() => setIsSearch(false)} />
+          <SearchDialog onClose={() => dispatch(setIsSearch(false))} />
         </Suspense>
       )}
       {isNotifications && (
