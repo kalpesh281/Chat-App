@@ -183,42 +183,28 @@ const CheckCreds = async (req, res) => {
 
 const SearchUser = async (req, res) => {
   try {
-    const { name } = req.query;
-    const currentUserId = req.id; // Using req.id as set by your auth middleware
-    // console.log("Current user ID:", currentUserId);
+    const { name = "" } = req.query;
+    const currentUserId = req.id;
 
-    if (!name) {
-      return res.status(400).json({
-        success: false,
-        message: "Name query parameter is required",
-      });
+    // Find all my chats (only private chats)
+    const myChats = await Chat.find({ groupChat: false, members: currentUserId });
+
+    // Extract all users from my chats (friends)
+    const allUsersFromMyChats = myChats.flatMap((chat) => chat.members.map(id => id.toString()));
+
+    // Add current user to exclusion list
+    const usersToExclude = [...new Set([...allUsersFromMyChats, currentUserId.toString()])];
+
+    // Build query
+    const userQuery = { _id: { $nin: usersToExclude } };
+    if (name) {
+      userQuery.name = { $regex: name, $options: "i" };
     }
-    const myChats = await Chat.find({
-      members: currentUserId,
-    });
-    //the list of the user in my chats means friends
-    const allUserFromMyChats = myChats.flatMap((chat) => chat.members);
 
-    const uniqueUserIds = [
-      ...new Set(allUserFromMyChats.map((id) => id.toString())),
-    ];
-    const friendUserIds = uniqueUserIds.filter(
-      (id) => id !== currentUserId.toString()
-    );
+    // Find users
+    const allUsersExceptMeAndFriends = await User.find(userQuery);
 
-    // console.log("All Friend User IDs:", friendUserIds);
-
-    // Add current user to the exclusion list to ensure they don't appear in results
-    const usersToExclude = [...friendUserIds, currentUserId.toString()];
-
-    const allUsersExpectMeAndFriends = await User.find({
-      _id: { $nin: usersToExclude },
-      name: { $regex: name, $options: "i" },
-    });
-
-    // console.log("Other Remaining Users:", allUsersExpectMeAndFriends.map(user => ({ id: user._id, name: user.name })));
-
-    const users = allUsersExpectMeAndFriends.map((user) => ({
+    const users = allUsersExceptMeAndFriends.map((user) => ({
       _id: user._id,
       name: user.name,
       username: user.username,
@@ -473,6 +459,7 @@ const getMyFriends = async (req, res) => {
     });
   }
 };
+
 export {
   Register,
   Login,
@@ -484,5 +471,5 @@ export {
   acceptFriendRequest,
   getAllNotifications,
   getMyFriends,
-  
 };
+

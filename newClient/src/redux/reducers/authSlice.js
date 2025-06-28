@@ -96,9 +96,9 @@ export const fetchUserProfile = createAsyncThunk(
 
 const initialState = {
   user: null,
-  userProfile: null, // Optional: to store user profile data
+  userProfile: null,
   isAuthenticated: false,
-  loader: false, // set to false by default for faster UI
+  loader: false,
   error: null,
 };
 

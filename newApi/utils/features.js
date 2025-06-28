@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { v2 as cloudinary } from "cloudinary";
+import { v4 as uuid } from "uuid";
 
 dotenv.config();
 
@@ -57,6 +58,7 @@ const uploadFilesToCloudinary = async (files = []) => {
             if (error) return reject(error);
             resolve({
               public_id: result.public_id,
+              // public_id: uuid(),
               url: result.secure_url,
             });
           }
@@ -73,4 +75,10 @@ const uploadFilesToCloudinary = async (files = []) => {
   }
 };
 
-export { connectDB, emitEvent, deleteFilesFromCloudinary, uploadFilesToCloudinary, cloudinary };
+export {
+  connectDB,
+  emitEvent,
+  deleteFilesFromCloudinary,
+  uploadFilesToCloudinary,
+  cloudinary,
+};

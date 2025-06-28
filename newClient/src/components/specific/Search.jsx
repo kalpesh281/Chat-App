@@ -9,33 +9,49 @@ import {
   Typography,
   Divider,
   Paper,
-  
 } from "@mui/material";
 import {
   Search as SearchIcon,
   Close as CloseIcon,
   PersonAdd as PersonAddIcon,
 } from "@mui/icons-material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useInputValidation } from "6pp";
 import UserList from "../shared/UserList";
-import { sampleUsers } from "../data/sampleData";
+import { useDispatch } from "react-redux";
+import { setIsSearch } from "../../redux/reducers/miscSlice";
+import { useLazySearchUserQuery } from "../../redux/api/api";
 
 function Search({ onClose }) {
-  const [users, setUsers] = useState(sampleUsers);
- 
+  const [users, setUsers] = useState([]);
+  const dispatch = useDispatch();
+
+  const [searchUser] = useLazySearchUserQuery();
+
   const search = useInputValidation("");
 
-  const handleClose = () => {
-    if (onClose) onClose();
-    else console.log("No onClose prop provided");
-  };
+  const handleClose = () => dispatch(setIsSearch(false));
 
-  let isLoadingSendFriendRequest=false
+  useEffect(() => {
+    const timeOutId = setTimeout(() => {
+      searchUser(search.value)
+        .then(({ data }) => {
+          console.log("Search results:", data);
+          if (Array.isArray(data?.users)) setUsers(data.users);
+          else setUsers([]);
+        })
+        .catch((error) => {
+          console.error("Error fetching search results:", error);
+          setUsers([]);
+        });
+    }, 1000);
+    return () => clearTimeout(timeOutId);
+  }, [search.value]);
+
+  let isLoadingSendFriendRequest = false;
 
   const addFriendHandler = (id) => {
     console.log("Add friend handler called with id:", id);
-
   };
 
   return (
@@ -52,7 +68,6 @@ function Search({ onClose }) {
         },
       }}
     >
-     
       <Box
         sx={{
           background: "linear-gradient(135deg, #0a2e63 0%, #1976d2 100%)",
@@ -92,7 +107,6 @@ function Search({ onClose }) {
         </IconButton>
       </Box>
 
-     
       <Stack p={2} spacing={2}>
         <TextField
           placeholder="Search by name or username..."

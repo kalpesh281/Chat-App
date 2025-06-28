@@ -55,9 +55,7 @@ const UserList = ({
                 opacity: { xs: 1, sm: 0.7 },
                 transition: "all 0.2s",
                 "&:hover": {
-                  bgcolor: isAdded
-                    ? "#f5222d"
-                    : "rgba(25, 118, 210, 0.15)",
+                  bgcolor: isAdded ? "#f5222d" : "rgba(25, 118, 210, 0.15)",
                   transform: "scale(1.05)",
                 },
               }}
@@ -74,7 +72,11 @@ const UserList = ({
     >
       <ListItemAvatar>
         <Avatar
-          src={user.avatar[0]}
+          src={
+            Array.isArray(user.avatar) && user.avatar[0]
+              ? user.avatar[0]
+              : undefined
+          }
           alt={user.name}
           sx={{
             width: 40,

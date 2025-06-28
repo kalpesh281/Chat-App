@@ -3,6 +3,8 @@ import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import authSlice from "./reducers/authSlice";
 import adminReducer from "./reducers/adminSlice";
+import api from "./api/api";
+import miscSlice from "./reducers/miscSlice";
 
 const authPersistConfig = {
   key: "auth",
@@ -21,15 +23,14 @@ const persistedAuthReducer = persistReducer(
   authSlice.reducer
 );
 
-const persistedAdminReducer = persistReducer(
-  adminPersistConfig,
-  adminReducer
-);
+const persistedAdminReducer = persistReducer(adminPersistConfig, adminReducer);
 
 const store = configureStore({
   reducer: {
     auth: persistedAuthReducer,
     admin: persistedAdminReducer,
+    api: api.reducer,
+    misc: miscSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -37,7 +38,7 @@ const store = configureStore({
         // Ignore these action types
         ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
       },
-    }),
+    }).concat(api.middleware),
 });
 
 const persistor = persistStore(store);
