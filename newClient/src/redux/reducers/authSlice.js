@@ -84,7 +84,7 @@ export const fetchUserProfile = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get("/me");
-      console.log("User profile fetched:", response.data);
+      // console.log("User profile fetched:", response.data);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -199,7 +199,7 @@ const authSlice = createSlice({
       })
       .addCase(fetchUserProfile.fulfilled, (state, action) => {
         state.loader = false;
-        console.log("User profile fetched:", action.payload);
+        // console.log("User profile fetched:", action.payload);
         state.userProfile = action.payload.user; // Store user profile data
         state.error = null;
       })

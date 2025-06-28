@@ -20,13 +20,19 @@ import { useInputValidation } from "6pp";
 import UserList from "../shared/UserList";
 import { useDispatch } from "react-redux";
 import { setIsSearch } from "../../redux/reducers/miscSlice";
-import { useLazySearchUserQuery } from "../../redux/api/api";
+import {
+  useLazySearchUserQuery,
+  useSendFriendRequestMutation,
+} from "../../redux/api/api";
+import toast from "react-hot-toast";
 
-function Search({ onClose }) {
+function Search() {
   const [users, setUsers] = useState([]);
   const dispatch = useDispatch();
 
   const [searchUser] = useLazySearchUserQuery();
+  const [sendFriendRequest, { isLoading: isLoadingSendFriendRequest }] =
+    useSendFriendRequestMutation();
 
   const search = useInputValidation("");
 
@@ -48,10 +54,13 @@ function Search({ onClose }) {
     return () => clearTimeout(timeOutId);
   }, [search.value]);
 
-  let isLoadingSendFriendRequest = false;
-
-  const addFriendHandler = (id) => {
-    console.log("Add friend handler called with id:", id);
+  const addFriendHandler = async (id) => {
+    try {
+      await sendFriendRequest({ userId: id }).unwrap();
+      toast.success("Friend request sent successfully!");
+    } catch (error) {
+      toast.error("Failed to send friend request.");
+    }
   };
 
   return (
