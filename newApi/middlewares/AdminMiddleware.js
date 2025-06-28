@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 
 export const adminMiddleware = (req, res, next) => {
   try {
-    console.log("Admin middleware triggered");
+    // console.log("Admin middleware triggered");
     const token = req.cookies?.token;
     if (!token) {
       return res.status(401).json({

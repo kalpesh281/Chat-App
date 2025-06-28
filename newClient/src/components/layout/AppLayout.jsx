@@ -8,11 +8,16 @@ import Profile from "../specific/Profile";
 import { useMyChatQuery } from "../../redux/api/api";
 import toast from "react-hot-toast";
 import { useErrors } from "../../hooks/hooks";
+import { getSocket } from "../../socket";
 
 const AppLayout = () => (WrappedComponent) => {
   return (props) => {
     const params = useParams();
     const chatId = params.chatId;
+
+    const socket = getSocket();
+
+    console.log("Socket instance:", socket);
 
     const { isLoading, data, isError, error, refetch } = useMyChatQuery("");
 
@@ -136,7 +141,7 @@ const AppLayout = () => (WrappedComponent) => {
               borderRight: "1px solid #e0e0e0",
             }}
           >
-            <WrappedComponent {...props} />
+            <WrappedComponent {...props} chatId={chatId} />
           </Box>
 
           <Box

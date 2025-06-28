@@ -12,26 +12,37 @@ import { NEW_MESSAGE, NEW_MESSAGE_ALERT } from "./constants/events.js";
 import { v4 as uuid } from "uuid";
 import { getSockets } from "./lib/helper.js";
 import { Message } from "./models/MessageSchema.js";
+import { socketAuthenticator } from "./middlewares/SocketAuthMiddleware.js";
 
 dotenv.config();
 
 const app = express();
 const server = createServer(app);
 
-const io = new Server(server, {});
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+    Methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Content-Type", "Authorization"],
+  },
+});
 
 const PORT = process.env.PORT || 5001;
 const userSocketIds = new Map();
 
-io.use((socket, next) => {});
+io.use((socket, next) => {
+  cookieParser()(socket.request, socket.request.res, async (err) =>
+    socketAuthenticator(err, socket, next)
+  );
+});
 
 io.on("connection", (socket) => {
-  const user = {
-    _id: "000123",
-    name: "John",
-  };
+  const user = socket.user;
+  // console.log("Socket connected:", user);
   userSocketIds.set(user._id.toString(), socket.id);
-  console.log("Client connected", userSocketIds);
+  // console.log("Client connected", userSocketIds);
 
   socket.on(NEW_MESSAGE, async ({ chatId, members, message }) => {
     console.log("NEW_MESSAGE event received:", { chatId, members, message });
@@ -51,9 +62,9 @@ io.on("connection", (socket) => {
       chat: chatId,
       sender: user._id,
     };
-
+    // console.log("Message for real-time:", messageForRealTime);
     const memberSockets = getSockets(members);
-    console.log("Member sockets:", memberSockets);
+    // console.log("Member sockets:", memberSockets);
 
     io.to(memberSockets).emit(NEW_MESSAGE, {
       message: messageForRealTime,
@@ -76,8 +87,8 @@ io.on("connection", (socket) => {
 
   // Handle incoming messages
   socket.on("disconnect", () => {
-    userSocketIds.delete(user._id.toString());
     console.log("User disconnected");
+    userSocketIds.delete(user._id.toString());
   });
 });
 
