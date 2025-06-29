@@ -8,6 +8,7 @@ import {
   Typography,
   alpha,
   Divider,
+  Badge,
 } from "@mui/material";
 import React, { lazy, Suspense, useState } from "react";
 import {
@@ -24,6 +25,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../redux/reducers/authSlice";
 import toast from "react-hot-toast";
 import { setIsNotification, setIsSearch } from "../../redux/reducers/miscSlice";
+import { resetNotificationCount } from "../../redux/reducers/chatSlice";
 
 const SearchDialog = lazy(() => import("../specific/Search"));
 const NotificationsDialog = lazy(() => import("../specific/Notification"));
@@ -37,7 +39,7 @@ function Header() {
   const dispatch = useDispatch();
 
   const { isSearch, isNotification } = useSelector((state) => state.misc);
-
+  const { notificationCount } = useSelector((state) => state.chat);
   const handleMobile = () => {
     setIsMobile((prev) => !prev);
     console.log("Mobile view detected");
@@ -57,6 +59,7 @@ function Header() {
 
   const openNotifications = () => {
     dispatch(setIsNotification(true));
+    dispatch(resetNotificationCount());
   };
   const logoutHandler = async () => {
     try {
@@ -117,7 +120,7 @@ function Header() {
                   filter: "drop-shadow(0px 1px 1px rgba(0,0,0,0.3))",
                 }}
               >
-                Chat Application
+                Message Me!
               </Typography>
             </Box>
 
@@ -172,6 +175,7 @@ function Header() {
                 title={"Notifications"}
                 icon={<NotificationsIcon size={20} />}
                 onClick={openNotifications}
+                value={notificationCount}
               />
 
               <IconBtn
@@ -211,7 +215,7 @@ function Header() {
   );
 }
 
-const IconBtn = ({ title, icon, onClick }) => {
+const IconBtn = ({ title, icon, onClick, value }) => {
   return (
     <Tooltip title={title} arrow placement="bottom">
       <IconButton
@@ -228,7 +232,48 @@ const IconBtn = ({ title, icon, onClick }) => {
           },
         }}
       >
-        {icon}
+        {value ? (
+          <Badge
+            color="error"
+            overlap="circular"
+            sx={{
+              position: "relative",
+              "& .MuiBadge-badge": {
+                background: "none",
+                padding: 0,
+                minWidth: 0,
+              },
+            }}
+            badgeContent={
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: "40%",
+                  right: 0,
+                  transform: "translate(50%, -50%)",
+                  fontSize: "0.75rem",
+                  fontWeight: 500,
+                  color: "#fff",
+                  backgroundColor: "#d32f2f",
+                  borderRadius: "50%",
+                  width: "20px",
+                  height: "20px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  // Optionally add a boxShadow for better visibility
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.15)",
+                }}
+              >
+                {value}
+              </Box>
+            }
+          >
+            {icon}
+          </Badge>
+        ) : (
+          icon
+        )}
       </IconButton>
     </Tooltip>
   );

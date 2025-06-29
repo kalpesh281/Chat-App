@@ -22,6 +22,7 @@ import { useErrors, useSocketEvents } from "../hooks/hooks";
 import { useDispatch, useSelector } from "react-redux";
 import { useInfiniteScrollTop } from "6pp";
 import { setIsFileMenu } from "../redux/reducers/miscSlice";
+import { removeNewMessageAlert } from "../redux/reducers/chatSlice";
 
 function ChatPage({ chatId }) {
   const containerRef = useRef(null);
@@ -41,7 +42,6 @@ function ChatPage({ chatId }) {
   const chatDetails = useChatDetailsQuery({ chatId, skip: !chatId });
   const oldMessageChunk = useGetMessagesQuery({ chatId, page });
 
-  // Track loading state for old messages
   useEffect(() => {
     setIsLoadingOldMessages(oldMessageChunk.isLoading);
   }, [oldMessageChunk.isLoading]);
@@ -86,13 +86,28 @@ function ChatPage({ chatId }) {
     });
 
     setMessage("");
-    setShouldScrollToBottom(true); // Mark that we should scroll to bottom after new message
+    setShouldScrollToBottom(true);
   };
 
-  const newMessagesHandler = useCallback((data) => {
-    setMessages((prevMessages) => [...prevMessages, data.message]);
-    setShouldScrollToBottom(true); // Scroll to bottom for new messages
-  }, []);
+  useEffect(() => {
+    dispatch(removeNewMessageAlert({ chatId }));
+    return () => {
+      setMessages([]);
+      setOldMessages([]);
+      setPage(1);
+      setShouldScrollToBottom(false);
+      setIsLoadingOldMessages(false);
+    };
+  }, [chatId]);
+
+  const newMessagesHandler = useCallback(
+    (data) => {
+      if (data.chatId !== chatId) return;
+      setMessages((prevMessages) => [...prevMessages, data.message]);
+      setShouldScrollToBottom(true);
+    },
+    [chatId]
+  );
 
   const eventHandler = {
     [NEW_MESSAGE]: newMessagesHandler,
@@ -103,13 +118,11 @@ function ChatPage({ chatId }) {
 
   const allMessages = [...oldMessages, ...messages];
 
-  // Scroll position management for infinite scroll
   const prevOldMessagesLength = useRef(0);
   const prevScrollHeight = useRef(0);
   const prevScrollTop = useRef(0);
   const isRestoringScroll = useRef(false);
 
-  // Save scroll position before loading old messages
   useEffect(() => {
     if (containerRef.current && page > 1) {
       prevScrollHeight.current = containerRef.current.scrollHeight;
@@ -118,7 +131,6 @@ function ChatPage({ chatId }) {
     }
   }, [page]);
 
-  // Restore scroll position after old messages are loaded
   useEffect(() => {
     if (
       containerRef.current &&
@@ -137,7 +149,6 @@ function ChatPage({ chatId }) {
     prevOldMessagesLength.current = oldMessages.length;
   }, [oldMessages.length, oldMessageChunk.isLoading]);
 
-  // Scroll to bottom for new messages (only when explicitly needed)
   useEffect(() => {
     if (
       containerRef.current &&

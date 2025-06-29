@@ -4,7 +4,7 @@ import { Box, Stack, Typography, Badge } from "@mui/material";
 import AvatarCard from "./AvatarCard";
 
 const ChatItem = ({
-  avatar = [],
+  avatar,
   name,
   _id,
   groupChat = false,
@@ -14,7 +14,6 @@ const ChatItem = ({
   index = 0,
   handleDeleteChat,
 }) => {
-  const testMessageAlert = newMessageAlert || { count: index + 1 };
   const showNewMessageIndicators = !sameSender;
 
   // Extract first letter of name for the avatar
@@ -135,46 +134,50 @@ const ChatItem = ({
               )}
             </Typography>
 
-            {showNewMessageIndicators && (
-              <Typography
-                variant="caption"
-                color="primary"
-                fontWeight="bold"
-                sx={{
-                  fontSize: "0.8rem",
-                  bgcolor: "primary.main",
-                  color: "white",
-                  borderRadius: "50%",
-                  width: "20px",
-                  height: "20px",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginLeft: "auto",
-                }}
-              >
-                {testMessageAlert.count}
-              </Typography>
-            )}
+            {showNewMessageIndicators &&
+              newMessageAlert &&
+              newMessageAlert.count > 0 && (
+                <Typography
+                  variant="caption"
+                  color="primary"
+                  fontWeight="bold"
+                  sx={{
+                    fontSize: "0.8rem",
+                    bgcolor: "primary.main",
+                    color: "white",
+                    borderRadius: "50%",
+                    width: "20px",
+                    height: "20px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginLeft: "auto",
+                  }}
+                >
+                  {newMessageAlert.count}
+                </Typography>
+              )}
           </Stack>
 
-          {showNewMessageIndicators && (
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              noWrap
-              sx={{
-                fontSize: "0.8rem",
-                fontWeight: 400,
-                mt: 0.5,
-                display: "block",
-                padding: "2px 4px",
-                borderRadius: "4px",
-              }}
-            >
-              New messages
-            </Typography>
-          )}
+          {showNewMessageIndicators &&
+            newMessageAlert &&
+            newMessageAlert.count > 0 && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                noWrap
+                sx={{
+                  fontSize: "0.8rem",
+                  fontWeight: 400,
+                  mt: 0.5,
+                  display: "block",
+                  padding: "2px 4px",
+                  borderRadius: "4px",
+                }}
+              >
+                New messages
+              </Typography>
+            )}
         </Stack>
       </Box>
     </Link>

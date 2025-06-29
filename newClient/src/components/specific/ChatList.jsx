@@ -15,16 +15,20 @@ const ChatList = ({
       {chats?.map((data, index) => {
         const { _id, avatar, name, groupChat, members } = data;
 
+        // Find the new message alert for this chat
+        const newMessageAlert = newMessagesAlert.find(
+          (alert) => alert.chatId === _id
+        );
 
-        const newMessageAlert = { chatId: _id, count: index + 1 };
+        // Determine if the user is online (for groupChat, you may want to adjust logic)
+        const isOnline = !groupChat && onlineUsers.includes(_id);
 
-      
         const isSelected = chatId === _id;
 
         return (
           <ChatItem
             newMessageAlert={newMessageAlert}
-            isOnline={true} 
+            isOnline={isOnline}
             avatar={avatar}
             name={name}
             _id={_id}
