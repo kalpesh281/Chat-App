@@ -11,14 +11,14 @@ import {
 } from "@mui/material";
 import React, { lazy, Suspense, useState } from "react";
 import {
-  Add as AddIcon,
+  Plus as AddIcon,
   Menu as MenuIcon,
   Search as SearchIcon,
-  Group as GroupIcon,
-  Logout as LogoutIcon,
-  Notifications as NotificationsIcon,
-  Chat as ChatIcon,
-} from "@mui/icons-material";
+  Users as GroupIcon,
+  LogOut as LogoutIcon,
+  Bell as NotificationsIcon,
+  MessageCircle as ChatIcon,
+} from "lucide-react"; // lucide-react icons
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../redux/reducers/authSlice";
@@ -88,10 +88,12 @@ function Header() {
               }}
             >
               <ChatIcon
-                sx={{
+                style={{
                   fontSize: 28,
                   color: "#fff",
                   filter: "drop-shadow(0px 2px 3px rgba(0,0,0,0.2))",
+                  width: 28,
+                  height: 28,
                 }}
               />
               <Divider
@@ -133,7 +135,7 @@ function Header() {
                   "&:hover": { background: "rgba(255,255,255,0.2)" },
                 }}
               >
-                <MenuIcon />
+                <MenuIcon size={22} />
               </IconButton>
             </Box>
 
@@ -151,30 +153,30 @@ function Header() {
             >
               <IconBtn
                 title={"Search"}
-                icon={<SearchIcon />}
+                icon={<SearchIcon size={20} />}
                 onClick={openSearchDialog}
               />
 
               <IconBtn
                 title={"New Group"}
-                icon={<AddIcon />}
+                icon={<AddIcon size={20} />}
                 onClick={openNewGroup}
               />
               <IconBtn
                 title={"Manage Groups"}
-                icon={<GroupIcon />}
+                icon={<GroupIcon size={20} />}
                 onClick={navigateToGroup}
               />
 
               <IconBtn
                 title={"Notifications"}
-                icon={<NotificationsIcon />}
+                icon={<NotificationsIcon size={20} />}
                 onClick={openNotifications}
               />
 
               <IconBtn
                 title={"Logout"}
-                icon={<LogoutIcon />}
+                icon={<LogoutIcon size={20} />}
                 onClick={logoutHandler}
               />
             </Box>
@@ -195,7 +197,9 @@ function Header() {
       )}
       {isNotification && (
         <Suspense fallback={<Backdrop open={true} />}>
-          <NotificationsDialog onClose={() => dispatch(setIsNotification(false))} />
+          <NotificationsDialog
+            onClose={() => dispatch(setIsNotification(false))}
+          />
         </Suspense>
       )}
       {isNewGroup && (
@@ -229,7 +233,5 @@ const IconBtn = ({ title, icon, onClick }) => {
     </Tooltip>
   );
 };
-
-
 
 export default Header;

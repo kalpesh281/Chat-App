@@ -15,13 +15,13 @@ import {
 } from "@mui/material";
 import React, { memo, useState } from "react";
 import {
-  KeyboardBackspace as KeyboardBackspaceIcon,
-  Edit as EditIcon,
-  Done as DoneIcon,
-  Delete as DeleteIcon,
-  Add as AddIcon,
-  Group as GroupIcon,
-} from "@mui/icons-material";
+  ArrowLeft,
+  Pencil,
+  Check,
+  Trash2,
+  UserPlus,
+  Users,
+} from "lucide-react"; // lucide-react icons
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Link } from "../components/styles/StyledComponent";
 import AvatarCard from "../components/shared/AvatarCard";
@@ -33,6 +33,7 @@ import AddMemberDialog from "../components/dialog/AddMemberDialog";
 import UserList from "../components/shared/UserList";
 
 const isAddMember = false;
+const GroupIcon = Users;
 
 function GroupPage() {
   const [isEdit, setIsEdit] = useState(false);
@@ -48,10 +49,10 @@ function GroupPage() {
   const chatId = useSearchParams()[0].get("group");
 
   useEffect(() => {
-   if(chatId) {
-    setGroupName(`Group Name ${chatId}`);
-    setGroupNameUpdatedValue(`Group Name ${chatId}`);
-   }
+    if (chatId) {
+      setGroupName(`Group Name ${chatId}`);
+      setGroupNameUpdatedValue(`Group Name ${chatId}`);
+    }
 
     return () => {
       setGroupName("");
@@ -104,7 +105,7 @@ function GroupPage() {
         }}
         onClick={handleBackClick}
       >
-        <KeyboardBackspaceIcon />
+        <ArrowLeft size={24} />
       </IconButton>
     </Tooltip>
   );
@@ -170,7 +171,7 @@ function GroupPage() {
                 transition: "all 0.2s ease",
               }}
             >
-              <DoneIcon />
+              <Check size={22} />
             </IconButton>
           </>
         ) : (
@@ -184,7 +185,7 @@ function GroupPage() {
                   boxShadow: `0 4px 12px rgba(25, 118, 210, 0.3)`, // primary.main with alpha
                 }}
               >
-                <GroupIcon />
+                <Users size={28} />
               </Avatar>
               <Stack>
                 <Typography
@@ -223,7 +224,7 @@ function GroupPage() {
                   transition: "all 0.2s ease",
                 }}
               >
-                <EditIcon />
+                <Pencil size={22} />
               </IconButton>
             </Tooltip>
           </>
@@ -253,7 +254,7 @@ function GroupPage() {
       <Button
         size="large"
         color="error"
-        startIcon={<DeleteIcon />}
+        startIcon={<Trash2 size={20} />}
         variant="outlined"
         onClick={openConfirmDeleteGroup}
         sx={{
@@ -278,7 +279,7 @@ function GroupPage() {
         size="large"
         variant="contained"
         color="primary"
-        startIcon={<AddIcon />}
+        startIcon={<UserPlus size={20} />}
         onClick={handleAddGroup}
         sx={{
           borderRadius: 2,
@@ -338,7 +339,7 @@ function GroupPage() {
             gap: 1,
           }}
         >
-          <GroupIcon fontSize="small" />
+          <GroupIcon size={18} />
           My Groups
         </Typography>
         <Divider sx={{ mb: 2, opacity: 0.6 }} />
@@ -406,10 +407,10 @@ function GroupPage() {
                   bgcolor: "#ffffff",
                   mb: 3,
                   position: "relative",
-                  maxHeight: "400px",  // Fixed height to enable scrolling
-                  overflow: "hidden",  // Hide overflow
+                  maxHeight: "400px", // Fixed height to enable scrolling
+                  overflow: "hidden", // Hide overflow
                   display: "flex",
-                  flexDirection: "column"
+                  flexDirection: "column",
                 }}
               >
                 <Typography
@@ -426,22 +427,24 @@ function GroupPage() {
                   Members
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
-                
-                <Box sx={{ 
-                  overflowY: "auto", 
-                  flex: 1,
-                  pr: 1, // Add a bit of padding to account for scrollbar
-                  "&::-webkit-scrollbar": {
-                    width: "8px",
-                  },
-                  "&::-webkit-scrollbar-thumb": {
-                    backgroundColor: "rgba(0,0,0,0.1)",
-                    borderRadius: "4px",
-                  },
-                  "&::-webkit-scrollbar-track": {
-                    backgroundColor: "rgba(0,0,0,0.05)",
-                  }
-                }}>
+
+                <Box
+                  sx={{
+                    overflowY: "auto",
+                    flex: 1,
+                    pr: 1, // Add a bit of padding to account for scrollbar
+                    "&::-webkit-scrollbar": {
+                      width: "8px",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: "rgba(0,0,0,0.1)",
+                      borderRadius: "4px",
+                    },
+                    "&::-webkit-scrollbar-track": {
+                      backgroundColor: "rgba(0,0,0,0.05)",
+                    },
+                  }}
+                >
                   {sampleUsers.map((i) => (
                     <UserList
                       user={i}

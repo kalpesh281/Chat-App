@@ -13,7 +13,7 @@ import {
   IconButton,
   Button,
 } from "@mui/material";
-import { Close as CloseIcon, Group as GroupIcon } from "@mui/icons-material";
+import { X as CloseIcon, Users as GroupIcon } from "lucide-react"; // lucide-react icons
 import { sampleUsers } from "../data/sampleData";
 import UserList from "../shared/UserList";
 
@@ -88,7 +88,7 @@ function NewGroup({ onClose }) {
             gap: 1,
           }}
         >
-          <GroupIcon fontSize="small" />
+          <GroupIcon size={18} />
           Create New Group
         </Typography>
 
@@ -103,7 +103,7 @@ function NewGroup({ onClose }) {
             },
           }}
         >
-          <CloseIcon fontSize="small" />
+          <CloseIcon size={18} />
         </IconButton>
       </Box>
 

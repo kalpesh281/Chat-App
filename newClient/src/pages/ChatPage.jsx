@@ -1,10 +1,7 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect, useMemo } from "react";
 import AppLayout from "../components/layout/AppLayout";
 import { IconButton, Stack, Box, Paper, Skeleton } from "@mui/material";
-import {
-  AttachFile as AttachFileIcon,
-  Send as SendIcon,
-} from "@mui/icons-material";
+import { Paperclip as AttachFileIcon, Send as SendIcon } from "lucide-react"; // lucide-react icons
 import { InputBox, Button } from "../components/styles/StyledComponent";
 import FileMenu from "../components/dialog/FileMenu";
 import { sampleMessages } from "../components/data/sampleData";
@@ -12,24 +9,58 @@ import MessageComponent from "../components/shared/MessageComponent";
 import { getSocket } from "../socket";
 import { useState } from "react";
 import { NEW_MESSAGE } from "../constant/events";
-import { useChatDetailsQuery } from "../redux/api/api";
-import { useEffect } from "react";
+import { useChatDetailsQuery, useGetMessagesQuery } from "../redux/api/api";
 import { useCallback } from "react";
-import { useSocketEvents } from "../hooks/hooks";
-import { useSelector } from "react-redux";
+import { useErrors, useSocketEvents } from "../hooks/hooks";
+import { useDispatch, useSelector } from "react-redux";
+import { useInfiniteScrollTop } from "6pp";
+import { setIsFileMenu } from "../redux/reducers/miscSlice";
 
 function ChatPage({ chatId }) {
   const containerRef = useRef(null);
 
   const [message, setMessage] = useState("");
-
   const [messages, setMessages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [fileMenuAnchor, setFileMenuAnchor] = useState(null);
 
+  const dispatch = useDispatch();
   const socket = getSocket();
 
   const chatDetails = useChatDetailsQuery({ chatId, skip: !chatId });
 
-  console.log("Chat details:", chatDetails.data);
+  const oldMessageChunk = useGetMessagesQuery({ chatId, page });
+
+  // Use infinite scroll to load more messages when scrolled to the top
+  const { data: oldMessages, setData: setOldMessages } = useInfiniteScrollTop(
+    containerRef,
+    oldMessageChunk.data?.totalPages,
+    page,
+    setPage,
+    oldMessageChunk.data?.messages || []
+  );
+
+  const error = useMemo(
+    () => [
+      {
+        isError: chatDetails.isError,
+        error: chatDetails.error,
+      },
+      {
+        isError: oldMessageChunk.isError,
+        error: oldMessageChunk.error,
+      },
+    ],
+    [
+      chatDetails.isError,
+      chatDetails.error,
+      oldMessageChunk.isError,
+      oldMessageChunk.error,
+    ]
+  );
+
+  console.log("Old message chunk:", oldMessages);
+  // console.log("Chat details:", chatDetails.data);
 
   const members = chatDetails.data?.chat.members;
 
@@ -50,7 +81,7 @@ function ChatPage({ chatId }) {
 
   const newMessagesHandler = useCallback((data) => {
     setMessages((prevMessages) => [...prevMessages, data.message]);
-    console.log("New message received:", data);
+    // console.log("New message received:", data);
   });
 
   const eventHandler = {
@@ -59,6 +90,18 @@ function ChatPage({ chatId }) {
 
   useSocketEvents(socket, eventHandler);
 
+  useErrors(error);
+
+  // Fix: Default to empty array if messages is undefined
+  const allMessages = [...oldMessages, ...messages];
+
+  // Scroll to bottom when allMessages changes
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [allMessages]);
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -66,8 +109,12 @@ function ChatPage({ chatId }) {
       e.target.form.requestSubmit();
     }
   };
+  const handleFileOpen = (e) => {
+    dispatch(setIsFileMenu(true));
+    setFileMenuAnchor(e.currentTarget);
+    console.log("File menu opened");
+  };
 
-  // Get the actual logged-in user
   const user = useSelector((state) => state.auth.user);
 
   return chatDetails.isLoading ? (
@@ -94,7 +141,7 @@ function ChatPage({ chatId }) {
           overflowY: "auto",
         }}
       >
-        {messages.map((i) => (
+        {allMessages.map((i) => (
           <MessageComponent key={i._id} message={i} user={user} />
         ))}
       </Stack>
@@ -118,8 +165,12 @@ function ChatPage({ chatId }) {
             alignItems="center"
             sx={{ width: "100%" }}
           >
-            <IconButton color="primary" sx={{ flexShrink: 0 }}>
-              <AttachFileIcon />
+            <IconButton
+              color="primary"
+              sx={{ flexShrink: 0 }}
+              onClick={handleFileOpen}
+            >
+              <AttachFileIcon size={22} />
             </IconButton>
 
             <InputBox
@@ -150,12 +201,12 @@ function ChatPage({ chatId }) {
               type="submit"
               disabled={!message.trim()}
             >
-              <SendIcon />
+              <SendIcon size={22} />
             </IconButton>
           </Stack>
         </form>
       </Paper>
-      <FileMenu />
+      <FileMenu anchorE1={fileMenuAnchor} />
     </Box>
   );
 }

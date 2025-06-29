@@ -14,10 +14,7 @@ import {
   Paper,
   Divider,
 } from "@mui/material";
-import {
-  Close as CloseIcon,
-  Notifications as NotificationsIcon,
-} from "@mui/icons-material";
+import { X as CloseIcon, Bell as NotificationsIcon } from "lucide-react"; // lucide-react icons
 import {
   useAcceptFriendRequestMutation,
   useGetNotificationQuery,
@@ -93,7 +90,7 @@ function Notification() {
             gap: 1,
           }}
         >
-          <NotificationsIcon fontSize="small" />
+          <NotificationsIcon size={18} />
           Notifications
         </Typography>
 
@@ -108,7 +105,7 @@ function Notification() {
             },
           }}
         >
-          <CloseIcon fontSize="small" />
+          <CloseIcon size={18} />
         </IconButton>
       </Box>
 
@@ -123,7 +120,10 @@ function Notification() {
               color: "text.secondary",
             }}
           >
-            <NotificationsIcon sx={{ fontSize: 40, opacity: 0.3, mb: 1 }} />
+            <NotificationsIcon
+              size={40}
+              style={{ opacity: 0.3, marginBottom: 8 }}
+            />
             <Typography>Loading notifications...</Typography>
           </Box>
         ) : data?.requests?.length > 0 ? (
@@ -189,7 +189,10 @@ function Notification() {
               color: "text.secondary",
             }}
           >
-            <NotificationsIcon sx={{ fontSize: 40, opacity: 0.3, mb: 1 }} />
+            <NotificationsIcon
+              size={40}
+              style={{ opacity: 0.3, marginBottom: 8 }}
+            />
             <Typography>No notifications available</Typography>
           </Box>
         )}

@@ -27,6 +27,13 @@ createRoot(document.getElementById("root")).render(
             error: {
               style: { background: "rgb(245, 176, 176)", color: "#222" },
             },
+            loading: {
+              style: { background: "rgb(59, 130, 246)", color: "#fff" },
+            },
+            warning: {
+              style: { background: "rgb(251, 191, 36)", color: "#222" },
+            },
+            duration: 3000,
           }}
         />
       </PersistGate>

@@ -9,9 +9,9 @@ import {
   Box,
 } from "@mui/material";
 import {
-  PersonAdd as PersonAddIcon,
-  PersonRemove as PersonRemoveIcon,
-} from "@mui/icons-material";
+  UserPlus as PersonAddIcon,
+  UserMinus as PersonRemoveIcon,
+} from "lucide-react"; // lucide-react icons
 import React, { memo } from "react";
 
 const UserList = ({
@@ -61,9 +61,9 @@ const UserList = ({
               }}
             >
               {isAdded ? (
-                <PersonRemoveIcon fontSize="small" />
+                <PersonRemoveIcon size={18} />
               ) : (
-                <PersonAddIcon fontSize="small" />
+                <PersonAddIcon size={18} />
               )}
             </IconButton>
           )}

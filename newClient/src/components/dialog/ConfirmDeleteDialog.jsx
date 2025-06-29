@@ -14,9 +14,11 @@ import {
   Slide,
   Avatar,
 } from "@mui/material";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import CloseIcon from "@mui/icons-material/Close";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import {
+  Trash2 as DeleteOutlineIcon,
+  X as CloseIcon,
+  AlertTriangle as WarningAmberIcon,
+} from "lucide-react"; // lucide-react icons
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -68,7 +70,7 @@ function ConfirmDeleteDialog({ open, handleClose, deleteHandle }) {
             boxShadow: "0 4px 14px rgba(211, 47, 47, 0.2)",
           }}
         >
-          <WarningAmberIcon />
+          <WarningAmberIcon size={28} />
         </Avatar>
       </Box>
 
@@ -97,7 +99,7 @@ function ConfirmDeleteDialog({ open, handleClose, deleteHandle }) {
             color: theme.palette.grey[500],
           }}
         >
-          <CloseIcon />
+          <CloseIcon size={20} />
         </IconButton>
       </DialogTitle>
 
@@ -121,8 +123,8 @@ function ConfirmDeleteDialog({ open, handleClose, deleteHandle }) {
             opacity: 0.8,
           }}
         >
-          This action cannot be undone. All messages and data will be permanently
-          removed.
+          This action cannot be undone. All messages and data will be
+          permanently removed.
         </DialogContentText>
       </DialogContent>
 
@@ -157,7 +159,7 @@ function ConfirmDeleteDialog({ open, handleClose, deleteHandle }) {
           onClick={deleteHandle}
           variant="contained"
           color="error"
-          startIcon={<DeleteOutlineIcon />}
+          startIcon={<DeleteOutlineIcon size={18} />}
           sx={{
             borderRadius: 2,
             px: 3,

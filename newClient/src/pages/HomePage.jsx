@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Typography, Paper } from "@mui/material";
-import { ChatBubbleOutline as ChatIcon } from "@mui/icons-material";
+import { MessageCircle } from "lucide-react"; // replaced icon import
 import AppLayout from "../components/layout/AppLayout";
 
 const HomePage = () => {
@@ -30,12 +30,14 @@ const HomePage = () => {
           maxWidth: "80%",
         }}
       >
-        <ChatIcon
-          sx={{
+        <MessageCircle
+          style={{
             fontSize: 80,
-            color: "primary.light",
-            mb: 3,
+            color: "#90caf9",
+            marginBottom: "24px",
             opacity: 0.8,
+            width: 80,
+            height: 80,
           }}
         />
         <Typography

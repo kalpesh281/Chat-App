@@ -1,16 +1,21 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 const useErrors = (errors = []) => {
+  const shownErrors = useRef(new Set());
+
   useEffect(() => {
     errors.forEach(({ isError, error, fallback }) => {
-      if (isError)
+      const errorId = error?.data?.message || error?.message || "unknown";
+      if (isError && !shownErrors.current.has(errorId)) {
         if (fallback) {
           fallback();
-        } else
-          toast.error(
-            error?.data?.message || error?.message || "Failed to fetch chats"
-          );
+        } else {
+          toast.error(errorId);
+        }
+        shownErrors.current.add(errorId);
+        // Optionally remove the error from the set after some time if you want to allow re-showing
+      }
     });
   }, [errors]);
 };

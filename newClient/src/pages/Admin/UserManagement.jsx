@@ -14,13 +14,10 @@ import {
   Container,
 } from "@mui/material";
 import {
-  Search as SearchIcon,
-  DeleteOutline,
-  Edit,
-  PersonAdd,
-  Person,
-  Group as GroupIcon,
-} from "@mui/icons-material";
+  Search,
+  User as LucideUser,
+  Users as LucideGroup,
+} from "lucide-react"; // lucide-react icons
 import { fetchAllUsers } from "../../redux/reducers/adminSlice";
 import { DataGrid } from "@mui/x-data-grid";
 import { sampleUserData } from "../../components/data/sampleData";
@@ -128,7 +125,7 @@ function UserListPage() {
       flex: 1,
       renderCell: (params) => (
         <Chip
-          icon={<Person sx={{ fontSize: "1rem !important" }} />}
+          icon={<LucideUser size={16} style={{ marginLeft: 4 }} />}
           label={params.value}
           size="small"
           sx={{
@@ -148,7 +145,7 @@ function UserListPage() {
       flex: 1,
       renderCell: (params) => (
         <Chip
-          icon={<GroupIcon sx={{ fontSize: "1rem !important" }} />}
+          icon={<LucideGroup size={16} style={{ marginLeft: 4 }} />}
           label={params.value}
           size="small"
           sx={{
@@ -229,11 +226,9 @@ function UserListPage() {
                 mr: 1,
               }}
             >
-              <Person
-                sx={{
-                  fontSize: { xs: "1.8rem", md: "2.2rem" },
-                  color: "primary.main",
-                }}
+              <LucideUser
+                size={32}
+                style={{ color: "#1976d2" }}
               />
             </Box>
 
@@ -268,9 +263,9 @@ function UserListPage() {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon
-                      fontSize="small"
-                      sx={{ color: "text.secondary" }}
+                    <Search
+                      size={18}
+                      style={{ color: "#757575" }}
                     />
                   </InputAdornment>
                 ),
@@ -354,5 +349,7 @@ function UserListPage() {
     </AdminLayout>
   );
 }
+
+
 
 export default UserListPage;

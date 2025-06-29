@@ -15,15 +15,13 @@ import {
   Tooltip,
 } from "@mui/material";
 import {
-  Search as SearchIcon,
-  DeleteOutline,
-  Edit,
-  Message,
-  Group,
-  Person,
-  Attachment as AttachmentIcon,
-  AccessTime as AccessTimeIcon,
-} from "@mui/icons-material";
+  Search,
+  Paperclip,
+  MessageCircle,
+  Users as LucideGroup,
+  User as LucideUser,
+  Clock,
+} from "lucide-react"; // lucide-react icons
 import { DataGrid } from "@mui/x-data-grid";
 import { sampleMessageData } from "../../components/data/sampleData";
 import { useDispatch, useSelector } from "react-redux";
@@ -92,7 +90,7 @@ function MessageManagement() {
       flex: 0.7,
       renderCell: (params) => (
         <Chip
-          icon={<AttachmentIcon sx={{ fontSize: "1rem !important" }} />}
+          icon={<Paperclip size={16} style={{ marginLeft: 4 }} />}
           label={params.value ? "Yes" : "No"}
           size="small"
           sx={{
@@ -171,9 +169,9 @@ function MessageManagement() {
         <Chip
           icon={
             params.value ? (
-              <Group sx={{ fontSize: "1rem !important" }} />
+              <LucideGroup size={16} style={{ marginLeft: 4 }} />
             ) : (
-              <Person sx={{ fontSize: "1rem !important" }} />
+              <LucideUser size={16} style={{ marginLeft: 4 }} />
             )
           }
           label={params.value ? "Yes" : "No"}
@@ -209,7 +207,7 @@ function MessageManagement() {
             gap: 0.5,
           }}
         >
-          <AccessTimeIcon sx={{ fontSize: "0.875rem" }} />
+          <Clock size={14} style={{ marginRight: 4 }} />
           {params.value}
         </Typography>
       ),
@@ -262,11 +260,9 @@ function MessageManagement() {
                 mr: 1,
               }}
             >
-              <Message
-                sx={{
-                  fontSize: { xs: "1.8rem", md: "2.2rem" },
-                  color: "warning.main",
-                }}
+              <MessageCircle
+                size={32}
+                style={{ color: "#ed6c02" }}
               />
             </Box>
 
@@ -301,9 +297,9 @@ function MessageManagement() {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon
-                      fontSize="small"
-                      sx={{ color: "text.secondary" }}
+                    <Search
+                      size={18}
+                      style={{ color: "#757575" }}
                     />
                   </InputAdornment>
                 ),
@@ -392,5 +388,6 @@ function MessageManagement() {
       </Container>
     </AdminLayout>
   );
+
 }
 export default MessageManagement;
