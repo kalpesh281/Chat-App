@@ -1,3 +1,6 @@
+// =======================
+// Imports & Config
+// =======================
 import express from "express";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
@@ -21,9 +24,15 @@ import { socketAuthenticator } from "./middlewares/SocketAuthMiddleware.js";
 
 dotenv.config();
 
+// =======================
+// Express & Server Setup
+// =======================
 const app = express();
 const server = createServer(app);
 
+// =======================
+// Socket.io Setup
+// =======================
 const io = new Server(server, {
   cors: {
     origin: process.env.CLIENT_URL,
@@ -39,12 +48,18 @@ app.set("io", io);
 const PORT = process.env.PORT || 5001;
 const userSocketIds = new Map();
 
+// =======================
+// Socket.io Middleware
+// =======================
 io.use((socket, next) => {
   cookieParser()(socket.request, socket.request.res, async (err) =>
     socketAuthenticator(err, socket, next)
   );
 });
 
+// =======================
+// Socket.io Events
+// =======================
 io.on("connection", (socket) => {
   const user = socket.user;
   // console.log("Socket connected:", user);
@@ -53,7 +68,7 @@ io.on("connection", (socket) => {
 
   socket.on(NEW_MESSAGE, async ({ chatId, members, message }) => {
     // console.log("NEW_MESSAGE event received:", { chatId, members, message });
-    console.log(members, "members in NEW_MESSAGE event");
+    // console.log(members, "members in NEW_MESSAGE event");
     const messageForRealTime = {
       content: message,
       _id: uuid(),
@@ -124,7 +139,9 @@ io.on("connection", (socket) => {
   });
 });
 
-// Middleware
+// =======================
+// Express Middleware
+// =======================
 app.use(
   cors({
     origin: process.env.CLIENT_URL,
@@ -135,10 +152,14 @@ app.use(express.json({ limit: "16mb" }));
 app.use(express.urlencoded({ extended: true, limit: "16mb" }));
 app.use(cookieParser());
 
-// Connect to MongoDB
+// =======================
+// Database Connection
+// =======================
 connectDB();
 
-// Routes
+// =======================
+// API Routes
+// =======================
 app.use("/api/v1/user", UserAuthRoute);
 app.use("/api/v1/chat", ChatRoute);
 app.use("/api/v1/admin", AdminRoute);
@@ -147,6 +168,9 @@ app.get("/", (req, res) => {
   res.send("Hello, World!");
 });
 
+// =======================
+// Server Start
+// =======================
 server.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`);
 });

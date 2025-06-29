@@ -66,23 +66,25 @@ const getMyChats = async (req, res) => {
       members: { $in: [req.id] },
     }).populate("members", "name username ");
 
-    const transformedChats = chats.map(({ _id, name, members, groupChat }) => {
-      return {
-        _id,
-        name: groupChat
-          ? name
-          : members.find(
-              (member) => member._id.toString() !== req.id.toString()
-            ).name,
-        members: members.map((member) => ({
-          _id: member._id,
-          name: member.name,
-          username: member.username,
-        })),
-        groupChat,
-      };
-    });
-
+    const transformedChats = chats.map(
+      ({ _id, name, groupName, members, groupChat }) => {
+        return {
+          _id,
+          name: groupChat
+            ? groupName
+            : members.find(
+                (member) => member._id.toString() !== req.id.toString()
+              ).name,
+          members: members.map((member) => ({
+            _id: member._id,
+            name: member.name,
+            username: member.username,
+          })),
+          groupChat,
+        };
+      }
+    );
+    // console.log("Transformed chats:", transformedChats);
     return res.status(200).json({
       success: true,
       chats: transformedChats,
