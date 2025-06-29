@@ -15,6 +15,7 @@ import {
   incrementNotificationCount,
   setNewMessageAlert,
 } from "../../redux/reducers/chatSlice";
+import { getOrSaveFromLocalStorage } from "../../libs/features";
 
 const AppLayout = () => (WrappedComponent) => {
   return (props) => {
@@ -41,15 +42,25 @@ const AppLayout = () => (WrappedComponent) => {
       },
     ]);
 
+    useEffect(() => {
+      getOrSaveFromLocalStorage({
+        key: NEW_MESSAGE_ALERT,
+        value: newMessageAlert,
+      });
+    }, [newMessageAlert]);
+
     const handleDeleteChat = (e, _id, groupChat) => {
       e.preventDefault();
       // console.log("Delete chat with ID:", chatId);
     };
 
-    const newMessagesAlertHandler = useCallback((data) => {
-      if (data.chatId === chatId) return;
-      dispatch(setNewMessageAlert(data));
-    }, [chatId]);
+    const newMessagesAlertHandler = useCallback(
+      (data) => {
+        if (data.chatId === chatId) return;
+        dispatch(setNewMessageAlert(data));
+      },
+      [chatId]
+    );
     const newRequestHandler = useCallback(() => {
       dispatch(incrementNotificationCount());
     }, [dispatch]);

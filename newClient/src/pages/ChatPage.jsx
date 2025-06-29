@@ -15,7 +15,7 @@ import { sampleMessages } from "../components/data/sampleData";
 import MessageComponent from "../components/shared/MessageComponent";
 import { getSocket } from "../socket";
 import { useState } from "react";
-import { NEW_MESSAGE } from "../constant/events";
+import { NEW_MESSAGE, STOP_TYPING, TYPING } from "../constant/events";
 import { useChatDetailsQuery, useGetMessagesQuery } from "../redux/api/api";
 import { useCallback } from "react";
 import { useErrors, useSocketEvents } from "../hooks/hooks";
@@ -23,6 +23,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useInfiniteScrollTop } from "6pp";
 import { setIsFileMenu } from "../redux/reducers/miscSlice";
 import { removeNewMessageAlert } from "../redux/reducers/chatSlice";
+import { motion } from "framer-motion";
 
 function ChatPage({ chatId }) {
   const containerRef = useRef(null);
@@ -30,6 +31,9 @@ function ChatPage({ chatId }) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [page, setPage] = useState(1);
+  const [IamTyping, setIamTyping] = useState(false);
+  const [userTyping, setUserTyping] = useState(false);
+  const typingTimeout = useRef(null);
   const [fileMenuAnchor, setFileMenuAnchor] = useState(null);
   const [isLoadingOldMessages, setIsLoadingOldMessages] = useState(false);
   const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
@@ -100,6 +104,9 @@ function ChatPage({ chatId }) {
     };
   }, [chatId]);
 
+
+  const [typingUser, setTypingUser] = useState(null);
+
   const newMessagesHandler = useCallback(
     (data) => {
       if (data.chatId !== chatId) return;
@@ -109,8 +116,36 @@ function ChatPage({ chatId }) {
     [chatId]
   );
 
+  const startTypingHandler = useCallback(
+    (data) => {
+      if (data.chatId !== chatId) return;
+      // Only set typingUser if it's not the current user
+      if (data.sender && data.sender._id !== user?._id) {
+        setUserTyping(true);
+        setTypingUser(data.sender);
+        // Auto scroll to show typing indicator
+        setShouldScrollToBottom(true);
+      }
+    },
+    [chatId, user?._id]
+  );
+
+  const stopTypingHandler = useCallback(
+    (data) => {
+      if (data.chatId !== chatId) return;
+      // Only clear if the sender is not the current user
+      if (data.sender && data.sender._id !== user?._id) {
+        setUserTyping(false);
+        setTypingUser(null);
+      }
+    },
+    [chatId, user?._id]
+  );
+
   const eventHandler = {
     [NEW_MESSAGE]: newMessagesHandler,
+    [TYPING]: startTypingHandler,
+    [STOP_TYPING]: stopTypingHandler,
   };
 
   useSocketEvents(socket, eventHandler);
@@ -149,6 +184,7 @@ function ChatPage({ chatId }) {
     prevOldMessagesLength.current = oldMessages.length;
   }, [oldMessages.length, oldMessageChunk.isLoading]);
 
+ 
   useEffect(() => {
     if (
       containerRef.current &&
@@ -162,7 +198,18 @@ function ChatPage({ chatId }) {
         }
       }, 50);
     }
-  }, [allMessages.length, shouldScrollToBottom]);
+  }, [allMessages.length, shouldScrollToBottom, userTyping]); 
+
+
+  useEffect(() => {
+    if (userTyping && typingUser && typingUser._id !== user?._id) {
+      setTimeout(() => {
+        if (containerRef.current) {
+          containerRef.current.scrollTop = containerRef.current.scrollHeight;
+        }
+      }, 100); 
+    }
+  }, [userTyping, typingUser, user?._id]);
 
   // Initial scroll to bottom when chat loads
   useEffect(() => {
@@ -186,6 +233,93 @@ function ChatPage({ chatId }) {
     dispatch(setIsFileMenu(true));
     setFileMenuAnchor(e.currentTarget);
   };
+
+  const messageOnChange = (e) => {
+    const value = e.target.value;
+    setMessage(value);
+    if (!IamTyping) {
+      socket.emit(TYPING, {
+        chatId,
+        members,
+      });
+      setIamTyping(true);
+    }
+    if (value.trim()) {
+      e.target.style.height = "auto";
+    }
+    if (typingTimeout.current) clearTimeout(typingTimeout.current);
+    typingTimeout.current = setTimeout(() => {
+      socket.emit(STOP_TYPING, {
+        chatId,
+        members,
+      });
+      setIamTyping(false);
+    }, [1500]);
+  };
+
+  function TypingIndicator() {
+    // Left-aligned, styled like a received message bubble
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "flex-end",
+          pl: 0,
+          pb: 0.5,
+        }}
+      >
+        <Box
+          sx={{
+            background: "#fffbe6", // match left/receiver bubble
+            borderRadius: "16px 16px 16px 4px",
+            px: 2,
+            py: 1,
+            display: "flex",
+            alignItems: "center",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+            minWidth: 44,
+            minHeight: 32,
+            maxWidth: "60%",
+            border: "1px solid #f5e9c6",
+            ml: 0.5,
+          }}
+        >
+          <motion.div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              height: 12,
+            }}
+            aria-label="User is typing"
+          >
+            {[0, 1, 2].map((i) => (
+              <motion.span
+                key={i}
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: "#e0b800", // yellow/dark accent
+                  display: "inline-block",
+                  margin: "0 2px",
+                }}
+                animate={{
+                  y: [0, -6, 0],
+                  opacity: [0.5, 1, 0.5],
+                }}
+                transition={{
+                  duration: 0.8,
+                  repeat: Infinity,
+                  delay: i * 0.2,
+                }}
+              />
+            ))}
+          </motion.div>
+        </Box>
+      </Box>
+    );
+  }
 
   return chatDetails.isLoading ? (
     <Skeleton />
@@ -238,7 +372,7 @@ function ChatPage({ chatId }) {
                 fontWeight: 500,
               }}
             >
-              Loading older messages...
+              Loading messages...
             </Box>
           </Box>
         )}
@@ -270,6 +404,12 @@ function ChatPage({ chatId }) {
             user={user}
           />
         ))}
+
+        {/* Typing indicator */}
+        {/* Only show if someone else is typing */}
+        {userTyping && typingUser && typingUser._id !== user?._id && (
+          <TypingIndicator />
+        )}
       </Stack>
 
       {/* Input form area */}
@@ -310,7 +450,7 @@ function ChatPage({ chatId }) {
                 overflowY: "auto",
               }}
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={messageOnChange}
               onKeyDown={handleKeyDown}
             />
 

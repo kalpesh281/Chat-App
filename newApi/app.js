@@ -8,7 +8,12 @@ import ChatRoute from "./routes/ChatRoute.js";
 import AdminRoute from "./routes/AdminRoute.js";
 import { Server } from "socket.io";
 import { createServer } from "http";
-import { NEW_MESSAGE, NEW_MESSAGE_ALERT } from "./constants/events.js";
+import {
+  NEW_MESSAGE,
+  NEW_MESSAGE_ALERT,
+  STOP_TYPING,
+  TYPING,
+} from "./constants/events.js";
 import { v4 as uuid } from "uuid";
 import { getSockets } from "./lib/helper.js";
 import { Message } from "./models/MessageSchema.js";
@@ -85,6 +90,31 @@ io.on("connection", (socket) => {
     }
 
     // console.log("New message sent to sockets:", messageForRealTime);
+  });
+
+  socket.on(TYPING, ({ chatId, members }) => {
+    // console.log("TYPING start event received:", { chatId, members });
+    const memberSockets = getSockets(members);
+    // console.log("Member sockets for TYPING:", memberSockets);
+    io.to(memberSockets).emit(TYPING, {
+      chatId,
+      sender: {
+        _id: user._id,
+        name: user.name,
+      },
+    });
+  });
+  socket.on(STOP_TYPING, ({ chatId, members }) => {
+    // console.log("TYPING stop event received:", { chatId, members });
+    const memberSockets = getSockets(members);
+    // console.log("Member sockets for TYPING:", memberSockets);
+    io.to(memberSockets).emit(STOP_TYPING, {
+      chatId,
+      sender: {
+        _id: user._id,
+        name: user.name,
+      },
+    });
   });
 
   // Handle incoming messages
