@@ -19,6 +19,7 @@ import {
   FileText as LucideDocument,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useSendAttachmentMutation } from "../../redux/api/api";
 
 const fileOptions = [
   {
@@ -48,11 +49,13 @@ const fileOptions = [
   },
 ];
 
-function FileMenu({ anchorE1 }) {
+function FileMenu({ anchorE1, chatId }) {
   const dispatch = useDispatch();
   const { isFileMenu } = useSelector((state) => state.misc);
 
   const inputRefs = useRef({});
+
+  const [sendAttachments] = useSendAttachmentMutation();
 
   const handleClose = () => dispatch(setIsFileMenu(false));
 
@@ -60,7 +63,7 @@ function FileMenu({ anchorE1 }) {
     inputRefs.current[key]?.click();
   };
 
-  const handleFileChange = (e, key) => {
+  const handleFileChange = async (e, key) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
@@ -73,6 +76,24 @@ function FileMenu({ anchorE1 }) {
     handleClose();
 
     try {
+      const formData = new FormData();
+
+      formData.append("chatId", chatId);
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
+
+      const res = await sendAttachments(formData);
+      if (res.data) {
+        // console.log("File sent successfully:", res.data);
+        toast.success(`${key} sent successfully`, {
+          id: toastId,
+        });
+      } else {
+        toast.error("Failed to send file", {
+          id: toastId,
+        });
+      }
     } catch (error) {
       toast.error(error?.message || "Failed to send file", {
         id: toastId,

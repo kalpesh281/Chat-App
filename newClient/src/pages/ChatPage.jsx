@@ -206,7 +206,7 @@ function ChatPage({ chatId }) {
           </Stack>
         </form>
       </Paper>
-      <FileMenu anchorE1={fileMenuAnchor} />
+      <FileMenu anchorE1={fileMenuAnchor} chatId={chatId} />
     </Box>
   );
 }

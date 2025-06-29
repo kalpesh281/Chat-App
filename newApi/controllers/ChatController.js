@@ -313,8 +313,8 @@ const leaveGroup = async (req, res) => {
 const sendAttachments = async (req, res) => {
   try {
     const { chatId } = req.body;
-    console.log("sendAttachments called with chatId:", chatId);
-    console.log("req.files:", req.files);
+    // console.log("sendAttachments called with chatId:", chatId);
+    // console.log("req.files:", req.files);
 
     const [chat, me] = await Promise.all([
       Chat.findById(chatId),
@@ -357,7 +357,7 @@ const sendAttachments = async (req, res) => {
     };
 
     const message = await Message.create(messageForDb);
-
+    // console.log("Message created:", message);
     emitEvent(req, NEW_ATTACHMENT, chat.members, {
       message: messageForRealTime,
       chatId,
