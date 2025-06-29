@@ -1,7 +1,14 @@
 import React, { useRef, useEffect, useMemo } from "react";
 import AppLayout from "../components/layout/AppLayout";
-import { IconButton, Stack, Box, Paper, Skeleton } from "@mui/material";
-import { Paperclip as AttachFileIcon, Send as SendIcon } from "lucide-react"; // lucide-react icons
+import {
+  IconButton,
+  Stack,
+  Box,
+  Paper,
+  Skeleton,
+  CircularProgress,
+} from "@mui/material";
+import { Paperclip as AttachFileIcon, Send as SendIcon } from "lucide-react";
 import { InputBox, Button } from "../components/styles/StyledComponent";
 import FileMenu from "../components/dialog/FileMenu";
 import { sampleMessages } from "../components/data/sampleData";
@@ -23,15 +30,22 @@ function ChatPage({ chatId }) {
   const [messages, setMessages] = useState([]);
   const [page, setPage] = useState(1);
   const [fileMenuAnchor, setFileMenuAnchor] = useState(null);
+  const [isLoadingOldMessages, setIsLoadingOldMessages] = useState(false);
+  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
 
   const dispatch = useDispatch();
   const socket = getSocket();
 
-  const chatDetails = useChatDetailsQuery({ chatId, skip: !chatId });
+  const user = useSelector((state) => state.auth.user);
 
+  const chatDetails = useChatDetailsQuery({ chatId, skip: !chatId });
   const oldMessageChunk = useGetMessagesQuery({ chatId, page });
 
-  // Use infinite scroll to load more messages when scrolled to the top
+  // Track loading state for old messages
+  useEffect(() => {
+    setIsLoadingOldMessages(oldMessageChunk.isLoading);
+  }, [oldMessageChunk.isLoading]);
+
   const { data: oldMessages, setData: setOldMessages } = useInfiniteScrollTop(
     containerRef,
     oldMessageChunk.data?.totalPages,
@@ -59,16 +73,12 @@ function ChatPage({ chatId }) {
     ]
   );
 
-  console.log("Old message chunk:", oldMessages);
-  // console.log("Chat details:", chatDetails.data);
-
   const members = chatDetails.data?.chat.members;
 
   const submitMessage = (e) => {
     e.preventDefault();
     if (!message.trim()) return;
 
-    // Emit the message to the server
     socket.emit(NEW_MESSAGE, {
       chatId,
       members,
@@ -76,46 +86,95 @@ function ChatPage({ chatId }) {
     });
 
     setMessage("");
-    // console.log("Message submitted:", message);
+    setShouldScrollToBottom(true); // Mark that we should scroll to bottom after new message
   };
 
   const newMessagesHandler = useCallback((data) => {
     setMessages((prevMessages) => [...prevMessages, data.message]);
-    // console.log("New message received:", data);
-  });
+    setShouldScrollToBottom(true); // Scroll to bottom for new messages
+  }, []);
 
   const eventHandler = {
     [NEW_MESSAGE]: newMessagesHandler,
   };
 
   useSocketEvents(socket, eventHandler);
-
   useErrors(error);
 
-  // Fix: Default to empty array if messages is undefined
   const allMessages = [...oldMessages, ...messages];
 
-  // Scroll to bottom when allMessages changes
+  // Scroll position management for infinite scroll
+  const prevOldMessagesLength = useRef(0);
+  const prevScrollHeight = useRef(0);
+  const prevScrollTop = useRef(0);
+  const isRestoringScroll = useRef(false);
+
+  // Save scroll position before loading old messages
   useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    if (containerRef.current && page > 1) {
+      prevScrollHeight.current = containerRef.current.scrollHeight;
+      prevScrollTop.current = containerRef.current.scrollTop;
+      isRestoringScroll.current = true;
     }
-  }, [allMessages]);
+  }, [page]);
+
+  // Restore scroll position after old messages are loaded
+  useEffect(() => {
+    if (
+      containerRef.current &&
+      oldMessages.length > prevOldMessagesLength.current &&
+      !oldMessageChunk.isLoading &&
+      isRestoringScroll.current
+    ) {
+      const newScrollTop =
+        containerRef.current.scrollHeight -
+        prevScrollHeight.current +
+        prevScrollTop.current;
+
+      containerRef.current.scrollTop = newScrollTop;
+      isRestoringScroll.current = false;
+    }
+    prevOldMessagesLength.current = oldMessages.length;
+  }, [oldMessages.length, oldMessageChunk.isLoading]);
+
+  // Scroll to bottom for new messages (only when explicitly needed)
+  useEffect(() => {
+    if (
+      containerRef.current &&
+      shouldScrollToBottom &&
+      !isRestoringScroll.current
+    ) {
+      setTimeout(() => {
+        if (containerRef.current) {
+          containerRef.current.scrollTop = containerRef.current.scrollHeight;
+          setShouldScrollToBottom(false);
+        }
+      }, 50);
+    }
+  }, [allMessages.length, shouldScrollToBottom]);
+
+  // Initial scroll to bottom when chat loads
+  useEffect(() => {
+    if (containerRef.current && allMessages.length > 0 && page === 1) {
+      setTimeout(() => {
+        if (containerRef.current) {
+          containerRef.current.scrollTop = containerRef.current.scrollHeight;
+        }
+      }, 100);
+    }
+  }, [chatDetails.isLoading, allMessages.length, page]);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-
       e.target.form.requestSubmit();
     }
   };
+
   const handleFileOpen = (e) => {
     dispatch(setIsFileMenu(true));
     setFileMenuAnchor(e.currentTarget);
-    console.log("File menu opened");
   };
-
-  const user = useSelector((state) => state.auth.user);
 
   return chatDetails.isLoading ? (
     <Skeleton />
@@ -141,8 +200,64 @@ function ChatPage({ chatId }) {
           overflowY: "auto",
         }}
       >
-        {allMessages.map((i) => (
-          <MessageComponent key={i._id} message={i} user={user} />
+        {/* Enhanced loader at the top when loading old messages */}
+        {isLoadingOldMessages && (
+          <Box
+            sx={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              mb: 1,
+              position: "sticky",
+              top: 0,
+              zIndex: 2,
+              background: "rgba(245, 247, 251, 0.9)",
+              backdropFilter: "blur(8px)",
+              borderRadius: 1,
+              padding: 1,
+              gap: 1,
+            }}
+          >
+            <CircularProgress size={20} />
+            <Box
+              sx={{
+                fontSize: "0.875rem",
+                color: "text.secondary",
+                fontWeight: 500,
+              }}
+            >
+              Loading older messages...
+            </Box>
+          </Box>
+        )}
+
+        {/* Alternative skeleton loader for more messages */}
+        {isLoadingOldMessages && (
+          <Stack spacing={1} sx={{ mb: 2 }}>
+            {[1, 2, 3].map((i) => (
+              <Box key={i} sx={{ display: "flex", gap: 1 }}>
+                <Skeleton variant="circular" width={32} height={32} />
+                <Box sx={{ flexGrow: 1 }}>
+                  <Skeleton variant="text" width="60%" height={20} />
+                  <Skeleton
+                    variant="rectangular"
+                    width="40%"
+                    height={40}
+                    sx={{ borderRadius: 1 }}
+                  />
+                </Box>
+              </Box>
+            ))}
+          </Stack>
+        )}
+
+        {allMessages.map((i, idx) => (
+          <MessageComponent
+            key={i._id || `msg-${idx}`}
+            message={i}
+            user={user}
+          />
         ))}
       </Stack>
 

@@ -1,6 +1,7 @@
 import {
   ALERT,
   NEW_ATTACHMENT,
+  NEW_MESSAGE,
   NEW_MESSAGE_ALERT,
   REFETCH_CHATS,
 } from "../constants/events.js";
@@ -358,11 +359,14 @@ const sendAttachments = async (req, res) => {
 
     const message = await Message.create(messageForDb);
     // console.log("Message created:", message);
-    emitEvent(req, NEW_ATTACHMENT, chat.members, {
+    const membersArray = Array.isArray(chat.members)
+      ? chat.members
+      : [chat.members];
+    emitEvent(req, NEW_MESSAGE, membersArray, {
       message: messageForRealTime,
       chatId,
     });
-    emitEvent(req, NEW_MESSAGE_ALERT, chat.members, { chatId });
+    emitEvent(req, NEW_MESSAGE_ALERT, membersArray, { chatId });
 
     res.status(200).json({
       success: true,
