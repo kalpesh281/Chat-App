@@ -14,11 +14,12 @@ import {
   Skeleton,
 } from "@mui/material";
 import { X as CloseIcon, Users as GroupIcon } from "lucide-react";
-import { sampleUsers } from "../data/sampleData";
+
 import UserList from "../shared/UserList";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useAvailableFriendsQuery } from "../../redux/api/api";
 import { useErrors } from "../../hooks/hooks";
+import { setIsNewGroup } from "../../redux/reducers/miscSlice";
 
 function NewGroup({ onClose }) {
   const dispatch = useDispatch();
@@ -27,10 +28,11 @@ function NewGroup({ onClose }) {
   const [loadingUserId, setLoadingUserId] = useState(null);
 
   const { isError, isLoading, error, data } = useAvailableFriendsQuery("");
+  const { isNewGroup } = useSelector((state) => state.misc);
 
   console.log("Available friends data:", data);
   const handleClose = () => {
-    if (onClose) onClose();
+    dispatch(setIsNewGroup(false));
   };
 
   const handleToggleUser = (userId) => {
@@ -54,6 +56,7 @@ function NewGroup({ onClose }) {
     if (groupName.trim() && selectedUsers.length >= 2) {
       console.log("Creating group with name:", groupName);
       console.log("Selected users:", selectedUsers);
+      //Create group logic here
       handleClose();
     }
   };
@@ -75,7 +78,7 @@ function NewGroup({ onClose }) {
 
   return (
     <Dialog
-      open={true}
+      open={isNewGroup}
       onClose={handleClose}
       PaperProps={{
         sx: {

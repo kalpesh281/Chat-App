@@ -24,7 +24,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../redux/reducers/authSlice";
 import toast from "react-hot-toast";
-import { setIsNotification, setIsSearch } from "../../redux/reducers/miscSlice";
+import { setIsNotification, setIsSearch, setIsNewGroup } from "../../redux/reducers/miscSlice";
 import { resetNotificationCount } from "../../redux/reducers/chatSlice";
 
 const SearchDialog = lazy(() => import("../specific/Search"));
@@ -33,12 +33,11 @@ const NewGroupDialog = lazy(() => import("../specific/NewGroup"));
 
 function Header() {
   const [isMobile, setIsMobile] = useState(false);
-  const [isNewGroup, setIsNewGroup] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { isSearch, isNotification } = useSelector((state) => state.misc);
+  const { isSearch, isNotification, isNewGroup } = useSelector((state) => state.misc);
   const { notificationCount } = useSelector((state) => state.chat);
   const handleMobile = () => {
     setIsMobile((prev) => !prev);
@@ -51,8 +50,7 @@ function Header() {
   };
 
   const openNewGroup = () => {
-    setIsNewGroup((prev) => !prev);
-    console.log("Open new group dialog");
+    dispatch(setIsNewGroup(true));
   };
 
   const navigateToGroup = () => navigate("/groups");
@@ -208,7 +206,7 @@ function Header() {
       )}
       {isNewGroup && (
         <Suspense fallback={<Backdrop open={true} />}>
-          <NewGroupDialog onClose={() => setIsNewGroup(false)} />
+          <NewGroupDialog onClose={() => dispatch(setIsNewGroup(false))} />
         </Suspense>
       )}
     </>
@@ -280,3 +278,4 @@ const IconBtn = ({ title, icon, onClick, value }) => {
 };
 
 export default Header;
+
