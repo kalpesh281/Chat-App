@@ -15,13 +15,18 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/material";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import PersonIcon from "@mui/icons-material/Person";
-import AlternateEmailIcon from "@mui/icons-material/AlternateEmail";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+
+import {
+  Lock,
+  UserPlus,
+  User,
+  AtSign,
+  Eye,
+  EyeOff,
+  MessageCircle,
+  LogIn,
+} from "lucide-react"; // lucide-react icons
+
 import { useInputValidation } from "6pp";
 import { usernameValidator } from "../utils/validators";
 import { useDispatch, useSelector } from "react-redux";
@@ -94,7 +99,7 @@ function LoginPage() {
       password.clear && password.clear();
       bio.clear && bio.clear();
       // Redirect to home page after signup
-  
+
     } catch (error) {
       toast.error(error || "Signup failed");
     }
@@ -317,7 +322,9 @@ function LoginPage() {
               },
             }}
           >
-            <ChatBubbleOutlineIcon
+
+            <MessageCircle
+
               sx={{
                 color: "white",
                 fontSize: 65,
@@ -457,7 +464,10 @@ function LoginPage() {
               height: 56,
             }}
           >
-            {isLogin ? <LockOutlinedIcon /> : <PersonAddIcon />}
+
+            {isLogin ? <Lock size={28} /> : <UserPlus size={28} />}
+
+
           </Avatar>
 
           <Typography
@@ -500,7 +510,7 @@ function LoginPage() {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <PersonIcon color="primary" />
+                        <User color="#1976d2" size={20} />
                       </InputAdornment>
                     ),
                   }}
@@ -528,7 +538,7 @@ function LoginPage() {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <AlternateEmailIcon color="primary" />
+                      <AtSign color="#1976d2" size={20} />
                     </InputAdornment>
                   ),
                 }}
@@ -562,7 +572,7 @@ function LoginPage() {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <LockOutlinedIcon color="primary" />
+                      <Lock color="#1976d2" size={20} />
                     </InputAdornment>
                   ),
                   endAdornment: (
@@ -572,9 +582,9 @@ function LoginPage() {
                         edge="end"
                       >
                         {showPassword ? (
-                          <VisibilityOffIcon />
+                          <EyeOff size={20} />
                         ) : (
-                          <VisibilityIcon />
+                          <Eye size={20} />
                         )}
                       </IconButton>
                     </InputAdornment>
@@ -607,7 +617,7 @@ function LoginPage() {
                         position="start"
                         sx={{ alignSelf: "flex-start", mt: 0 }}
                       >
-                        <ChatBubbleOutlineIcon color="primary" />
+                        <MessageCircle color="#1976d2" size={20} />
                       </InputAdornment>
                     ),
                   }}

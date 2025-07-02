@@ -1,7 +1,7 @@
 import React from "react";
 import { transformImage } from "../../libs/features";
 
-function RenderAttatchment({ file, url }) {
+function RenderAttatchment({ file, url, disableLink }) {
   switch (file) {
     case "image":
       return (
@@ -43,6 +43,20 @@ function RenderAttatchment({ file, url }) {
         </audio>
       );
     case "document":
+      if (disableLink) {
+        return (
+          <div
+            style={{
+              padding: "10px",
+              border: "1px solid #ccc",
+              borderRadius: "5px",
+              backgroundColor: "#f9f9f9",
+            }}
+          >
+            <span style={{ fontWeight: "bold" }}>Download Document</span>
+          </div>
+        );
+      }
       return (
         <a
           href={url}
@@ -63,8 +77,21 @@ function RenderAttatchment({ file, url }) {
           </div>
         </a>
       );
-
     default:
+      if (disableLink) {
+        return (
+          <div
+            style={{
+              padding: "10px",
+              border: "1px solid #ccc",
+              borderRadius: "5px",
+              backgroundColor: "#f9f9f9",
+            }}
+          >
+            <span style={{ fontWeight: "bold" }}>Download File</span>
+          </div>
+        );
+      }
       return (
         <a
           href={url}

@@ -8,22 +8,26 @@ import {
   Typography,
   alpha,
   Divider,
+  Badge,
 } from "@mui/material";
 import React, { lazy, Suspense, useState } from "react";
 import {
-  Add as AddIcon,
+  Plus as AddIcon,
   Menu as MenuIcon,
   Search as SearchIcon,
-  Group as GroupIcon,
-  Logout as LogoutIcon,
-  Notifications as NotificationsIcon,
-  Chat as ChatIcon,
-} from "@mui/icons-material";
+  Users as GroupIcon,
+  LogOut as LogoutIcon,
+  Bell as NotificationsIcon,
+  MessageCircle as ChatIcon,
+} from "lucide-react"; // lucide-react icons
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../redux/reducers/authSlice";
 import toast from "react-hot-toast";
-import { setIsNotification, setIsSearch } from "../../redux/reducers/miscSlice";
+
+import { setIsNotification, setIsSearch, setIsNewGroup } from "../../redux/reducers/miscSlice";
+import { resetNotificationCount } from "../../redux/reducers/chatSlice";
+
 
 const SearchDialog = lazy(() => import("../specific/Search"));
 const NotificationsDialog = lazy(() => import("../specific/Notification"));
@@ -31,12 +35,16 @@ const NewGroupDialog = lazy(() => import("../specific/NewGroup"));
 
 function Header() {
   const [isMobile, setIsMobile] = useState(false);
+
   const [isNewGroup, setIsNewGroup] = useState(false);
+
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { isSearch, isNotification } = useSelector((state) => state.misc);
+
+  const { isSearch, isNotification, isNewGroup } = useSelector((state) => state.misc);
+  const { notificationCount } = useSelector((state) => state.chat);
 
   const handleMobile = () => {
     setIsMobile((prev) => !prev);
@@ -49,14 +57,16 @@ function Header() {
   };
 
   const openNewGroup = () => {
-    setIsNewGroup((prev) => !prev);
-    console.log("Open new group dialog");
+    dispatch(setIsNewGroup(true));
   };
 
   const navigateToGroup = () => navigate("/groups");
 
   const openNotifications = () => {
     dispatch(setIsNotification(true));
+
+    dispatch(resetNotificationCount());
+
   };
   const logoutHandler = async () => {
     try {
@@ -88,10 +98,12 @@ function Header() {
               }}
             >
               <ChatIcon
-                sx={{
+                style={{
                   fontSize: 28,
                   color: "#fff",
                   filter: "drop-shadow(0px 2px 3px rgba(0,0,0,0.2))",
+                  width: 28,
+                  height: 28,
                 }}
               />
               <Divider
@@ -115,7 +127,7 @@ function Header() {
                   filter: "drop-shadow(0px 1px 1px rgba(0,0,0,0.3))",
                 }}
               >
-                Chat Application
+                Message Me!
               </Typography>
             </Box>
 
@@ -133,7 +145,7 @@ function Header() {
                   "&:hover": { background: "rgba(255,255,255,0.2)" },
                 }}
               >
-                <MenuIcon />
+                <MenuIcon size={22} />
               </IconButton>
             </Box>
 
@@ -151,30 +163,31 @@ function Header() {
             >
               <IconBtn
                 title={"Search"}
-                icon={<SearchIcon />}
+                icon={<SearchIcon size={20} />}
                 onClick={openSearchDialog}
               />
 
               <IconBtn
                 title={"New Group"}
-                icon={<AddIcon />}
+                icon={<AddIcon size={20} />}
                 onClick={openNewGroup}
               />
               <IconBtn
                 title={"Manage Groups"}
-                icon={<GroupIcon />}
+                icon={<GroupIcon size={20} />}
                 onClick={navigateToGroup}
               />
 
               <IconBtn
                 title={"Notifications"}
-                icon={<NotificationsIcon />}
+                icon={<NotificationsIcon size={20} />}
                 onClick={openNotifications}
+                value={notificationCount}
               />
 
               <IconBtn
                 title={"Logout"}
-                icon={<LogoutIcon />}
+                icon={<LogoutIcon size={20} />}
                 onClick={logoutHandler}
               />
             </Box>
@@ -195,19 +208,23 @@ function Header() {
       )}
       {isNotification && (
         <Suspense fallback={<Backdrop open={true} />}>
-          <NotificationsDialog onClose={() => dispatch(setIsNotification(false))} />
+
+          <NotificationsDialog
+            onClose={() => dispatch(setIsNotification(false))}
+          />
+
         </Suspense>
       )}
       {isNewGroup && (
         <Suspense fallback={<Backdrop open={true} />}>
-          <NewGroupDialog onClose={() => setIsNewGroup(false)} />
+          <NewGroupDialog onClose={() => dispatch(setIsNewGroup(false))} />
         </Suspense>
       )}
     </>
   );
 }
 
-const IconBtn = ({ title, icon, onClick }) => {
+const IconBtn = ({ title, icon, onClick, value }) => {
   return (
     <Tooltip title={title} arrow placement="bottom">
       <IconButton
@@ -224,7 +241,48 @@ const IconBtn = ({ title, icon, onClick }) => {
           },
         }}
       >
-        {icon}
+        {value ? (
+          <Badge
+            color="error"
+            overlap="circular"
+            sx={{
+              position: "relative",
+              "& .MuiBadge-badge": {
+                background: "none",
+                padding: 0,
+                minWidth: 0,
+              },
+            }}
+            badgeContent={
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: "40%",
+                  right: 0,
+                  transform: "translate(50%, -50%)",
+                  fontSize: "0.75rem",
+                  fontWeight: 500,
+                  color: "#fff",
+                  backgroundColor: "#d32f2f",
+                  borderRadius: "50%",
+                  width: "20px",
+                  height: "20px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  // Optionally add a boxShadow for better visibility
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.15)",
+                }}
+              >
+                {value}
+              </Box>
+            }
+          >
+            {icon}
+          </Badge>
+        ) : (
+          icon
+        )}
       </IconButton>
     </Tooltip>
   );
@@ -233,3 +291,4 @@ const IconBtn = ({ title, icon, onClick }) => {
 
 
 export default Header;
+

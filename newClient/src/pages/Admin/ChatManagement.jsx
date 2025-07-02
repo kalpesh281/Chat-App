@@ -14,13 +14,10 @@ import {
   Avatar,
 } from "@mui/material";
 import {
-  Search as SearchIcon,
-  DeleteOutline,
-  Edit,
-  Message,
-  Group,
-  Add as AddIcon,
-} from "@mui/icons-material";
+  Search,
+  Users as LucideGroup,
+  MessageCircle,
+} from "lucide-react"; // lucide-react icons
 import { DataGrid } from "@mui/x-data-grid";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllGroups } from "../../redux/reducers/adminSlice";
@@ -92,7 +89,7 @@ function ChatManagement() {
               fontSize: "0.875rem",
             }}
           >
-            <Group sx={{ fontSize: "1rem" }} />
+            <LucideGroup size={16} />
           </Avatar>
           <Typography sx={{ fontWeight: 500 }}>{params.value}</Typography>
         </Stack>
@@ -118,7 +115,7 @@ function ChatManagement() {
       flex: 1,
       renderCell: (params) => (
         <Chip
-          icon={<Group sx={{ fontSize: "1rem !important" }} />}
+          icon={<LucideGroup size={16} style={{ marginLeft: 4 }} />}
           label={params.value}
           size="small"
           sx={{
@@ -138,7 +135,7 @@ function ChatManagement() {
       flex: 1,
       renderCell: (params) => (
         <Chip
-          icon={<Message sx={{ fontSize: "1rem !important" }} />}
+          icon={<MessageCircle size={16} style={{ marginLeft: 4 }} />}
           label={params.value}
           size="small"
           sx={{
@@ -241,11 +238,9 @@ function ChatManagement() {
                 mr: 1,
               }}
             >
-              <Group
-                sx={{
-                  fontSize: { xs: "1.8rem", md: "2.2rem" },
-                  color: "success.main",
-                }}
+              <LucideGroup
+                size={32}
+                style={{ color: "#2e7d32" }}
               />
             </Box>
 
@@ -280,9 +275,9 @@ function ChatManagement() {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon
-                      fontSize="small"
-                      sx={{ color: "text.secondary" }}
+                    <Search
+                      size={18}
+                      style={{ color: "#757575" }}
                     />
                   </InputAdornment>
                 ),
@@ -366,5 +361,7 @@ function ChatManagement() {
     </AdminLayout>
   );
 }
+
+
 
 export default ChatManagement;

@@ -3,8 +3,19 @@ import { Link } from "../styles/StyledComponent";
 import { Box, Stack, Typography, Badge } from "@mui/material";
 import AvatarCard from "./AvatarCard";
 
+// Utility to generate a consistent color from a string
+function stringToColor(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  
+  const hue = Math.abs(hash) % 360;
+  return `hsl(${hue}, 70%, 55%)`;
+}
+
 const ChatItem = ({
-  avatar = [],
+  avatar,
   name,
   _id,
   groupChat = false,
@@ -14,11 +25,13 @@ const ChatItem = ({
   index = 0,
   handleDeleteChat,
 }) => {
-  const testMessageAlert = newMessageAlert || { count: index + 1 };
   const showNewMessageIndicators = !sameSender;
 
   // Extract first letter of name for the avatar
   const firstLetter = name ? name.charAt(0).toUpperCase() : "";
+
+  // Generate a color for avatar (user or group)
+  const avatarColor = stringToColor(name || "");
 
   return (
     <Link
@@ -64,8 +77,29 @@ const ChatItem = ({
             position: "relative",
           }}
         >
-          {/* Pass the first letter to AvatarCard */}
-          <AvatarCard avatar={avatar} firstLetter={firstLetter} name={name} />
+          {/* Show colored avatar for both group and user if no avatar image */}
+          {!avatar || groupChat ? (
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: groupChat ? "6px" : "50%",
+                backgroundColor: avatarColor,
+                color: "white",
+                fontWeight: 700,
+                fontSize: "1.1rem",
+                userSelect: "none",
+                boxShadow: "0 1px 4px rgba(25, 118, 210, 0.08)",
+              }}
+            >
+              {firstLetter}
+            </Box>
+          ) : (
+            <AvatarCard avatar={avatar} firstLetter={firstLetter} name={name} />
+          )}
           {isOnline && (
             <Box
               sx={{
@@ -114,71 +148,59 @@ const ChatItem = ({
               }}
             >
               {name}
-              {groupChat && (
-                <Box
-                  component="span"
+             
+            </Typography>
+
+            {showNewMessageIndicators &&
+              newMessageAlert &&
+              newMessageAlert.count > 0 && (
+                <Typography
+                  variant="caption"
+                  color="primary"
+                  fontWeight="bold"
                   sx={{
-                    ml: 1,
-                    px: 1,
-                    py: 0.2,
-                    borderRadius: "4px",
-                    backgroundColor: "rgba(25, 118, 210, 0.1)",
-                    color: "primary.main",
-                    fontSize: "0.7rem",
-                    fontWeight: 500,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
+                    fontSize: "0.8rem",
+                    bgcolor: "primary.main",
+                    color: "white",
+                    borderRadius: "50%",
+                    width: "20px",
+                    height: "20px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginLeft: "auto",
                   }}
                 >
-                  Group
-                </Box>
+                  {newMessageAlert.count}
+                </Typography>
               )}
-            </Typography>
-
-            {showNewMessageIndicators && (
-              <Typography
-                variant="caption"
-                color="primary"
-                fontWeight="bold"
-                sx={{
-                  fontSize: "0.8rem",
-                  bgcolor: "primary.main",
-                  color: "white",
-                  borderRadius: "50%",
-                  width: "20px",
-                  height: "20px",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginLeft: "auto",
-                }}
-              >
-                {testMessageAlert.count}
-              </Typography>
-            )}
           </Stack>
 
-          {showNewMessageIndicators && (
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              noWrap
-              sx={{
-                fontSize: "0.8rem",
-                fontWeight: 400,
-                mt: 0.5,
-                display: "block",
-                padding: "2px 4px",
-                borderRadius: "4px",
-              }}
-            >
-              New messages
-            </Typography>
-          )}
+          {showNewMessageIndicators &&
+            newMessageAlert &&
+            newMessageAlert.count > 0 && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                noWrap
+                sx={{
+                  fontSize: "0.8rem",
+                  fontWeight: 400,
+                  mt: 0.5,
+                  display: "block",
+                  padding: "2px 4px",
+                  borderRadius: "4px",
+                }}
+              >
+                New messages
+              </Typography>
+            )}
         </Stack>
       </Box>
     </Link>
   );
 };
+
+
 
 export default memo(ChatItem);

@@ -17,12 +17,12 @@ import {
   alpha,
 } from "@mui/material";
 import {
-  AdminPanelSettings as AdminPanelSettingsIcon,
-  Group,
-  Message,
-  Person2,
-  Search as SearchIcon,
-} from "@mui/icons-material";
+  Shield,
+  Users as LucideGroup,
+  MessageCircle,
+  User as LucideUser,
+  Search,
+} from "lucide-react"; // lucide-react icons
 import moment from "moment";
 import { DoughnutChart, LineChart } from "../../components/specific/Charts";
 
@@ -89,12 +89,7 @@ function Dashboard() {
             mr: 1,
           }}
         >
-          <AdminPanelSettingsIcon
-            sx={{
-              fontSize: { xs: "1.8rem", md: "2.2rem" },
-              color: "primary.main",
-            }}
-          />
+          <Shield size={32} style={{ color: "#1976d2" }} />
         </Box>
 
         <TextField
@@ -115,7 +110,7 @@ function Dashboard() {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon fontSize="small" sx={{ color: "text.secondary" }} />
+                <Search size={18} style={{ color: "#757575" }} />
               </InputAdornment>
             ),
           }}
@@ -178,21 +173,21 @@ function Dashboard() {
       <Widgets
         title={"Users"}
         value={userCount}
-        icon={<Person2 />}
+        icon={<LucideUser size={24} />}
         color="#1976d2"
         iconBgColor="rgba(25, 118, 210, 0.1)"
       />
       <Widgets
         title={"Groups"}
         value={groupCount}
-        icon={<Group />}
+        icon={<LucideGroup size={24} />}
         color="#2e7d32"
         iconBgColor="rgba(46, 125, 50, 0.1)"
       />
       <Widgets
         title={"Messages"}
         value={messageCount}
-        icon={<Message />}
+        icon={<MessageCircle size={24} />}
         color="#ed6c02"
         iconBgColor="rgba(237, 108, 2, 0.1)"
       />

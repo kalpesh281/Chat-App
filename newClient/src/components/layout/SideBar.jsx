@@ -8,12 +8,14 @@ import {
 import React from "react";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import {
-  Dashboard as DashboardIcon,
-  Person as UserIcon,
-  Group as GroupIcon,
-  Message as MessageIcon,
-  Logout as LogoutIcon,
-} from "@mui/icons-material";
+
+  LayoutDashboard as DashboardIcon,
+  User as UserIcon,
+  Users as GroupIcon,
+  MessageCircle as MessageIcon,
+  LogOut as LogoutIcon,
+} from "lucide-react"; // lucide-react icons
+
 import { useDispatch } from "react-redux";
 import { logoutUser } from "../../redux/reducers/authSlice";
 import { useNavigate } from "react-router-dom";
@@ -23,19 +25,19 @@ const adminTabs = [
   {
     name: "Dashboard",
     path: "/dashboard",
-    icon: <DashboardIcon />,
+    icon: <DashboardIcon size={20} />,
   },
   {
     name: "Users",
     path: "/users-list",
-    icon: <UserIcon />,
+    icon: <UserIcon size={20} />,
   },
   {
     name: "Chats",
     path: "/groups-list",
-    icon: <GroupIcon />,
+    icon: <GroupIcon size={20} />,
   },
-  { name: "Messages", path: "/messages-list", icon: <MessageIcon /> },
+  { name: "Messages", path: "/messages-list", icon: <MessageIcon size={20} /> },
 ];
 
 function SideBar({ w = "100%" }) {
@@ -161,7 +163,7 @@ function SideBar({ w = "100%" }) {
                 alignItems: "center",
               }}
             >
-              <LogoutIcon />
+              <LogoutIcon size={20} />
             </Box>
             <Typography variant="body1" fontWeight={500} color="error.main">
               Logout

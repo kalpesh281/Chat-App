@@ -8,6 +8,7 @@ import {
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import Loader from "./components/layout/Loader";
+import { SocketProvider } from "./socket";
 
 // Lazy loading pages
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -38,11 +39,12 @@ function App() {
             {/* User Routes */}
             <Route
               element={
-                <ProtectedRoute
-                  user={isAuthenticated}
-                  requiredRole="user"
-                  // userRole={authUser?.role} // Remove this prop
-                />
+
+                <SocketProvider>
+                  <ProtectedRoute user={isAuthenticated} requiredRole="user" />
+                </SocketProvider>
+
+
               }
             >
               <Route path="/" element={<HomePage />} />

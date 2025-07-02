@@ -55,6 +55,68 @@ const api = createApi({
       }),
       providesTags: ["Chat"],
     }),
+
+    chatDetails: builder.query({
+      query: ({ chatId, populate = false }) => {
+        let url = `/chat/${chatId}`;
+        if (populate) {
+          url += "?populate=true";
+        }
+        return {
+          url,
+          method: "GET",
+          credentials: "include",
+        };
+      },
+      providesTags: ["Chat"],
+    }),
+    getMessages: builder.query({
+      query: ({ chatId, page }) => ({
+        url: `/chat/messages/${chatId}?page=${page}`,
+        credentials: "include",
+      }),
+      keepUnusedDataFor: 0,
+    }),
+    sendAttachment: builder.mutation({
+      query: (data) => ({
+        url: "/chat/messages",
+        method: "POST",
+        credentials: "include",
+        body: data,
+      }),
+    }),
+    myGroups: builder.query({
+      query: () => ({
+        url: "/chat/myGroups",
+        method: "GET",
+        credentials: "include",
+      }),
+      providesTags: ["Chat"],
+    }),
+    availableFriends: builder.query({
+      query: (chatId) => {
+        let url = `/user/friends`;
+        if (chatId) {
+          url += `?chatId=${chatId}`;
+        }
+        return {
+          url,
+          method: "GET",
+          credentials: "include",
+        };
+      },
+      providesTags: ["Chat"],
+    }),
+    newGroup: builder.mutation({
+      query: ({ groupName, members }) => ({
+        url: "/chat/newGroup",
+        method: "POST",
+        credentials: "include",
+        body: { groupName, members },
+      }),
+      invalidatesTags: ["Chat"],
+    }),
+
   }),
 });
 
@@ -66,4 +128,12 @@ export const {
   useSendFriendRequestMutation,
   useGetNotificationQuery,
   useAcceptFriendRequestMutation,
+
+  useChatDetailsQuery,
+  useGetMessagesQuery,
+  useSendAttachmentMutation,
+  useMyGroupsQuery,
+  useAvailableFriendsQuery,
+  useNewGroupMutation,
+
 } = api;

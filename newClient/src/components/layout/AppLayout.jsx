@@ -1,4 +1,6 @@
-import React, { use, useEffect } from "react";
+
+import React, { use, useCallback, useEffect } from "react";
+
 import Header from "./Header";
 import { Grid, Typography, Box } from "@mui/material";
 import ChatList from "../specific/ChatList";
@@ -7,16 +9,41 @@ import { useParams } from "react-router-dom";
 import Profile from "../specific/Profile";
 import { useMyChatQuery } from "../../redux/api/api";
 import toast from "react-hot-toast";
-import { useErrors } from "../../hooks/hooks";
+
+import { useErrors, useSocketEvents } from "../../hooks/hooks";
+import { getSocket } from "../../socket";
+import { NEW_MESSAGE_ALERT, NEW_REQUEST } from "../../constant/events";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  incrementNotificationCount,
+  setNewMessageAlert,
+} from "../../redux/reducers/chatSlice";
+import { getOrSaveFromLocalStorage } from "../../libs/features";
+import Loader from "./Loader";
+
 
 const AppLayout = () => (WrappedComponent) => {
   return (props) => {
     const params = useParams();
     const chatId = params.chatId;
 
+
+    const dispatch = useDispatch();
+
+    const socket = getSocket();
+
+    // console.log("Socket instance:", socket);
+
     const { isLoading, data, isError, error, refetch } = useMyChatQuery("");
 
-    // console.log("Chat data:", data);
+    // Defensive selector to avoid crash if state.chat is undefined
+    const { newMessageAlert } = useSelector((state) => state.chat);
+
+    // console.log("New message alert:", newMessageAlert);
+=======
+    const { isLoading, data, isError, error, refetch } = useMyChatQuery("");
+
+
 
     useErrors([
       {
@@ -25,10 +52,37 @@ const AppLayout = () => (WrappedComponent) => {
       },
     ]);
 
+
+    useEffect(() => {
+      getOrSaveFromLocalStorage({
+        key: NEW_MESSAGE_ALERT,
+        value: newMessageAlert,
+      });
+    }, [newMessageAlert]);
+
+
     const handleDeleteChat = (e, _id, groupChat) => {
       e.preventDefault();
-      console.log("Delete chat with ID:", chatId);
+      // console.log("Delete chat with ID:", chatId);
     };
+
+    const newMessagesAlertHandler = useCallback(
+      (data) => {
+        if (data.chatId === chatId) return;
+        dispatch(setNewMessageAlert(data));
+      },
+      [chatId]
+    );
+    const newRequestHandler = useCallback(() => {
+      dispatch(incrementNotificationCount());
+    }, [dispatch]);
+
+    const eventHandler = {
+      [NEW_MESSAGE_ALERT]: newMessagesAlertHandler,
+      [NEW_REQUEST]: newRequestHandler,
+    };
+
+    useSocketEvents(socket, eventHandler);
 
     return (
       <Box
@@ -108,20 +162,17 @@ const AppLayout = () => (WrappedComponent) => {
               }}
             >
               {isLoading ? (
-                <Typography variant="body2" color="text.secondary">
-                  Loading chats...
-                </Typography>
+
+                <Loader />
+
               ) : (
                 <ChatList
                   chats={data?.chats}
                   chatId={chatId}
-                  newMessagesAlert={[
-                    {
-                      chatId,
-                      count: 4,
-                    },
-                  ]}
-                  onlineUsers={["1", "2", "3"]}
+
+                  newMessagesAlert={newMessageAlert}
+
+ 
                 />
               )}
             </Box>
@@ -136,7 +187,7 @@ const AppLayout = () => (WrappedComponent) => {
               borderRight: "1px solid #e0e0e0",
             }}
           >
-            <WrappedComponent {...props} />
+            <WrappedComponent {...props} chatId={chatId} />
           </Box>
 
           <Box

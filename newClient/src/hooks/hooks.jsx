@@ -1,3 +1,23 @@
+
+import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
+
+const useErrors = (errors = []) => {
+  const shownErrors = useRef(new Set());
+
+  useEffect(() => {
+    errors.forEach(({ isError, error, fallback }) => {
+      const errorId = error?.data?.message || error?.message || "unknown";
+      if (isError && !shownErrors.current.has(errorId)) {
+        if (fallback) {
+          fallback();
+        } else {
+          toast.error(errorId);
+        }
+        shownErrors.current.add(errorId);
+        // Optionally remove the error from the set after some time if you want to allow re-showing
+      }
+
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -11,6 +31,7 @@ const useErrors = (errors = []) => {
           toast.error(
             error?.data?.message || error?.message || "Failed to fetch chats"
           );
+
     });
   }, [errors]);
 };
@@ -48,4 +69,19 @@ const useAsyncMutation = (mutationHook) => {
   return [isLoading, data, executeMutation];
 };
 
-export { useErrors, useAsyncMutation };
+
+const useSocketEvents = (socket, handlers) => {
+  useEffect(() => {
+    Object.entries(handlers).forEach(([event, handler]) => {
+      socket.on(event, handler);
+    });
+    return () => {
+      Object.entries(handlers).forEach(([event, handler]) => {
+        socket.off(event, handler);
+      });
+    };
+  }, [socket, handlers]);
+};
+
+export { useErrors, useAsyncMutation, useSocketEvents };
+

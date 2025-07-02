@@ -11,10 +11,12 @@ import {
   Paper,
 } from "@mui/material";
 import {
-  Search as SearchIcon,
-  Close as CloseIcon,
-  PersonAdd as PersonAddIcon,
-} from "@mui/icons-material";
+
+  Search as SearchIcon, // <-- rename here
+  X as CloseIcon,
+  UserPlus as PersonAddIcon,
+} from "lucide-react"; // lucide-react icons
+
 import React, { useEffect, useState } from "react";
 import { useInputValidation } from "6pp";
 import UserList from "../shared/UserList";
@@ -97,7 +99,7 @@ function Search() {
             gap: 1,
           }}
         >
-          <SearchIcon fontSize="small" />
+          <SearchIcon size={18} />
           Find People
         </Typography>
 
@@ -112,7 +114,7 @@ function Search() {
             },
           }}
         >
-          <CloseIcon fontSize="small" />
+          <CloseIcon size={18} />
         </IconButton>
       </Box>
 
@@ -127,7 +129,7 @@ function Search() {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon color="primary" />
+                <SearchIcon color="#1976d2" size={18} />
               </InputAdornment>
             ),
             sx: {
@@ -210,7 +212,7 @@ function Search() {
               color: "text.secondary",
             }}
           >
-            <SearchIcon sx={{ fontSize: 40, opacity: 0.3, mb: 1 }} />
+            <SearchIcon size={40} style={{ opacity: 0.3, marginBottom: 8 }} />
             <Typography>No users found</Typography>
           </Box>
         )}

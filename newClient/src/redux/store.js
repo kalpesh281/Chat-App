@@ -6,6 +6,9 @@ import adminReducer from "./reducers/adminSlice";
 import api from "./api/api";
 import miscSlice from "./reducers/miscSlice";
 
+import chatReducer from "./reducers/chatSlice";
+
+
 const authPersistConfig = {
   key: "auth",
   storage,
@@ -31,6 +34,9 @@ const store = configureStore({
     admin: persistedAdminReducer,
     api: api.reducer,
     misc: miscSlice.reducer,
+
+    chat: chatReducer,
+
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

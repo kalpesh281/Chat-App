@@ -1,6 +1,7 @@
 import {
   ALERT,
   NEW_ATTACHMENT,
+  NEW_MESSAGE,
   NEW_MESSAGE_ALERT,
   REFETCH_CHATS,
 } from "../constants/events.js";
@@ -14,8 +15,11 @@ import {
 } from "../utils/features.js";
 
 const newGroupChat = async (req, res) => {
+  console.log("newGroupChat called with body:", req.body);
   try {
     const { groupName, members } = req.body;
+
+    console.log("Group Data:", groupName, members);
 
     if (!groupName || !members || members.length === 0) {
       return res.status(400).json({
@@ -65,23 +69,25 @@ const getMyChats = async (req, res) => {
       members: { $in: [req.id] },
     }).populate("members", "name username ");
 
-    const transformedChats = chats.map(({ _id, name, members, groupChat }) => {
-      return {
-        _id,
-        name: groupChat
-          ? name
-          : members.find(
-              (member) => member._id.toString() !== req.id.toString()
-            ).name,
-        members: members.map((member) => ({
-          _id: member._id,
-          name: member.name,
-          username: member.username,
-        })),
-        groupChat,
-      };
-    });
-
+    const transformedChats = chats.map(
+      ({ _id, name, groupName, members, groupChat }) => {
+        return {
+          _id,
+          name: groupChat
+            ? groupName
+            : members.find(
+                (member) => member._id.toString() !== req.id.toString()
+              ).name,
+          members: members.map((member) => ({
+            _id: member._id,
+            name: member.name,
+            username: member.username,
+          })),
+          groupChat,
+        };
+      }
+    );
+    // console.log("Transformed chats:", transformedChats);
     return res.status(200).json({
       success: true,
       chats: transformedChats,
@@ -97,12 +103,13 @@ const getMyChats = async (req, res) => {
 
 const myGroups = async (req, res) => {
   try {
+    // console.log("myGroups called with user ID:", req.id);
     const chats = await Chat.find({
       members: { $in: [req.id] },
       groupChat: true,
       creator: req.id,
     }).populate("members", "name username");
-
+    // console.log("Chats found:", chats);
     const transformedChats = chats.map(
       ({ _id, groupName, members, groupChat }) => {
         return {
@@ -118,10 +125,10 @@ const myGroups = async (req, res) => {
         };
       }
     );
-
+    // console.log("Transformed chats:", transformedChats);
     return res.status(200).json({
       success: true,
-      chats: transformedChats,
+      chats
     });
   } catch (error) {
     console.error("myGroups error:", error);
@@ -313,8 +320,8 @@ const leaveGroup = async (req, res) => {
 const sendAttachments = async (req, res) => {
   try {
     const { chatId } = req.body;
-    console.log("sendAttachments called with chatId:", chatId);
-    console.log("req.files:", req.files);
+    // console.log("sendAttachments called with chatId:", chatId);
+    // console.log("req.files:", req.files);
 
     const [chat, me] = await Promise.all([
       Chat.findById(chatId),
@@ -357,12 +364,15 @@ const sendAttachments = async (req, res) => {
     };
 
     const message = await Message.create(messageForDb);
-
-    emitEvent(req, NEW_ATTACHMENT, chat.members, {
+    // console.log("Message created:", message);
+    const membersArray = Array.isArray(chat.members)
+      ? chat.members
+      : [chat.members];
+    emitEvent(req, NEW_MESSAGE, membersArray, {
       message: messageForRealTime,
       chatId,
     });
-    emitEvent(req, NEW_MESSAGE_ALERT, chat.members, { chatId });
+    emitEvent(req, NEW_MESSAGE_ALERT, membersArray, { chatId });
 
     res.status(200).json({
       success: true,
@@ -380,7 +390,7 @@ const sendAttachments = async (req, res) => {
 const getChatDetails = async (req, res) => {
   try {
     if (req.query.populate === "true") {
-      //   console.log("true");
+        console.log("true");
       const chat = await Chat.findById(req.params.id)
         .populate("members", "name username")
         .lean();
@@ -402,7 +412,7 @@ const getChatDetails = async (req, res) => {
         chat,
       });
     } else {
-      //   console.log("false");
+        console.log("false");
       const chat = await Chat.findById(req.params.id);
       if (!chat) {
         return res.status(404).json({

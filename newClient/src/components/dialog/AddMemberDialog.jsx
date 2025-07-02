@@ -18,10 +18,12 @@ import {
 } from "@mui/material";
 import { sampleUsers } from "../data/sampleData";
 import UserList from "../shared/UserList";
-import CloseIcon from "@mui/icons-material/Close";
-import SearchIcon from "@mui/icons-material/Search";
-import GroupAddIcon from "@mui/icons-material/GroupAdd";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import {
+  X as CloseIcon,
+  Search as SearchIcon,
+  UserPlus as PersonAddIcon,
+  Users as GroupAddIcon,
+} from "lucide-react"; // lucide-react icons
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -102,7 +104,7 @@ function AddMemberDialog({ addMember, isLoadingMember, chatId }) {
             boxShadow: `0 4px 14px rgba(25, 118, 210, 0.3)`, // alpha(primary.main, 0.3)
           }}
         >
-          <GroupAddIcon />
+          <GroupAddIcon size={28} />
         </Avatar>
       </Box>
 
@@ -131,7 +133,7 @@ function AddMemberDialog({ addMember, isLoadingMember, chatId }) {
             color: "#9e9e9e", // grey[500]
           }}
         >
-          <CloseIcon />
+          <CloseIcon size={20} />
         </IconButton>
       </DialogTitle>
 
@@ -156,7 +158,7 @@ function AddMemberDialog({ addMember, isLoadingMember, chatId }) {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon color="action" />
+                <SearchIcon color="#757575" size={18} />
               </InputAdornment>
             ),
           }}
@@ -274,7 +276,7 @@ function AddMemberDialog({ addMember, isLoadingMember, chatId }) {
           color="primary"
           disabled={isLoadingMember || selectedMembers.length === 0}
           onClick={addFriendSubmitHandler}
-          startIcon={<PersonAddIcon />}
+          startIcon={<PersonAddIcon size={18} />}
           sx={{
             borderRadius: 2,
             px: 3,

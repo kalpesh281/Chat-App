@@ -69,17 +69,18 @@ function MessageComponent({ message, user }) {
             <Box key={index}>
               <a
                 href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                download
                 style={{
                   textDecoration: "none",
                   color: "inherit",
                   display: "inline-block",
                   marginBottom: "5px",
                 }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.open(url, "_blank", "noopener,noreferrer");
+                }}
               >
-                <RenderAttatchment file={file} url={url} />
+                <RenderAttatchment file={file} url={url} disableLink={true} />
               </a>
             </Box>
           );

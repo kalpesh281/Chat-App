@@ -14,11 +14,9 @@ import {
   Paper,
   Divider,
 } from "@mui/material";
+import { X as CloseIcon, Bell as NotificationsIcon } from "lucide-react"; // lucide-react icons
 import {
-  Close as CloseIcon,
-  Notifications as NotificationsIcon,
-} from "@mui/icons-material";
-import {
+
   useAcceptFriendRequestMutation,
   useGetNotificationQuery,
 } from "../../redux/api/api";
@@ -26,6 +24,15 @@ import { useErrors } from "../../hooks/hooks";
 import { useDispatch, useSelector } from "react-redux";
 import { setIsNotification } from "../../redux/reducers/miscSlice";
 import toast from "react-hot-toast";
+
+
+function Notification() {
+  const dispatch = useDispatch();
+  const isNotification = useSelector((state) => state.misc.isNotification);
+  const { isLoading, error, data, isError } = useGetNotificationQuery("");
+
+  const [acceptRequest] = useAcceptFriendRequestMutation();
+
 
 function Notification() {
   const dispatch = useDispatch();
@@ -93,7 +100,7 @@ function Notification() {
             gap: 1,
           }}
         >
-          <NotificationsIcon fontSize="small" />
+          <NotificationsIcon size={18} />
           Notifications
         </Typography>
 
@@ -108,7 +115,7 @@ function Notification() {
             },
           }}
         >
-          <CloseIcon fontSize="small" />
+          <CloseIcon size={18} />
         </IconButton>
       </Box>
 
@@ -123,7 +130,12 @@ function Notification() {
               color: "text.secondary",
             }}
           >
-            <NotificationsIcon sx={{ fontSize: 40, opacity: 0.3, mb: 1 }} />
+
+            <NotificationsIcon
+              size={40}
+              style={{ opacity: 0.3, marginBottom: 8 }}
+            />
+
             <Typography>Loading notifications...</Typography>
           </Box>
         ) : data?.requests?.length > 0 ? (
@@ -189,7 +201,10 @@ function Notification() {
               color: "text.secondary",
             }}
           >
-            <NotificationsIcon sx={{ fontSize: 40, opacity: 0.3, mb: 1 }} />
+            <NotificationsIcon
+              size={40}
+              style={{ opacity: 0.3, marginBottom: 8 }}
+            />
             <Typography>No notifications available</Typography>
           </Box>
         )}

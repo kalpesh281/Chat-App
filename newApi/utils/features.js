@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import { v2 as cloudinary } from "cloudinary";
 import { v4 as uuid } from "uuid";
 
+import { getSockets } from "../lib/helper.js"; // Adjust the import path as necessary
+
 dotenv.config();
 
 cloudinary.config({
@@ -21,8 +23,11 @@ const connectDB = async () => {
   }
 };
 
-const emitEvent = (req, event, data, users) => {
-  console.log(`Emitting event: ${event} with data:`, data);
+// Change parameter order to: (req, event, users, data)
+const emitEvent = (req, event, users, data) => {
+  const io = req.app.get("io");
+  const userSocket = getSockets(users);
+  io.to(userSocket).emit(event, data);
 };
 
 const deleteFilesFromCloudinary = async (files) => {
