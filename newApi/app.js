@@ -160,6 +160,7 @@ connectDB();
 // =======================
 // API Routes
 // =======================
+
 app.use("/api/v1/user", UserAuthRoute);
 app.use("/api/v1/chat", ChatRoute);
 app.use("/api/v1/admin", AdminRoute);

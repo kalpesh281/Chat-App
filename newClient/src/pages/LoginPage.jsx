@@ -15,6 +15,7 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/material";
+
 import {
   Lock,
   UserPlus,
@@ -25,6 +26,7 @@ import {
   MessageCircle,
   LogIn,
 } from "lucide-react"; // lucide-react icons
+
 import { useInputValidation } from "6pp";
 import { usernameValidator } from "../utils/validators";
 import { useDispatch, useSelector } from "react-redux";
@@ -97,6 +99,7 @@ function LoginPage() {
       password.clear && password.clear();
       bio.clear && bio.clear();
       // Redirect to home page after signup
+
     } catch (error) {
       toast.error(error || "Signup failed");
     }
@@ -319,7 +322,9 @@ function LoginPage() {
               },
             }}
           >
+
             <MessageCircle
+
               sx={{
                 color: "white",
                 fontSize: 65,
@@ -459,7 +464,10 @@ function LoginPage() {
               height: 56,
             }}
           >
+
             {isLogin ? <Lock size={28} /> : <UserPlus size={28} />}
+
+
           </Avatar>
 
           <Typography

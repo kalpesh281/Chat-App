@@ -39,9 +39,12 @@ function App() {
             {/* User Routes */}
             <Route
               element={
+
                 <SocketProvider>
                   <ProtectedRoute user={isAuthenticated} requiredRole="user" />
                 </SocketProvider>
+
+
               }
             >
               <Route path="/" element={<HomePage />} />

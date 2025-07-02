@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { X as CloseIcon, Bell as NotificationsIcon } from "lucide-react"; // lucide-react icons
 import {
+
   useAcceptFriendRequestMutation,
   useGetNotificationQuery,
 } from "../../redux/api/api";
@@ -23,6 +24,15 @@ import { useErrors } from "../../hooks/hooks";
 import { useDispatch, useSelector } from "react-redux";
 import { setIsNotification } from "../../redux/reducers/miscSlice";
 import toast from "react-hot-toast";
+
+
+function Notification() {
+  const dispatch = useDispatch();
+  const isNotification = useSelector((state) => state.misc.isNotification);
+  const { isLoading, error, data, isError } = useGetNotificationQuery("");
+
+  const [acceptRequest] = useAcceptFriendRequestMutation();
+
 
 function Notification() {
   const dispatch = useDispatch();
@@ -120,10 +130,12 @@ function Notification() {
               color: "text.secondary",
             }}
           >
+
             <NotificationsIcon
               size={40}
               style={{ opacity: 0.3, marginBottom: 8 }}
             />
+
             <Typography>Loading notifications...</Typography>
           </Box>
         ) : data?.requests?.length > 0 ? (

@@ -55,8 +55,10 @@ const UserList = ({
                 transition: "all 0.2s",
                 border: isAdded ? "2px solid white" : "2px solid transparent",
                 "&:hover": {
+
                   bgcolor: isAdded ? "red" : "rgba(25, 118, 210, 0.15)",
                   color: "white",
+
                   transform: "scale(1.05)",
                 },
               }}
