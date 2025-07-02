@@ -15,8 +15,11 @@ import {
 } from "../utils/features.js";
 
 const newGroupChat = async (req, res) => {
+  console.log("newGroupChat called with body:", req.body);
   try {
     const { groupName, members } = req.body;
+
+    console.log("Group Data:", groupName, members);
 
     if (!groupName || !members || members.length === 0) {
       return res.status(400).json({
@@ -122,10 +125,10 @@ const myGroups = async (req, res) => {
         };
       }
     );
-    console.log("Transformed chats:", transformedChats);
+    // console.log("Transformed chats:", transformedChats);
     return res.status(200).json({
       success: true,
-      chats: transformedChats,
+      chats
     });
   } catch (error) {
     console.error("myGroups error:", error);
@@ -387,7 +390,7 @@ const sendAttachments = async (req, res) => {
 const getChatDetails = async (req, res) => {
   try {
     if (req.query.populate === "true") {
-      //   console.log("true");
+        console.log("true");
       const chat = await Chat.findById(req.params.id)
         .populate("members", "name username")
         .lean();
@@ -409,7 +412,7 @@ const getChatDetails = async (req, res) => {
         chat,
       });
     } else {
-      //   console.log("false");
+        console.log("false");
       const chat = await Chat.findById(req.params.id);
       if (!chat) {
         return res.status(404).json({

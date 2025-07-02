@@ -34,7 +34,7 @@ const AppLayout = () => (WrappedComponent) => {
     // Defensive selector to avoid crash if state.chat is undefined
     const { newMessageAlert } = useSelector((state) => state.chat);
 
-    console.log("New message alert:", newMessageAlert);
+    // console.log("New message alert:", newMessageAlert);
 
     useErrors([
       {

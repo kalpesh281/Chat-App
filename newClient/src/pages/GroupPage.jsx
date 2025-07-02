@@ -10,7 +10,6 @@ import {
   Paper,
   Avatar,
   Divider,
-  Chip,
   alpha,
 } from "@mui/material";
 import React, { memo, useState } from "react";
@@ -31,7 +30,7 @@ import { Suspense } from "react";
 import ConfirmDeleteDialog from "../components/dialog/ConfirmDeleteDialog";
 import AddMemberDialog from "../components/dialog/AddMemberDialog";
 import UserList from "../components/shared/UserList";
-import { useMyGroupsQuery } from "../redux/api/api";
+import { useChatDetailsQuery, useMyGroupsQuery } from "../redux/api/api";
 import { useErrors } from "../hooks/hooks";
 import Loader from "../components/layout/Loader";
 
@@ -41,32 +40,45 @@ const GroupIcon = Users;
 function GroupPage() {
   const [isEdit, setIsEdit] = useState(false);
   const [groupName, setGroupName] = useState("");
+  const [member, setMember] = useState([]);
   const [groupNameUpdatedValue, setGroupNameUpdatedValue] = useState("");
   const [confirmDeleteDialog, setConfirmDeleteDialog] = useState(false);
   const navigate = useNavigate();
 
-  const myGroups = useMyGroupsQuery("");
+  const chatId = useSearchParams()[0].get("group");
 
-  console.log("My Groups:", myGroups);
+  const myGroups = useMyGroupsQuery("");
+  const groupDetails = useChatDetailsQuery(
+    {
+      chatId,
+      populate: true, // <-- use boolean true, not string "true"
+    },
+    {
+      skip: !chatId,
+    }
+  );
+
+  // console.log("My Groups:", myGroups.data);
+  console.log("Group Details:", groupDetails.data);
 
   const handleBackClick = () => {
     navigate("/");
   };
 
-  const chatId = useSearchParams()[0].get("group");
-
   useEffect(() => {
-    if (chatId) {
-      setGroupName(`Group Name ${chatId}`);
-      setGroupNameUpdatedValue(`Group Name ${chatId}`);
+    if (groupDetails.data) {
+      setGroupName(groupDetails.data.chat.groupName);
+      setGroupNameUpdatedValue(groupDetails.data.chat.groupName);
+      setMember(groupDetails.data.chat.members);
     }
 
     return () => {
       setGroupName("");
       setGroupNameUpdatedValue("");
+      setMember([]);
       setIsEdit(false);
     };
-  }, [chatId]);
+  }, [groupDetails.data]);
 
   const updateGroupName = () => {
     setIsEdit(false);
@@ -101,9 +113,15 @@ function GroupPage() {
       isError: myGroups.isError,
       error: myGroups.error,
     },
+    {
+      isError: myGroups.isError,
+      error: myGroups.error,
+    },
   ];
 
   useErrors(errors);
+
+  const My_groups = myGroups.data?.chats || []; // handle undefined safely
 
   const IconsBtns = (
     <Tooltip title="Back" arrow placement="right">
@@ -146,7 +164,7 @@ function GroupPage() {
           left: 0,
           width: "6px",
           height: "100%",
-          background: "#1976d2", // primary.main
+          background: "#1976d2",
           borderTopLeftRadius: 3,
           borderBottomLeftRadius: 3,
         },
@@ -169,7 +187,7 @@ function GroupPage() {
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 2,
                   "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#4791db", // primary.light
+                    borderColor: "#4791db",
                   },
                 },
               }}
@@ -179,10 +197,10 @@ function GroupPage() {
               onClick={updateGroupName}
               sx={{
                 ml: 2,
-                color: "#1976d2", // primary.main
-                backgroundColor: "rgba(71, 145, 219, 0.1)", // alpha(primary.light, 0.1)
+                color: "#1976d2",
+                backgroundColor: "rgba(71, 145, 219, 0.1)",
                 "&:hover": {
-                  backgroundColor: "rgba(71, 145, 219, 0.2)", // alpha(primary.light, 0.2)
+                  backgroundColor: "rgba(71, 145, 219, 0.2)",
                 },
                 transition: "all 0.2s ease",
               }}
@@ -195,10 +213,10 @@ function GroupPage() {
             <Stack direction="row" alignItems="center" spacing={2}>
               <Avatar
                 sx={{
-                  bgcolor: "#1976d2", // primary.main
+                  bgcolor: "#1976d2",
                   width: 48,
                   height: 48,
-                  boxShadow: `0 4px 12px rgba(25, 118, 210, 0.3)`, // primary.main with alpha
+                  boxShadow: `0 4px 12px rgba(25, 118, 210, 0.3)`,
                 }}
               >
                 <Users size={28} />
@@ -208,34 +226,21 @@ function GroupPage() {
                   variant="h5"
                   sx={{
                     fontWeight: "bold",
-                    color: "#212121", // text.primary
+                    color: "#212121",
                   }}
                 >
                   {groupName}
                 </Typography>
-                <Chip
-                  label="Active"
-                  size="small"
-                  sx={{
-                    bgcolor: "rgba(46, 125, 50, 0.1)", // alpha(success.main, 0.1)
-                    color: "#1b5e20", // success.dark
-                    borderRadius: "4px",
-                    fontSize: "0.75rem",
-                    height: 24,
-                    mt: 0.5,
-                    fontWeight: 500,
-                  }}
-                />
               </Stack>
             </Stack>
             <Tooltip title="Edit group name" arrow>
               <IconButton
                 onClick={() => setIsEdit(true)}
                 sx={{
-                  color: "#757575", // text.secondary
+                  color: "#757575",
                   "&:hover": {
-                    backgroundColor: "rgba(25, 118, 210, 0.1)", // alpha(primary.main, 0.1)
-                    color: "#1976d2", // primary.main
+                    backgroundColor: "rgba(25, 118, 210, 0.1)",
+                    color: "#1976d2",
                   },
                   transition: "all 0.2s ease",
                 }}
@@ -339,8 +344,8 @@ function GroupPage() {
           width: "20%",
           height: "100%",
           overflow: "auto",
-          borderRight: `1px solid rgba(224, 224, 224, 0.7)`, // alpha(divider, 0.7)
-          bgcolor: "#ffffff", // background.paper
+          borderRight: `1px solid rgba(224, 224, 224, 0.7)`,
+          bgcolor: "#ffffff",
           boxShadow: "inset -5px 0 15px rgba(0, 0, 0, 0.03)",
           p: 2,
         }}
@@ -351,7 +356,7 @@ function GroupPage() {
           sx={{
             px: 1.5,
             py: 1,
-            color: "#757575", // text.secondary
+            color: "#757575",
             display: "flex",
             alignItems: "center",
             gap: 1,
@@ -361,7 +366,7 @@ function GroupPage() {
           My Groups
         </Typography>
         <Divider sx={{ mb: 2, opacity: 0.6 }} />
-        <GroupList myGroups={sampleChats} chatId={chatId} />
+        <GroupList myGroups={My_groups} chatId={chatId} />
       </Box>
 
       <Box
@@ -401,97 +406,99 @@ function GroupPage() {
             zIndex: 1,
           }}
         >
-          {groupName && (
-            <>
-              <Stack
-                direction="row"
-                spacing={2}
-                alignItems="center"
-                sx={{ width: "100%", mb: 4 }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  {IconsBtns}
-                </Box>
-                <Box sx={{ flexGrow: 1 }}>{GroupNameSection}</Box>
-              </Stack>
+          {groupDetails.data &&
+            groupDetails.data.chat &&
+            groupDetails.data.chat.groupName && (
+              <>
+                <Stack
+                  direction="row"
+                  spacing={2}
+                  alignItems="center"
+                  sx={{ width: "100%", mb: 4 }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    {IconsBtns}
+                  </Box>
+                  <Box sx={{ flexGrow: 1 }}>{GroupNameSection}</Box>
+                </Stack>
 
-              {/* Members section */}
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 3,
-                  width: "100%",
-                  borderRadius: 3,
-                  bgcolor: "#ffffff",
-                  mb: 3,
-                  position: "relative",
-                  maxHeight: "400px", // Fixed height to enable scrolling
-                  overflow: "hidden", // Hide overflow
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
-                <Typography
-                  variant="h6"
+                {/* Members section */}
+                <Paper
+                  elevation={0}
                   sx={{
-                    color: "#212121",
-                    mb: 2,
-                    fontWeight: 600,
+                    p: 3,
+                    width: "100%",
+                    borderRadius: 3,
+                    bgcolor: "#ffffff",
+                    mb: 3,
+                    position: "relative",
+                    maxHeight: "400px", // Fixed height to enable scrolling
+                    overflow: "hidden", // Hide overflow
                     display: "flex",
-                    alignItems: "center",
-                    gap: 1,
+                    flexDirection: "column",
                   }}
                 >
-                  Members
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      color: "#212121",
+                      mb: 2,
+                      fontWeight: 600,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
+                  >
+                    Members
+                  </Typography>
+                  <Divider sx={{ mb: 2 }} />
 
-                <Box
-                  sx={{
-                    overflowY: "auto",
-                    flex: 1,
-                    pr: 1, // Add a bit of padding to account for scrollbar
-                    "&::-webkit-scrollbar": {
-                      width: "8px",
-                    },
-                    "&::-webkit-scrollbar-thumb": {
-                      backgroundColor: "rgba(0,0,0,0.1)",
-                      borderRadius: "4px",
-                    },
-                    "&::-webkit-scrollbar-track": {
-                      backgroundColor: "rgba(0,0,0,0.05)",
-                    },
-                  }}
-                >
-                  {sampleUsers.map((i) => (
-                    <UserList
-                      user={i}
-                      key={i._id}
-                      handler={removeMemberHandler}
-                      isAdded
-                      styling={{
-                        cursor: "pointer",
-                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
-                        padding: "8px 16px",
-                        borderRadius: 2,
-                        backgroundColor: "rgba(255, 255, 255, 0.8)",
-                        mb: 3,
-                        borderLeft: "3px solid rgba(62, 105, 184, 0.5)", // Green border indicating member
-                        transition: "all 0.2s ease-in-out",
-                        "&:hover": {
-                          backgroundColor: "rgba(255, 255, 255, 0.9)",
-                          transform: "translateY(-2px)",
-                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                        },
-                      }}
-                    />
-                  ))}
-                </Box>
-              </Paper>
+                  <Box
+                    sx={{
+                      overflowY: "auto",
+                      flex: 1,
+                      pr: 1, // Add a bit of padding to account for scrollbar
+                      "&::-webkit-scrollbar": {
+                        width: "8px",
+                      },
+                      "&::-webkit-scrollbar-thumb": {
+                        backgroundColor: "rgba(0,0,0,0.1)",
+                        borderRadius: "4px",
+                      },
+                      "&::-webkit-scrollbar-track": {
+                        backgroundColor: "rgba(0,0,0,0.05)",
+                      },
+                    }}
+                  >
+                    {groupDetails.data.chat.members.map((i) => (
+                      <UserList
+                        user={i}
+                        key={i._id}
+                        handler={removeMemberHandler}
+                        isAdded
+                        styling={{
+                          cursor: "pointer",
+                          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
+                          padding: "8px 16px",
+                          borderRadius: 2,
+                          backgroundColor: "rgba(255, 255, 255, 0.8)",
+                          mb: 3,
+                          borderLeft: "3px solid rgba(62, 105, 184, 0.5)", // Green border indicating member
+                          transition: "all 0.2s ease-in-out",
+                          "&:hover": {
+                            backgroundColor: "rgba(255, 255, 255, 0.9)",
+                            transform: "translateY(-2px)",
+                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                          },
+                        }}
+                      />
+                    ))}
+                  </Box>
+                </Paper>
 
-              {ButtonGroup}
-            </>
-          )}
+                {ButtonGroup}
+              </>
+            )}
         </Box>
 
         {isAddMember && (
@@ -552,8 +559,20 @@ const GroupList = ({ w = "100%", myGroups = [], chatId }) => {
 };
 
 const GroupListItem = memo(({ group, chatId }) => {
-  const { _id, name, avatar } = group;
+  const { _id, groupName } = group;
   const isSelected = chatId === _id;
+
+  // Generate color and first letter for group avatar (like ChatItem)
+  function stringToColor(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = Math.abs(hash) % 360;
+    return `hsl(${hue}, 70%, 55%)`;
+  }
+  const firstLetter = groupName ? groupName.charAt(0).toUpperCase() : "";
+  const avatarColor = stringToColor(groupName || "");
 
   return (
     <Link
@@ -566,54 +585,71 @@ const GroupListItem = memo(({ group, chatId }) => {
       style={{ textDecoration: "none" }}
     >
       <Paper
-        elevation={isSelected ? 1 : 0}
+        elevation={isSelected ? 2 : 0}
         sx={{
-          p: 0.75, // Reduced padding
-          borderRadius: 1, // Smaller border radius
-          backgroundColor: isSelected
-            ? "rgba(25, 118, 210, 0.08)" // alpha(primary.main, 0.08)
+          p: 1.2,
+          borderRadius: 2,
+          background: isSelected
+            ? "linear-gradient(90deg, #e3f0ff 0%, #eaf6ff 100%)"
             : "transparent",
           borderLeft: isSelected
-            ? `3px solid #1976d2` // primary.main
-            : "3px solid transparent",
-          transition: "all 0.2s ease",
-          "&:hover": {
-            backgroundColor: isSelected
-              ? "rgba(25, 118, 210, 0.12)" // alpha(primary.main, 0.12)
-              : "rgba(0, 0, 0, 0.04)", // alpha(action.hover, 0.1)
-            transform: "translateX(2px)", // Reduced transform
-          },
+            ? "4px solid #1976d2"
+            : "4px solid transparent",
+          boxShadow: isSelected
+            ? "0 4px 16px 0 rgba(25, 118, 210, 0.10)"
+            : "none",
+          transition: "all 0.18s cubic-bezier(.4,0,.2,1)",
+          cursor: "pointer",
         }}
       >
         <Stack
           direction="row"
           alignItems="center"
-          spacing={1} // Reduced spacing
+          spacing={1.5}
           sx={{ width: "100%" }}
         >
-          <AvatarCard avatar={avatar} />
+          <Box
+            sx={{
+              width: 40,
+              height: 40,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: "8px",
+              backgroundColor: avatarColor,
+              color: "white",
+              fontWeight: 700,
+              fontSize: "1.1rem",
+              userSelect: "none",
+              boxShadow: "0 1px 4px rgba(25, 118, 210, 0.08)",
+              mr: 1,
+            }}
+          >
+            {firstLetter}
+          </Box>
           <Typography
             variant="body2"
             sx={{
-              fontWeight: isSelected ? 600 : 500,
-              fontSize: "0.85rem", // Smaller font size
-              color: isSelected ? "#1976d2" : "#212121", // text.primary
+              fontWeight: isSelected ? 700 : 500,
+              fontSize: "1rem",
+              color: isSelected ? "#1976d2" : "#212121",
               flexGrow: 1,
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
+              letterSpacing: 0.1,
             }}
           >
-            {name}
+            {groupName}
           </Typography>
           {isSelected && (
             <Box
               sx={{
-                width: 6, // Smaller indicator
-                height: 6,
+                width: 8,
+                height: 8,
                 borderRadius: "50%",
-                bgcolor: "#1976d2", // primary.main
-                boxShadow: `0 0 0 2px rgba(25, 118, 210, 0.2)`, // Smaller shadow
+                bgcolor: "#1976d2",
+                boxShadow: `0 0 0 2px rgba(25, 118, 210, 0.2)`,
               }}
             />
           )}

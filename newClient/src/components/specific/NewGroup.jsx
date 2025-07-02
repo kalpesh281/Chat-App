@@ -17,7 +17,10 @@ import { X as CloseIcon, Users as GroupIcon } from "lucide-react";
 
 import UserList from "../shared/UserList";
 import { useDispatch, useSelector } from "react-redux";
-import { useAvailableFriendsQuery } from "../../redux/api/api";
+import {
+  useAvailableFriendsQuery,
+  useNewGroupMutation,
+} from "../../redux/api/api";
 import { useErrors } from "../../hooks/hooks";
 import { setIsNewGroup } from "../../redux/reducers/miscSlice";
 
@@ -29,6 +32,8 @@ function NewGroup({ onClose }) {
 
   const { isError, isLoading, error, data } = useAvailableFriendsQuery("");
   const { isNewGroup } = useSelector((state) => state.misc);
+
+  const [newGroup, { isLoading: isNewGroupLoading }] = useNewGroupMutation();
 
   console.log("Available friends data:", data);
   const handleClose = () => {
@@ -56,7 +61,11 @@ function NewGroup({ onClose }) {
     if (groupName.trim() && selectedUsers.length >= 2) {
       console.log("Creating group with name:", groupName);
       console.log("Selected users:", selectedUsers);
-      //Create group logic here
+      newGroup({
+        groupName,
+        members: selectedUsers.map((user) => user._id),
+      });
+
       handleClose();
     }
   };
@@ -252,7 +261,7 @@ function NewGroup({ onClose }) {
         <Button
           variant="contained"
           fullWidth
-          disabled={!isButtonEnabled}
+          disabled={isNewGroupLoading}
           onClick={handleCreateGroup}
           sx={{
             mt: 2,
