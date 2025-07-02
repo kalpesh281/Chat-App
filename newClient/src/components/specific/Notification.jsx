@@ -16,7 +16,6 @@ import {
 } from "@mui/material";
 import { X as CloseIcon, Bell as NotificationsIcon } from "lucide-react"; // lucide-react icons
 import {
-
   useAcceptFriendRequestMutation,
   useGetNotificationQuery,
 } from "../../redux/api/api";
@@ -24,15 +23,6 @@ import { useErrors } from "../../hooks/hooks";
 import { useDispatch, useSelector } from "react-redux";
 import { setIsNotification } from "../../redux/reducers/miscSlice";
 import toast from "react-hot-toast";
-
-
-function Notification() {
-  const dispatch = useDispatch();
-  const isNotification = useSelector((state) => state.misc.isNotification);
-  const { isLoading, error, data, isError } = useGetNotificationQuery("");
-
-  const [acceptRequest] = useAcceptFriendRequestMutation();
-
 
 function Notification() {
   const dispatch = useDispatch();
@@ -50,12 +40,13 @@ function Notification() {
       if (res?.data?.success) {
         console.log("Use Here Socket ");
         toast.success(res.data.message);
+      } else {
+        toast.error(
+          res?.error?.data?.message ||
+            res?.error?.message ||
+            "Failed to update request"
+        );
       }
-      toast.error(
-        res?.error?.data?.message ||
-          res?.error?.message ||
-          "Failed to update request"
-      );
     } catch (error) {
       console.log(error);
       toast.error(
@@ -130,7 +121,6 @@ function Notification() {
               color: "text.secondary",
             }}
           >
-
             <NotificationsIcon
               size={40}
               style={{ opacity: 0.3, marginBottom: 8 }}

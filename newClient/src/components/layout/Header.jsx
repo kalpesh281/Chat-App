@@ -25,9 +25,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../redux/reducers/authSlice";
 import toast from "react-hot-toast";
 
-import { setIsNotification, setIsSearch, setIsNewGroup } from "../../redux/reducers/miscSlice";
+import {
+  setIsNotification,
+  setIsSearch,
+  setIsNewGroup,
+} from "../../redux/reducers/miscSlice";
 import { resetNotificationCount } from "../../redux/reducers/chatSlice";
-
 
 const SearchDialog = lazy(() => import("../specific/Search"));
 const NotificationsDialog = lazy(() => import("../specific/Notification"));
@@ -36,15 +39,15 @@ const NewGroupDialog = lazy(() => import("../specific/NewGroup"));
 function Header() {
   const [isMobile, setIsMobile] = useState(false);
 
-  const [isNewGroup, setIsNewGroup] = useState(false);
-
-
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-
-  const { isSearch, isNotification, isNewGroup } = useSelector((state) => state.misc);
   const { notificationCount } = useSelector((state) => state.chat);
+  const {
+    isSearch,
+    isNotification,
+    isNewGroup: isNewGroupFromStore,
+  } = useSelector((state) => state.misc);
 
   const handleMobile = () => {
     setIsMobile((prev) => !prev);
@@ -66,7 +69,6 @@ function Header() {
     dispatch(setIsNotification(true));
 
     dispatch(resetNotificationCount());
-
   };
   const logoutHandler = async () => {
     try {
@@ -208,14 +210,12 @@ function Header() {
       )}
       {isNotification && (
         <Suspense fallback={<Backdrop open={true} />}>
-
           <NotificationsDialog
             onClose={() => dispatch(setIsNotification(false))}
           />
-
         </Suspense>
       )}
-      {isNewGroup && (
+      {isNewGroupFromStore && (
         <Suspense fallback={<Backdrop open={true} />}>
           <NewGroupDialog onClose={() => dispatch(setIsNewGroup(false))} />
         </Suspense>
@@ -288,7 +288,4 @@ const IconBtn = ({ title, icon, onClick, value }) => {
   );
 };
 
-
-
 export default Header;
-
