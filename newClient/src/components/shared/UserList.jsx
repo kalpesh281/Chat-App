@@ -11,7 +11,7 @@ import {
 import {
   UserPlus as PersonAddIcon,
   UserMinus as PersonRemoveIcon,
-} from "lucide-react"; // lucide-react icons
+} from "lucide-react";
 import React, { memo } from "react";
 
 const UserList = ({
@@ -50,12 +50,13 @@ const UserList = ({
               disabled={handleIsDisabled}
               onClick={() => handler(user._id)}
               sx={{
-                bgcolor: isAdded ? "#ff4d4f" : "rgba(25, 118, 210, 0.08)",
+                bgcolor: isAdded ? "red" : "rgba(25, 118, 210, 0.08)",
                 color: isAdded ? "white" : "primary.main",
-                opacity: { xs: 1, sm: 0.7 },
                 transition: "all 0.2s",
+                border: isAdded ? "2px solid white" : "2px solid transparent",
                 "&:hover": {
-                  bgcolor: isAdded ? "#f5222d" : "rgba(25, 118, 210, 0.15)",
+                  bgcolor: isAdded ? "red" : "rgba(25, 118, 210, 0.15)",
+                  color: "white",
                   transform: "scale(1.05)",
                 },
               }}

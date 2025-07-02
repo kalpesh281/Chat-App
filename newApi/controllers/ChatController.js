@@ -100,12 +100,13 @@ const getMyChats = async (req, res) => {
 
 const myGroups = async (req, res) => {
   try {
+    // console.log("myGroups called with user ID:", req.id);
     const chats = await Chat.find({
       members: { $in: [req.id] },
       groupChat: true,
       creator: req.id,
     }).populate("members", "name username");
-
+    // console.log("Chats found:", chats);
     const transformedChats = chats.map(
       ({ _id, groupName, members, groupChat }) => {
         return {
@@ -121,7 +122,7 @@ const myGroups = async (req, res) => {
         };
       }
     );
-
+    console.log("Transformed chats:", transformedChats);
     return res.status(200).json({
       success: true,
       chats: transformedChats,

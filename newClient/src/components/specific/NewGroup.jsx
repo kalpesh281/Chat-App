@@ -9,19 +9,26 @@ import {
   Divider,
   TextField,
   Chip,
-  Avatar,
   IconButton,
   Button,
+  Skeleton,
 } from "@mui/material";
-import { X as CloseIcon, Users as GroupIcon } from "lucide-react"; // lucide-react icons
+import { X as CloseIcon, Users as GroupIcon } from "lucide-react";
 import { sampleUsers } from "../data/sampleData";
 import UserList from "../shared/UserList";
+import { useDispatch } from "react-redux";
+import { useAvailableFriendsQuery } from "../../redux/api/api";
+import { useErrors } from "../../hooks/hooks";
 
 function NewGroup({ onClose }) {
+  const dispatch = useDispatch();
   const [groupName, setGroupName] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [loadingUserId, setLoadingUserId] = useState(null);
 
+  const { isError, isLoading, error, data } = useAvailableFriendsQuery("");
+
+  console.log("Available friends data:", data);
   const handleClose = () => {
     if (onClose) onClose();
   };
@@ -29,12 +36,15 @@ function NewGroup({ onClose }) {
   const handleToggleUser = (userId) => {
     setLoadingUserId(userId);
     setSelectedUsers((prev) => {
-      const isSelected = prev.some((u) => u._id === userId);
+      const isSelected = prev.some((u) => u && u._id === userId);
       if (isSelected) {
-        return prev.filter((u) => u._id !== userId);
+        return prev.filter((u) => u && u._id !== userId);
       } else {
-        const userToAdd = sampleUsers.find((u) => u._id === userId);
-        return [...prev, userToAdd];
+        const userToAdd = data.friends.find((u) => u._id === userId);
+        if (userToAdd) {
+          return [...prev, userToAdd];
+        }
+        return prev;
       }
     });
     setLoadingUserId(null);
@@ -53,6 +63,15 @@ function NewGroup({ onClose }) {
   };
 
   const isButtonEnabled = groupName.trim() !== "" && selectedUsers.length >= 2;
+
+  const errors = [
+    {
+      isError,
+      error,
+    },
+  ];
+
+  useErrors(errors);
 
   return (
     <Dialog
@@ -132,26 +151,23 @@ function NewGroup({ onClose }) {
               Selected Members ({selectedUsers.length})
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-              {selectedUsers.map((user) => (
-                <Chip
-                  key={user._id}
-                  avatar={
-                    <Avatar src={user.avatar}>
-                      {user.name[0].toUpperCase()}
-                    </Avatar>
-                  }
-                  label={user.name}
-                  onDelete={() => handleRemoveUser(user._id)}
-                  sx={{
-                    borderRadius: 1.5,
-                    backgroundColor: "rgba(25, 118, 210, 0.08)",
-                    "& .MuiChip-deleteIcon": {
-                      color: "primary.main",
-                      "&:hover": { color: "error.main" },
-                    },
-                  }}
-                />
-              ))}
+              {selectedUsers
+                .filter((user) => user && user._id) // Only map valid users
+                .map((user) => (
+                  <Chip
+                    key={user._id}
+                    label={user?.name || "Unknown"}
+                    onDelete={() => handleRemoveUser(user._id)}
+                    sx={{
+                      borderRadius: 1.5,
+                      backgroundColor: "rgba(25, 118, 210, 0.08)",
+                      "& .MuiChip-deleteIcon": {
+                        color: "primary.main",
+                        "&:hover": { color: "error.main" },
+                      },
+                    }}
+                  />
+                ))}
             </Box>
           </Box>
         )}
@@ -181,41 +197,53 @@ function NewGroup({ onClose }) {
             },
           }}
         >
-          {sampleUsers.map((user) => {
-            const isSelected = selectedUsers.some((u) => u._id === user._id);
-            const isLoading = loadingUserId === user._id;
+          {isLoading ? (
+            <Skeleton variant="circular" width={40} height={40} />
+          ) : Array.isArray(data?.friends) && data.friends.length > 0 ? (
+            data.friends
+              .filter((user) => user && user._id)
+              .map((user) => {
+                const isSelected = selectedUsers.some(
+                  (u) => u && u._id === user._id
+                );
+                const isLoading = loadingUserId === user._id;
 
-            return (
-              <Paper
-                key={user._id}
-                elevation={0}
-                sx={{
-                  mb: 1,
-                  borderRadius: 2,
-                  overflow: "hidden",
-                  transition: "all 0.2s",
-                  backgroundColor: isSelected
-                    ? "rgba(25, 118, 210, 0.08)"
-                    : "rgba(0,0,0,0.01)",
-                  "&:hover": {
-                    backgroundColor: isSelected
-                      ? "rgba(25, 118, 210, 0.12)"
-                      : "rgba(0,0,0,0.04)",
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                  },
-                }}
-              >
-                <UserList
-                  key={user._id}
-                  user={user}
-                  handler={handleToggleUser}
-                  handlerIsLoading={isLoading}
-                  isAdded={isSelected}
-                />
-              </Paper>
-            );
-          })}
+                return (
+                  <Paper
+                    key={user._id}
+                    elevation={0}
+                    sx={{
+                      mb: 1,
+                      borderRadius: 2,
+                      overflow: "hidden",
+                      transition: "all 0.2s",
+                      backgroundColor: isSelected
+                        ? "rgba(25, 118, 210, 0.08)"
+                        : "rgba(0,0,0,0.01)",
+                      "&:hover": {
+                        backgroundColor: isSelected
+                          ? "rgba(25, 118, 210, 0.12)"
+                          : "rgba(0,0,0,0.04)",
+                        transform: "translateY(-2px)",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                      },
+                    }}
+                  >
+                    <UserList
+                      key={user._id}
+                      user={user}
+                      handler={handleToggleUser}
+                      handlerIsLoading={isLoading}
+                      isAdded={isSelected}
+                    />
+                  </Paper>
+                );
+              })
+          ) : (
+            <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+              No friends found.
+            </Typography>
+          )}
         </List>
 
         <Button

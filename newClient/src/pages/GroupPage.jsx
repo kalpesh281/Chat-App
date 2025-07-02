@@ -31,6 +31,9 @@ import { Suspense } from "react";
 import ConfirmDeleteDialog from "../components/dialog/ConfirmDeleteDialog";
 import AddMemberDialog from "../components/dialog/AddMemberDialog";
 import UserList from "../components/shared/UserList";
+import { useMyGroupsQuery } from "../redux/api/api";
+import { useErrors } from "../hooks/hooks";
+import Loader from "../components/layout/Loader";
 
 const isAddMember = false;
 const GroupIcon = Users;
@@ -41,6 +44,10 @@ function GroupPage() {
   const [groupNameUpdatedValue, setGroupNameUpdatedValue] = useState("");
   const [confirmDeleteDialog, setConfirmDeleteDialog] = useState(false);
   const navigate = useNavigate();
+
+  const myGroups = useMyGroupsQuery("");
+
+  console.log("My Groups:", myGroups);
 
   const handleBackClick = () => {
     navigate("/");
@@ -88,6 +95,15 @@ function GroupPage() {
     console.log("Group deleted");
     closeConfirmDeleteGroup();
   };
+
+  const errors = [
+    {
+      isError: myGroups.isError,
+      error: myGroups.error,
+    },
+  ];
+
+  useErrors(errors);
 
   const IconsBtns = (
     <Tooltip title="Back" arrow placement="right">
@@ -301,7 +317,9 @@ function GroupPage() {
     </Stack>
   );
 
-  return (
+  return myGroups.isLoading ? (
+    <Loader />
+  ) : (
     <Box
       sx={{
         display: "flex",

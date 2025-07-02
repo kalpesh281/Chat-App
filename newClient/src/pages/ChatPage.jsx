@@ -24,6 +24,7 @@ import { useInfiniteScrollTop } from "6pp";
 import { setIsFileMenu } from "../redux/reducers/miscSlice";
 import { removeNewMessageAlert } from "../redux/reducers/chatSlice";
 import { motion } from "framer-motion";
+import Loader from "../components/layout/Loader";
 
 function ChatPage({ chatId }) {
   const containerRef = useRef(null);
@@ -104,7 +105,6 @@ function ChatPage({ chatId }) {
     };
   }, [chatId]);
 
-
   const [typingUser, setTypingUser] = useState(null);
 
   const newMessagesHandler = useCallback(
@@ -184,7 +184,6 @@ function ChatPage({ chatId }) {
     prevOldMessagesLength.current = oldMessages.length;
   }, [oldMessages.length, oldMessageChunk.isLoading]);
 
- 
   useEffect(() => {
     if (
       containerRef.current &&
@@ -198,8 +197,7 @@ function ChatPage({ chatId }) {
         }
       }, 50);
     }
-  }, [allMessages.length, shouldScrollToBottom, userTyping]); 
-
+  }, [allMessages.length, shouldScrollToBottom, userTyping]);
 
   useEffect(() => {
     if (userTyping && typingUser && typingUser._id !== user?._id) {
@@ -207,7 +205,7 @@ function ChatPage({ chatId }) {
         if (containerRef.current) {
           containerRef.current.scrollTop = containerRef.current.scrollHeight;
         }
-      }, 100); 
+      }, 100);
     }
   }, [userTyping, typingUser, user?._id]);
 
@@ -322,7 +320,7 @@ function ChatPage({ chatId }) {
   }
 
   return chatDetails.isLoading ? (
-    <Skeleton />
+    <Loader />
   ) : (
     <Box
       sx={{

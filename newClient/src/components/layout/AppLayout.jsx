@@ -16,6 +16,7 @@ import {
   setNewMessageAlert,
 } from "../../redux/reducers/chatSlice";
 import { getOrSaveFromLocalStorage } from "../../libs/features";
+import Loader from "./Loader";
 
 const AppLayout = () => (WrappedComponent) => {
   return (props) => {
@@ -150,9 +151,7 @@ const AppLayout = () => (WrappedComponent) => {
               }}
             >
               {isLoading ? (
-                <Typography variant="body2" color="text.secondary">
-                  Loading chats...
-                </Typography>
+                <Loader />
               ) : (
                 <ChatList
                   chats={data?.chats}
