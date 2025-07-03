@@ -143,9 +143,9 @@ function ChatPage({ chatId }) {
     },
     [chatId, user?._id]
   );
-
+  // console.log("Data", chatDetails.data);
   useEffect(() => {
-    if (!chatDetails.data.chat) {
+    if (!chatDetails.data?.chat) {
       return navigate("/");
     }
   }, [chatDetails.data]);
