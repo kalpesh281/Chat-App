@@ -25,12 +25,14 @@ import { setIsFileMenu } from "../redux/reducers/miscSlice";
 import { removeNewMessageAlert } from "../redux/reducers/chatSlice";
 import { motion } from "framer-motion";
 import Loader from "../components/layout/Loader";
+import { useNavigate } from "react-router-dom";
 
 function ChatPage({ chatId }) {
   const containerRef = useRef(null);
 
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [IamTyping, setIamTyping] = useState(false);
   const [userTyping, setUserTyping] = useState(false);
@@ -141,6 +143,12 @@ function ChatPage({ chatId }) {
     },
     [chatId, user?._id]
   );
+
+  useEffect(() => {
+    if (!chatDetails.data.chat) {
+      return navigate("/");
+    }
+  }, [chatDetails.data]);
 
   const eventHandler = {
     [NEW_MESSAGE]: newMessagesHandler,

@@ -87,9 +87,11 @@ function AddMemberDialog({ chatId }) {
     console.log("Closing Add Member Dialog");
   };
 
-  const filteredMembers = data.friends.filter((member) =>
-    member.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredMembers = data?.friends
+    ? data.friends.filter((member) =>
+        member.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
 
   return (
     <Dialog

@@ -551,15 +551,31 @@ const getMessages = async (req, res) => {
   try {
     const chatId = req.params.id;
     const { page = 1 } = req.query;
+
+    const limit = 20;
+    const skip = (page - 1) * limit;
+
     if (!chatId) {
       return res.status(400).json({
         success: false,
         message: "Chat ID is required",
       });
     }
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      return res.status(404).json({
+        success: false,
+        message: "Chat not found",
+      });
+    }
 
-    const limit = 20;
-    const skip = (page - 1) * limit;
+    if (!chat.members.includes(req.id.toString())) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not a member of this chat",
+      });
+    }
+
     const [messages, totalMessages] = await Promise.all([
       Message.find({ chat: chatId })
         .populate("sender", "name username")

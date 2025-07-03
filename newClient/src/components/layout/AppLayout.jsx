@@ -4,7 +4,7 @@ import Header from "./Header";
 import { Grid, Typography, Box } from "@mui/material";
 import ChatList from "../specific/ChatList";
 import { sampleChats } from "../data/sampleData";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Profile from "../specific/Profile";
 import { useMyChatQuery } from "../../redux/api/api";
 import toast from "react-hot-toast";
@@ -27,6 +27,7 @@ import Loader from "./Loader";
 const AppLayout = () => (WrappedComponent) => {
   return (props) => {
     const params = useParams();
+    const navigate = useNavigate();
     const chatId = params.chatId;
 
     const dispatch = useDispatch();
@@ -72,7 +73,8 @@ const AppLayout = () => (WrappedComponent) => {
 
     const refetchListener = useCallback(() => {
       refetch();
-    }, [refetch]);
+      navigate("/");
+    }, [refetch, navigate]);
     const eventHandler = {
       [NEW_MESSAGE_ALERT]: newMessagesAlertListener,
       [NEW_REQUEST]: newRequestListener,
