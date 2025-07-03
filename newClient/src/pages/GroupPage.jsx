@@ -30,9 +30,14 @@ import { Suspense } from "react";
 import ConfirmDeleteDialog from "../components/dialog/ConfirmDeleteDialog";
 import AddMemberDialog from "../components/dialog/AddMemberDialog";
 import UserList from "../components/shared/UserList";
-import { useChatDetailsQuery, useMyGroupsQuery } from "../redux/api/api";
-import { useErrors } from "../hooks/hooks";
+import {
+  useChatDetailsQuery,
+  useMyGroupsQuery,
+  useRenameGroupMutation,
+} from "../redux/api/api";
+import { useAsyncMutation, useErrors } from "../hooks/hooks";
 import Loader from "../components/layout/Loader";
+import toast from "react-hot-toast";
 
 const isAddMember = false;
 const GroupIcon = Users;
@@ -58,8 +63,12 @@ function GroupPage() {
     }
   );
 
+  const [isLoadingGroupName, , updateGroup] = useAsyncMutation(
+    useRenameGroupMutation
+  );
+
   // console.log("My Groups:", myGroups.data);
-  console.log("Group Details:", groupDetails.data);
+  // console.log("Group Details:", groupDetails.data);
 
   const handleBackClick = () => {
     navigate("/");
@@ -82,7 +91,18 @@ function GroupPage() {
 
   const updateGroupName = () => {
     setIsEdit(false);
-    console.log("Group name updated to:", groupNameUpdatedValue);
+    if (groupNameUpdatedValue.trim() === "") {
+      toast.error("Group name cannot be empty");
+      return;
+    }
+    if (groupNameUpdatedValue === groupName) {
+      toast.error("Group name is unchanged");
+      return;
+    }
+    updateGroup("Updating Group Name...", {
+      chatId,
+      groupName: groupNameUpdatedValue.trim(),
+    });
   };
 
   const openConfirmDeleteGroup = () => {
@@ -195,6 +215,7 @@ function GroupPage() {
             />
             <IconButton
               onClick={updateGroupName}
+              disabled={isLoadingGroupName}
               sx={{
                 ml: 2,
                 color: "#1976d2",

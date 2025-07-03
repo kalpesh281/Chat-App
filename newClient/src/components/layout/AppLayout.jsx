@@ -1,4 +1,3 @@
-
 import React, { use, useCallback, useEffect } from "react";
 
 import Header from "./Header";
@@ -12,7 +11,11 @@ import toast from "react-hot-toast";
 
 import { useErrors, useSocketEvents } from "../../hooks/hooks";
 import { getSocket } from "../../socket";
-import { NEW_MESSAGE_ALERT, NEW_REQUEST } from "../../constant/events";
+import {
+  NEW_MESSAGE_ALERT,
+  NEW_REQUEST,
+  REFETCH_CHATS,
+} from "../../constant/events";
 import { useDispatch, useSelector } from "react-redux";
 import {
   incrementNotificationCount,
@@ -21,12 +24,10 @@ import {
 import { getOrSaveFromLocalStorage } from "../../libs/features";
 import Loader from "./Loader";
 
-
 const AppLayout = () => (WrappedComponent) => {
   return (props) => {
     const params = useParams();
     const chatId = params.chatId;
-
 
     const dispatch = useDispatch();
 
@@ -39,17 +40,12 @@ const AppLayout = () => (WrappedComponent) => {
     // Defensive selector to avoid crash if state.chat is undefined
     const { newMessageAlert } = useSelector((state) => state.chat);
 
-  
-
-
-
     useErrors([
       {
         isError,
         error,
       },
     ]);
-
 
     useEffect(() => {
       getOrSaveFromLocalStorage({
@@ -58,26 +54,29 @@ const AppLayout = () => (WrappedComponent) => {
       });
     }, [newMessageAlert]);
 
-
     const handleDeleteChat = (e, _id, groupChat) => {
       e.preventDefault();
       // console.log("Delete chat with ID:", chatId);
     };
 
-    const newMessagesAlertHandler = useCallback(
+    const newMessagesAlertListener = useCallback(
       (data) => {
         if (data.chatId === chatId) return;
         dispatch(setNewMessageAlert(data));
       },
       [chatId]
     );
-    const newRequestHandler = useCallback(() => {
+    const newRequestListener = useCallback(() => {
       dispatch(incrementNotificationCount());
     }, [dispatch]);
 
+    const refetchListener = useCallback(() => {
+      refetch();
+    }, [refetch]);
     const eventHandler = {
-      [NEW_MESSAGE_ALERT]: newMessagesAlertHandler,
-      [NEW_REQUEST]: newRequestHandler,
+      [NEW_MESSAGE_ALERT]: newMessagesAlertListener,
+      [NEW_REQUEST]: newRequestListener,
+      [REFETCH_CHATS]: refetchListener,
     };
 
     useSocketEvents(socket, eventHandler);
@@ -160,17 +159,12 @@ const AppLayout = () => (WrappedComponent) => {
               }}
             >
               {isLoading ? (
-
                 <Loader />
-
               ) : (
                 <ChatList
                   chats={data?.chats}
                   chatId={chatId}
-
                   newMessagesAlert={newMessageAlert}
-
- 
                 />
               )}
             </Box>
