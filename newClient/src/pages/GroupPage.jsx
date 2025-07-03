@@ -31,18 +31,24 @@ import ConfirmDeleteDialog from "../components/dialog/ConfirmDeleteDialog";
 import AddMemberDialog from "../components/dialog/AddMemberDialog";
 import UserList from "../components/shared/UserList";
 import {
+  useAddGroupMemberMutation,
   useChatDetailsQuery,
   useMyGroupsQuery,
+  useRemoveGroupMemberMutation,
   useRenameGroupMutation,
 } from "../redux/api/api";
 import { useAsyncMutation, useErrors } from "../hooks/hooks";
 import Loader from "../components/layout/Loader";
 import toast from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { setIsAddMember } from "../redux/reducers/miscSlice";
 
-const isAddMember = false;
 const GroupIcon = Users;
 
 function GroupPage() {
+  const dispatch = useDispatch();
+  const isAddMember = useSelector((state) => state.misc.isAddMember);
+
   const [isEdit, setIsEdit] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [member, setMember] = useState([]);
@@ -65,6 +71,11 @@ function GroupPage() {
 
   const [isLoadingGroupName, , updateGroup] = useAsyncMutation(
     useRenameGroupMutation
+  );
+
+  //remove group member
+  const [isLoadingRemoveGroupMember, , removeGroupMember] = useAsyncMutation(
+    useRemoveGroupMemberMutation
   );
 
   // console.log("My Groups:", myGroups.data);
@@ -116,11 +127,16 @@ function GroupPage() {
   };
 
   const handleAddGroup = () => {
-    console.log("Add member to group");
+    dispatch(setIsAddMember(true));
   };
 
-  const removeMemberHandler = (id) => {
-    console.log("Remove member with ID:", id);
+  const removeMemberHandler = (userId) => {
+    console.log("Removing member with ID:", userId);
+    if (!userId) {
+      toast.error("Invalid user ID");
+      return;
+    }
+    removeGroupMember("Removing member...", { chatId, userId });
   };
 
   const deleteHandle = () => {
@@ -524,7 +540,7 @@ function GroupPage() {
 
         {isAddMember && (
           <Suspense fallback={<Backdrop open={true} />}>
-            <AddMemberDialog />
+            <AddMemberDialog chatId={chatId} />
           </Suspense>
         )}
 

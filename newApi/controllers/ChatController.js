@@ -103,13 +103,13 @@ const getMyChats = async (req, res) => {
 
 const myGroups = async (req, res) => {
   try {
-    // console.log("myGroups called with user ID:", req.id);
+    console.log("myGroups called with user ID:", req.id);
     const chats = await Chat.find({
       members: { $in: [req.id] },
       groupChat: true,
       creator: req.id,
     }).populate("members", "name username");
-    // console.log("Chats found:", chats);
+    console.log("Chats found:", chats);
     const transformedChats = chats.map(
       ({ _id, groupName, members, groupChat }) => {
         return {
@@ -128,7 +128,7 @@ const myGroups = async (req, res) => {
     // console.log("Transformed chats:", transformedChats);
     return res.status(200).json({
       success: true,
-      chats
+      chats,
     });
   } catch (error) {
     console.error("myGroups error:", error);
@@ -200,6 +200,7 @@ const addMemberToGroup = async (req, res) => {
 const removeMembers = async (req, res) => {
   try {
     const { chatId, userId } = req.body;
+    console.log("removeMembers called with chatId:", chatId, "userId:", userId);
     if (!chatId || !userId) {
       return res.status(400).json({
         success: false,
@@ -219,17 +220,23 @@ const removeMembers = async (req, res) => {
         message: "This chat is not a group chat",
       });
     }
-    if (chat.creator.toString() !== userId) {
+
+    // Only the group creator can remove other members.
+    // Any user can remove themselves (leave group).
+    if (
+      userId.toString() !== req.id.toString() && // trying to remove someone else
+      chat.creator.toString() !== req.id.toString() // and not the creator
+    ) {
       return res.status(403).json({
         success: false,
-        message: "Only the group creator can remove members",
+        message: "Only the group creator can remove other members",
       });
     }
 
     if (chat.members.length <= 3) {
       return res.status(400).json({
         success: false,
-        message: "Cannot remove members, at least two members are required",
+        message: "Cannot remove members, at least 3 members are required",
       });
     }
 
@@ -390,7 +397,7 @@ const sendAttachments = async (req, res) => {
 const getChatDetails = async (req, res) => {
   try {
     if (req.query.populate === "true") {
-        console.log("true");
+      console.log("true");
       const chat = await Chat.findById(req.params.id)
         .populate("members", "name username")
         .lean();
@@ -412,7 +419,7 @@ const getChatDetails = async (req, res) => {
         chat,
       });
     } else {
-        console.log("false");
+      console.log("false");
       const chat = await Chat.findById(req.params.id);
       if (!chat) {
         return res.status(404).json({

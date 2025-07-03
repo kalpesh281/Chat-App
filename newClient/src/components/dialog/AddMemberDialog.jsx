@@ -15,6 +15,7 @@ import {
   Avatar,
   TextField,
   InputAdornment,
+  Skeleton,
 } from "@mui/material";
 import { sampleUsers } from "../data/sampleData";
 import UserList from "../shared/UserList";
@@ -24,16 +25,32 @@ import {
   UserPlus as PersonAddIcon,
   Users as GroupAddIcon,
 } from "lucide-react"; // lucide-react icons
+import {
+  useAddGroupMemberMutation,
+  useAvailableFriendsQuery,
+} from "../../redux/api/api";
+import { useAsyncMutation, useErrors } from "../../hooks/hooks";
+import { useDispatch, useSelector } from "react-redux";
+import { setIsAddMember } from "../../redux/reducers/miscSlice";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-function AddMemberDialog({ addMember, isLoadingMember, chatId }) {
+function AddMemberDialog({ chatId }) {
+  const dispatch = useDispatch();
+  const { isAddMember } = useSelector((state) => state.misc);
   const [members, setMembers] = useState(sampleUsers);
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Add group member mutation
+  const [isLoadingAddMember, , addMember] = useAsyncMutation(
+    useAddGroupMemberMutation
+  );
+
+  const { isError, isLoading, error, data } = useAvailableFriendsQuery("");
+  console.log("Available friends data:", data);
   const selectMemberHandler = (id) => {
     setSelectedMembers((prev) => {
       const isSelected = prev.includes(id);
@@ -44,25 +61,39 @@ function AddMemberDialog({ addMember, isLoadingMember, chatId }) {
       }
     });
   };
+  const errors = [
+    {
+      isError,
+      error,
+    },
+  ];
+
+  useErrors(errors);
 
   const addFriendSubmitHandler = () => {
+    if (selectedMembers.length === 0) {
+      console.warn("No members selected to add");
+      return;
+    }
+    addMember("Adding members to group...", {
+      chatId,
+      members: selectedMembers,
+    });
     closeHandler();
-    console.log("Submitting added members for chat ID:", chatId);
   };
 
   const closeHandler = () => {
-    setSelectedMembers([]);
-    setMembers([]);
+    dispatch(setIsAddMember(false));
     console.log("Closing Add Member Dialog");
   };
 
-  const filteredMembers = members.filter((member) =>
+  const filteredMembers = data.friends.filter((member) =>
     member.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <Dialog
-      open
+      open={isAddMember}
       onClose={closeHandler}
       maxWidth="sm"
       fullWidth
@@ -228,7 +259,9 @@ function AddMemberDialog({ addMember, isLoadingMember, chatId }) {
           }}
         >
           <Stack spacing={1}>
-            {filteredMembers.length > 0 ? (
+            {isLoading ? (
+              <Skeleton variant="rectangular" height={48} width="100%" />
+            ) : filteredMembers.length > 0 ? (
               filteredMembers.map((user) => (
                 <UserList
                   key={user._id}
@@ -274,7 +307,7 @@ function AddMemberDialog({ addMember, isLoadingMember, chatId }) {
         <Button
           variant="contained"
           color="primary"
-          disabled={isLoadingMember || selectedMembers.length === 0}
+          disabled={isLoadingAddMember}
           onClick={addFriendSubmitHandler}
           startIcon={<PersonAddIcon size={18} />}
           sx={{
