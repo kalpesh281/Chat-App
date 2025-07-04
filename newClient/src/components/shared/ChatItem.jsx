@@ -1,6 +1,14 @@
-import React, { memo } from "react";
+import React, { memo, useState } from "react";
 import { Link } from "../styles/StyledComponent";
-import { Box, Stack, Typography, Badge } from "@mui/material";
+import {
+  Box,
+  Stack,
+  Typography,
+  IconButton,
+  Menu,
+  MenuItem,
+} from "@mui/material";
+import { MoreVertical, Circle } from "lucide-react";
 import AvatarCard from "./AvatarCard";
 
 // Utility to generate a consistent color from a string
@@ -9,7 +17,7 @@ function stringToColor(str) {
   for (let i = 0; i < str.length; i++) {
     hash = str.charCodeAt(i) + ((hash << 5) - hash);
   }
-  
+
   const hue = Math.abs(hash) % 360;
   return `hsl(${hue}, 70%, 55%)`;
 }
@@ -33,6 +41,28 @@ const ChatItem = ({
   // Generate a color for avatar (user or group)
   const avatarColor = stringToColor(name || "");
 
+  // Menu state for three-dot icon
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleMenuOpen = (event) => {
+    event.preventDefault();
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleDelete = (e) => {
+    handleMenuClose();
+    if (handleDeleteChat) handleDeleteChat(e, _id, groupChat);
+  };
+
+  const handleLeaveGroup = (e) => {
+    handleMenuClose();
+    if (handleDeleteChat) handleDeleteChat(e, _id, true); // You can differentiate in handler if needed
+  };
+
   return (
     <Link
       sx={{
@@ -44,7 +74,7 @@ const ChatItem = ({
         overflow: "hidden",
       }}
       to={`/chat/${_id}`}
-      onContextMenu={(e) => handleDeleteChat(e, _id, groupChat)}
+      // Remove context menu for delete, now handled by menu
     >
       <Box
         sx={{
@@ -65,6 +95,7 @@ const ChatItem = ({
             : "4px solid transparent",
         }}
       >
+        {/* Show colored avatar for both group and user if no avatar image */}
         <Box
           sx={{
             display: "flex",
@@ -77,7 +108,6 @@ const ChatItem = ({
             position: "relative",
           }}
         >
-          {/* Show colored avatar for both group and user if no avatar image */}
           {!avatar || groupChat ? (
             <Box
               sx={{
@@ -101,24 +131,17 @@ const ChatItem = ({
             <AvatarCard avatar={avatar} firstLetter={firstLetter} name={name} />
           )}
           {isOnline && (
-            <Box
-              sx={{
-                width: "10px",
-                height: "10px",
-                borderRadius: "50%",
-                backgroundColor: "#4caf50",
+            <Circle
+              size={12}
+              color="#4caf50"
+              fill="#4caf50"
+              style={{
                 position: "absolute",
                 bottom: 3,
                 right: 5,
                 border: "2px solid white",
                 zIndex: 2,
                 boxShadow: "0 0 0 2px rgba(76, 175, 80, 0.2)",
-                animation: "pulse 2s infinite",
-                "@keyframes pulse": {
-                  "0%": { boxShadow: "0 0 0 0 rgba(76, 175, 80, 0.4)" },
-                  "70%": { boxShadow: "0 0 0 6px rgba(76, 175, 80, 0)" },
-                  "100%": { boxShadow: "0 0 0 0 rgba(76, 175, 80, 0)" },
-                },
               }}
             />
           )}
@@ -148,9 +171,36 @@ const ChatItem = ({
               }}
             >
               {name}
-             
             </Typography>
-
+            {/* Three-dot icon using lucide-react */}
+            <IconButton
+              size="small"
+              onClick={handleMenuOpen}
+              sx={{ ml: 1 }}
+              aria-label="more"
+            >
+              <MoreVertical size={20} />
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
+              }}
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+            >
+              {!groupChat && (
+                <MenuItem onClick={handleDelete}>Delete Chat</MenuItem>
+              )}
+              {groupChat && (
+                <MenuItem onClick={handleLeaveGroup}>Leave Group</MenuItem>
+              )}
+            </Menu>
             {showNewMessageIndicators &&
               newMessageAlert &&
               newMessageAlert.count > 0 && (
@@ -168,7 +218,7 @@ const ChatItem = ({
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    marginLeft: "auto",
+                    marginLeft: "8px",
                   }}
                 >
                   {newMessageAlert.count}
@@ -200,7 +250,5 @@ const ChatItem = ({
     </Link>
   );
 };
-
-
 
 export default memo(ChatItem);

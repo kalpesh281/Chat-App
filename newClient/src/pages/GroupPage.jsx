@@ -36,6 +36,7 @@ import {
   useMyGroupsQuery,
   useRemoveGroupMemberMutation,
   useRenameGroupMutation,
+  useDeleteGroupMutation, // <-- add this import
 } from "../redux/api/api";
 import { useAsyncMutation, useErrors } from "../hooks/hooks";
 import Loader from "../components/layout/Loader";
@@ -77,6 +78,9 @@ function GroupPage() {
   const [isLoadingRemoveGroupMember, , removeGroupMember] = useAsyncMutation(
     useRemoveGroupMemberMutation
   );
+
+  // Add delete group mutation
+  const [deleteGroup, { isLoading: isDeleting }] = useDeleteGroupMutation();
 
   // console.log("My Groups:", myGroups.data);
   // console.log("Group Details:", groupDetails.data);
@@ -139,9 +143,21 @@ function GroupPage() {
     removeGroupMember("Removing member...", { chatId, userId });
   };
 
-  const deleteHandle = () => {
-    console.log("Group deleted");
-    closeConfirmDeleteGroup();
+  const deleteHandle = async () => {
+    if (!chatId) {
+      toast.error("Invalid group id");
+      return;
+    }
+    try {
+      await deleteGroup(chatId).unwrap();
+      toast.success("Group deleted successfully");
+      closeConfirmDeleteGroup();
+      navigate("/groups"); 
+    } catch (error) {
+      toast.error(
+        error?.data?.message || "Failed to delete group. Please try again."
+      );
+    }
   };
 
   const errors = [
@@ -550,6 +566,8 @@ function GroupPage() {
               open={confirmDeleteDialog}
               handleClose={closeConfirmDeleteGroup}
               deleteHandle={deleteHandle}
+              // Optionally pass loading state if you want to disable button during deletion
+              // isLoading={isDeleting}
             />
           </Suspense>
         )}

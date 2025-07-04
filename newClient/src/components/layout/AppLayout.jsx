@@ -1,4 +1,5 @@
 import React, { use, useCallback, useEffect } from "react";
+import { MessageCircle } from "lucide-react";
 
 import Header from "./Header";
 import { Grid, Typography, Box } from "@mui/material";
@@ -6,7 +7,12 @@ import ChatList from "../specific/ChatList";
 import { sampleChats } from "../data/sampleData";
 import { useNavigate, useParams } from "react-router-dom";
 import Profile from "../specific/Profile";
-import { useMyChatQuery } from "../../redux/api/api";
+import {
+  useMyChatQuery,
+
+  useDeleteChatMutation,
+  useLeaveGroupMutation,
+} from "../../redux/api/api";
 import toast from "react-hot-toast";
 
 import { useErrors, useSocketEvents } from "../../hooks/hooks";
@@ -55,9 +61,26 @@ const AppLayout = () => (WrappedComponent) => {
       });
     }, [newMessageAlert]);
 
-    const handleDeleteChat = (e, _id, groupChat) => {
+    const [leaveGroup] = useLeaveGroupMutation();
+    const [deleteChat] = useDeleteChatMutation();
+
+    const handleDeleteChat = async (e, _id, groupChat) => {
       e.preventDefault();
-      // console.log("Delete chat with ID:", chatId);
+      try {
+        if (groupChat) {
+          await leaveGroup(_id).unwrap();
+          toast.success("Left group successfully");
+        } else {
+          await deleteChat(_id).unwrap();
+          toast.success("Chat deleted successfully");
+        }
+        refetch();
+        navigate("/");
+      } catch (err) {
+        toast.error(
+          err?.data?.message || err?.message || "Failed to delete chat/group"
+        );
+      }
     };
 
     const newMessagesAlertListener = useCallback(
@@ -132,8 +155,12 @@ const AppLayout = () => (WrappedComponent) => {
                   fontSize: "1.1rem",
                   fontWeight: 600,
                   letterSpacing: "0.01em",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
                 }}
               >
+                <MessageCircle size={20} style={{ marginRight: 6 }} />
                 Conversations
               </Typography>
               <Box
@@ -167,6 +194,7 @@ const AppLayout = () => (WrappedComponent) => {
                   chats={data?.chats}
                   chatId={chatId}
                   newMessagesAlert={newMessageAlert}
+                  handleDeleteChat={handleDeleteChat}
                 />
               )}
             </Box>
