@@ -4,12 +4,10 @@ import { MessageCircle } from "lucide-react";
 import Header from "./Header";
 import { Grid, Typography, Box } from "@mui/material";
 import ChatList from "../specific/ChatList";
-import { sampleChats } from "../data/sampleData";
 import { useNavigate, useParams } from "react-router-dom";
 import Profile from "../specific/Profile";
 import {
   useMyChatQuery,
-
   useDeleteChatMutation,
   useLeaveGroupMutation,
 } from "../../redux/api/api";
@@ -209,7 +207,7 @@ const AppLayout = () => (WrappedComponent) => {
               borderRight: "1px solid #e0e0e0",
             }}
           >
-            <WrappedComponent {...props} chatId={chatId} />
+            <WrappedComponent {...props} chatId={chatId}  />
           </Box>
 
           <Box

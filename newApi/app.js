@@ -16,6 +16,7 @@ import {
   NEW_MESSAGE_ALERT,
   STOP_TYPING,
   TYPING,
+  NEW_REQUEST,
 } from "./constants/events.js";
 import { v4 as uuid } from "uuid";
 import { getSockets } from "./lib/helper.js";
@@ -130,6 +131,13 @@ io.on("connection", (socket) => {
         name: user.name,
       },
     });
+  });
+
+  socket.on(NEW_REQUEST, ({ receiverId }) => {
+    const receiverSocketId = userSocketIds.get(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit(NEW_REQUEST, { receiverId });
+    }
   });
 
   // Handle incoming messages

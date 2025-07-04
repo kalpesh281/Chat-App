@@ -14,7 +14,7 @@ import {
   Paper,
   Divider,
 } from "@mui/material";
-import { X as CloseIcon, Bell as NotificationsIcon } from "lucide-react"; // lucide-react icons
+import { X as CloseIcon, Bell as NotificationsIcon } from "lucide-react"; 
 import {
   useAcceptFriendRequestMutation,
   useGetNotificationQuery,

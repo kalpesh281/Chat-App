@@ -172,38 +172,42 @@ const ChatItem = ({
             >
               {name}
             </Typography>
-            {/* Three-dot icon using lucide-react */}
-            <IconButton
-              size="small"
-              onClick={handleMenuOpen}
-              sx={{ ml: 1 }}
-              aria-label="more"
-            >
-              <MoreVertical size={20} />
-            </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "right",
-              }}
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-            >
-              {!groupChat && (
-                <MenuItem onClick={handleDelete}>Delete Chat</MenuItem>
-              )}
-              {groupChat && (
-                <MenuItem onClick={handleLeaveGroup}>Leave Group</MenuItem>
-              )}
-            </Menu>
-            {showNewMessageIndicators &&
-              newMessageAlert &&
-              newMessageAlert.count > 0 && (
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <IconButton
+                size="small"
+                onClick={handleMenuOpen}
+                sx={{ ml: 1 }}
+                aria-label="more"
+              >
+                <MoreVertical size={20} />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "right",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+              >
+                {!groupChat && (
+                  <MenuItem onClick={handleDelete}>Delete Chat</MenuItem>
+                )}
+                {groupChat && (
+                  <MenuItem onClick={handleLeaveGroup}>Leave Group</MenuItem>
+                )}
+              </Menu>
+            </Box>
+          </Stack>
+
+          {showNewMessageIndicators &&
+            newMessageAlert &&
+            newMessageAlert.count > 0 && (
+              <Box sx={{ display: "flex", alignItems: "center", mt: 0.5 }}>
                 <Typography
                   variant="caption"
                   color="primary"
@@ -218,32 +222,26 @@ const ChatItem = ({
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    marginLeft: "8px",
+                    marginRight: "8px",
                   }}
                 >
                   {newMessageAlert.count}
                 </Typography>
-              )}
-          </Stack>
-
-          {showNewMessageIndicators &&
-            newMessageAlert &&
-            newMessageAlert.count > 0 && (
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                noWrap
-                sx={{
-                  fontSize: "0.8rem",
-                  fontWeight: 400,
-                  mt: 0.5,
-                  display: "block",
-                  padding: "2px 4px",
-                  borderRadius: "4px",
-                }}
-              >
-                New messages
-              </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  noWrap
+                  sx={{
+                    fontSize: "0.8rem",
+                    fontWeight: 400,
+                    display: "block",
+                    padding: "2px 4px",
+                    borderRadius: "4px",
+                  }}
+                >
+                  New messages
+                </Typography>
+              </Box>
             )}
         </Stack>
       </Box>
