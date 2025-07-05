@@ -36,7 +36,10 @@ const server = createServer(app);
 // =======================
 const io = new Server(server, {
   cors: {
-    origin: ["https://chat-app-swart-beta.vercel.app/","http://localhost:5173"],
+    origin: [
+      "https://chat-app-swart-beta.vercel.app/",
+      "http://localhost:5173",
+    ],
     credentials: true,
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -152,8 +155,14 @@ io.on("connection", (socket) => {
 // =======================
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: [
+      "https://chat-app-swart-beta.vercel.app/",
+      "http://localhost:5173",
+    ],
     credentials: true,
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Content-Type", "Authorization"],
   })
 );
 app.use(express.json({ limit: "16mb" }));
