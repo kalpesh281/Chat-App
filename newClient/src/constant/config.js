@@ -1,5 +1,5 @@
-export const Server = import.meta.env.VITE_SERVER_URL;
+export const Server = "https://newapi-i35m.onrender.com/api/v1";
 
-export const SocketServer = import.meta.env.VITE_SOCKET_URL;
-export const ClientUrl = import.meta.env.VITE_CLIENT_URL;
+export const SocketServer = "https://newapi-i35m.onrender.com";
+
 
