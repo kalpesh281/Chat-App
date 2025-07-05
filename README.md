@@ -2,7 +2,7 @@
 
 A feature-rich, real-time chat application built with the MERN stack (MongoDB, Express.js, React, Node.js) and Socket.io for real-time communication.
 
-![Chat App](https://via.placeholder.com/800x400?text=Chat+App+Screenshot)
+https://chat-app-seven-beryl-20.vercel.app/
 
 ## Features
 
