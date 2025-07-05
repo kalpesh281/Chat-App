@@ -36,7 +36,10 @@ const server = createServer(app);
 // =======================
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: [
+      "https://chat-app-seven-beryl-20.vercel.app",
+      "http://localhost:5173",
+    ],
     credentials: true,
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -152,7 +155,10 @@ io.on("connection", (socket) => {
 // =======================
 app.use(
   cors({
-    origin: "*",
+    origin: [
+      "https://chat-app-seven-beryl-20.vercel.app",
+      "http://localhost:5173",
+    ],
     credentials: true,
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type", "Authorization"],
